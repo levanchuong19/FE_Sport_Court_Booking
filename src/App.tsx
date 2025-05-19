@@ -1,31 +1,33 @@
-
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import Home from './Pages/home';
-import Layout from './Components/layout';
-import Dashboard from './Components/dashboard';
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import Home from "./Pages/home";
+import Layout from "./Components/layout";
+import Dashboard from "./Components/dashboard";
+import Login from "./Pages/login";
 
 function App() {
   const router = createBrowserRouter([
     {
       path: "",
-      element: <Layout/>,
-      children: [
-        {path:"", element: <Home/>}, 
-      ],
+      element: <Layout />,
+      children: [{ path: "", element: <Home /> }],
     },
     {
-      path:"dashboard",
-      element:<Dashboard/>,
-      children:[
-        {
-        path:"category",
-        // element: </>,
-      },
-    ],
+      path: "login",
+      element: <Login />,
     },
-  ]); 
+    {
+      path: "dashboard",
+      element: <Dashboard />,
+      children: [
+        {
+          path: "category",
+          // element: </>,
+        },
+      ],
+    },
+  ]);
 
-  return  <RouterProvider router={router} />
+  return <RouterProvider router={router} />;
 }
 
-export default App
+export default App;
