@@ -3,6 +3,7 @@ import Home from "./Pages/home";
 import Layout from "./Components/layout";
 import Dashboard from "./Components/dashboard";
 import Login from "./Pages/login";
+import Register from "./Pages/register";
 
 function App() {
   const router = createBrowserRouter([
@@ -14,6 +15,10 @@ function App() {
     {
       path: "login",
       element: <Login />,
+    },
+    {
+      path: "register",
+      element: <Register />,
     },
     {
       path: "dashboard",

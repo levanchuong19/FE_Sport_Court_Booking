@@ -6,7 +6,7 @@ function Layout() {
   return (
     <div>
       <Header />
-      <main style={{ paddingTop: "90px" }}>
+      <main style={{ paddingTop: "10px" }}>
         <Outlet />
       </main>
       <Footer />

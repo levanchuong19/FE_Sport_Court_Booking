@@ -1,89 +1,78 @@
+import { FaFacebookF, FaInstagram, FaTwitter } from "react-icons/fa";
+
 function Footer() {
   return (
-    <footer className="bg-slate-900 text-slate-200">
-      <div className="container mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 px-4 max-w-6xl">
+    <footer className="bg-slate-900 text-slate-200 py-10">
+      <div className="container mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 px-4 max-w-6xl">
+        {/* Cột 1 */}
         <div>
           <div className="flex items-center gap-2 mb-4">
-            <span className="text-xl font-bold text-white">SportZone</span>
+            <span className="text-2xl font-bold text-white">SportZone</span>
           </div>
-          <p className="text-slate-400 text-sm">
+          <p className="text-slate-400 text-sm leading-relaxed">
             Nền tảng đặt sân thể thao trực tuyến hàng đầu Việt Nam
           </p>
-          <div className="flex gap-4 mt-4">
-            <a href="#" className="text-slate-400 hover:text-white">
-              FB
+          <div className="flex gap-4 mt-4 text-xl">
+            <a href="#" className="text-slate-400 hover:text-white transition">
+              <FaFacebookF />
             </a>
-            <a href="#" className="text-slate-400 hover:text-white">
-              IG
+            <a href="#" className="text-slate-400 hover:text-white transition">
+              <FaInstagram />
             </a>
-            <a href="#" className="text-slate-400 hover:text-white">
-              TW
+            <a href="#" className="text-slate-400 hover:text-white transition">
+              <FaTwitter />
             </a>
           </div>
         </div>
+
+        {/* Cột 2 */}
         <div>
-          <h3 className="font-bold text-white mb-4">Liên kết nhanh</h3>
+          <h3 className="font-semibold text-white text-base mb-4">
+            Liên kết nhanh
+          </h3>
           <ul className="space-y-2">
-            <li>
-              <a href="#" className="text-slate-400 hover:text-white text-sm">
-                Trang chủ
-              </a>
-            </li>
-            <li>
-              <a href="#" className="text-slate-400 hover:text-white text-sm">
-                Tìm sân
-              </a>
-            </li>
-            <li>
-              <a href="#" className="text-slate-400 hover:text-white text-sm">
-                Thể loại
-              </a>
-            </li>
-            <li>
-              <a href="#" className="text-slate-400 hover:text-white text-sm">
-                Đăng ký
-              </a>
-            </li>
-            <li>
-              <a href="#" className="text-slate-400 hover:text-white text-sm">
-                Đăng nhập
-              </a>
-            </li>
+            {["Trang chủ", "Tìm sân", "Thể loại", "Đăng ký", "Đăng nhập"].map(
+              (item, idx) => (
+                <li key={idx}>
+                  <a
+                    href="#"
+                    className="text-slate-400 hover:text-white text-sm transition"
+                  >
+                    {item}
+                  </a>
+                </li>
+              )
+            )}
           </ul>
         </div>
+
+        {/* Cột 3 */}
         <div>
-          <h3 className="font-bold text-white mb-4">Thông tin</h3>
+          <h3 className="font-semibold text-white text-base mb-4">Thông tin</h3>
           <ul className="space-y-2">
-            <li>
-              <a href="#" className="text-slate-400 hover:text-white text-sm">
-                Về chúng tôi
-              </a>
-            </li>
-            <li>
-              <a href="#" className="text-slate-400 hover:text-white text-sm">
-                Điều khoản sử dụng
-              </a>
-            </li>
-            <li>
-              <a href="#" className="text-slate-400 hover:text-white text-sm">
-                Chính sách bảo mật
-              </a>
-            </li>
-            <li>
-              <a href="#" className="text-slate-400 hover:text-white text-sm">
-                Câu hỏi thường gặp
-              </a>
-            </li>
-            <li>
-              <a href="#" className="text-slate-400 hover:text-white text-sm">
-                Liên hệ
-              </a>
-            </li>
+            {[
+              "Về chúng tôi",
+              "Điều khoản sử dụng",
+              "Chính sách bảo mật",
+              "Câu hỏi thường gặp",
+              "Liên hệ",
+            ].map((item, idx) => (
+              <li key={idx}>
+                <a
+                  href="#"
+                  className="text-slate-400 hover:text-white text-sm transition"
+                >
+                  {item}
+                </a>
+              </li>
+            ))}
           </ul>
         </div>
+
+        {/* Cột 4 */}
         <div>
-          <h3 className="font-bold text-white mb-4">Liên hệ</h3>
-          <ul className="space-y-2 text-sm text-slate-400">
+          <h3 className="font-semibold text-white text-base mb-4">Liên hệ</h3>
+          <ul className="space-y-2 text-sm text-slate-400 leading-relaxed">
             <li>123 Đường ABC, Quận 1, TP.HCM</li>
             <li>0123 456 789</li>
             <li>info@sportzone.vn</li>
@@ -91,11 +80,11 @@ function Footer() {
           </ul>
         </div>
       </div>
-      <div className="border-t border-slate-800 mt-8 pt-8 text-center text-sm text-slate-400">
-        <p>
-          &copy; {new Date().getFullYear()} SportZone. Tất cả các quyền được bảo
-          lưu.
-        </p>
+
+      {/* Chân cuối */}
+      <div className="border-t border-slate-800 mt-10 pt-6 text-center text-sm text-slate-500">
+        &copy; {new Date().getFullYear()} SportZone. Tất cả các quyền được bảo
+        lưu.
       </div>
     </footer>
   );
