@@ -1,6 +1,61 @@
+import { useState } from "react";
 import { FiUser, FiMail, FiPhone, FiLock } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
+import api from "../Config/api";
+
+interface RegisterFormData {
+  fullName: string;
+  email: string;
+  phone: string;
+  password: string;
+}
 
 function Register() {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState<RegisterFormData>({
+    fullName: "",
+    email: "",
+    phone: "",
+    password: "",
+  });
+  const [error, setError] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    if (error) setError("");
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const requestData = {
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
+      };
+
+      const response = await api.post("api/auth/register", requestData);
+      if (response.status === 200 || response.status === 201) {
+        alert("Đăng ký thành công!");
+        navigate("/login");
+      }
+    } catch (err: any) {
+      setError(
+        err.response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại."
+      );
+      console.error("Registration error:", err); // Add this for debugging
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col md:flex-row overflow-hidden">
       {/* Left side */}
@@ -37,14 +92,19 @@ function Register() {
 
         {/* Blur góc dưới phải */}
         <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-emerald-400/30 rounded-full blur-3xl z-0" />
-        <div className="w-full max-w-md bg-white p-10 shadow-2xl rounded-2xl  border-gray-100">
+        <div className="w-full max-w-md bg-white p-10 shadow-2xl rounded-2xl border-gray-100 relative z-10">
           <h2 className="text-3xl font-bold text-center text-emerald-600 mb-2">
             Đăng ký Sport-Zone
           </h2>
           <p className="text-center text-gray-500 mb-6">
             Vui lòng nhập thông tin bên dưới
           </p>
-          <form className="space-y-6">
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 text-red-500 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
+          <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Fullname */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">
@@ -53,6 +113,9 @@ function Register() {
               <div className="relative">
                 <input
                   type="text"
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleChange}
                   required
                   className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all"
                   placeholder="Nguyễn Văn A"
@@ -69,6 +132,9 @@ function Register() {
               <div className="relative">
                 <input
                   type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
                   required
                   className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all"
                   placeholder="you@example.com"
@@ -85,6 +151,9 @@ function Register() {
               <div className="relative">
                 <input
                   type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
                   pattern="[0-9]{10,11}"
                   maxLength={11}
                   required
@@ -103,6 +172,9 @@ function Register() {
               <div className="relative">
                 <input
                   type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
                   required
                   className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all"
                   placeholder="••••••••"
@@ -113,9 +185,12 @@ function Register() {
 
             <button
               type="submit"
-              className="w-full bg-emerald-600 text-white py-3 rounded-xl hover:bg-emerald-700 transition-all duration-200 text-lg font-semibold shadow-md"
+              disabled={isLoading}
+              className={`w-full bg-emerald-600 text-white py-3 rounded-xl hover:bg-emerald-700 transition-all duration-200 text-lg font-semibold shadow-md ${
+                isLoading ? "opacity-70 cursor-not-allowed" : ""
+              }`}
             >
-              Đăng ký
+              {isLoading ? "Đang xử lý..." : "Đăng ký"}
             </button>
           </form>
         </div>

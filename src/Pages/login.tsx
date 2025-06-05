@@ -1,7 +1,48 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../Config/api";
+
+interface LoginProps {
+  phone: string;
+  password: string;
+}
 
 function Login() {
   const navigate = useNavigate();
+  const [formData, setFormData] = useState<LoginProps>({
+    phone: "",
+    password: "",
+  });
+  const [error, setError] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    if (error) setError("");
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const response = await api.post("api/auth/login", formData);
+      if (response.status === 200) {
+        localStorage.setItem("token", response.data.token);
+        navigate("/");
+      }
+    } catch (err: any) {
+      setError(
+        err.response?.data?.message || "Đăng nhập thất bại. Vui lòng thử lại."
+      );
+      console.error("Login error:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSignIn = () => {
     navigate("/register");
@@ -44,15 +85,24 @@ function Login() {
           <p className="text-center text-gray-500 mb-6">
             Vui lòng nhập thông tin để đăng nhập
           </p>
-          <form className="space-y-5">
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 text-red-500 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
+          <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email
+                Số điện thoại
               </label>
               <input
-                type="email"
+                type="phone"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                required
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-400"
-                placeholder="you@example.com"
+                placeholder="0123456789"
               />
             </div>
             <div>
@@ -61,15 +111,22 @@ function Login() {
               </label>
               <input
                 type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-400"
                 placeholder="••••••••"
               />
             </div>
             <button
               type="submit"
-              className="w-full bg-emerald-600 text-white py-2 rounded-lg hover:bg-emerald-700 transition"
+              disabled={isLoading}
+              className={`w-full bg-emerald-600 text-white py-2 rounded-lg hover:bg-emerald-700 transition ${
+                isLoading ? "opacity-70 cursor-not-allowed" : ""
+              }`}
             >
-              Đăng nhập
+              {isLoading ? "Đang xử lý..." : "Đăng nhập"}
             </button>
           </form>
           <p className="mt-5 text-center text-sm text-gray-600">

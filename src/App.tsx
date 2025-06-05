@@ -2,11 +2,13 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Home from "./Pages/home";
 import Layout from "./Components/layout";
 import BookingManagement from "./Pages/dashboard/BookingManagement";
-import DashboardLayout from "./Components/dashboardLayout";
 import Dashboard from "./Pages/dashboard/dashboard";
 import CourtManagement from "./Pages/dashboard/CourtManagement";
 import UserManagement from "./Pages/dashboard/UserManagement";
 import Statistic from "./Pages/dashboard/Statistic";
+import Login from "./Pages/login";
+import Register from "./Pages/register";
+import DashboardLayout from "./Components/dashboardLayout";
 
 function App() {
   const router = createBrowserRouter([
@@ -25,7 +27,7 @@ function App() {
     },
     {
       path: "dashboard",
-      element: <Dashboard />,
+      element: <DashboardLayout />,
       children: [
         { path: "", element: <Dashboard /> },
         { path: "/dashboard/booking", element: <BookingManagement /> },
