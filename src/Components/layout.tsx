@@ -2,7 +2,7 @@ import { Outlet } from "react-router-dom";
 import Header from "../Pages/header";
 import Footer from "../Pages/footer";
 
-export default function Layout() {
+function Layout() {
   return (
     <div className="flex min-h-screen flex-col">
       <main className="flex-1">
@@ -10,6 +10,9 @@ export default function Layout() {
         <Outlet />
         <Footer />
       </main>
+      <Footer />
     </div>
   );
 }
+
+export default Layout;

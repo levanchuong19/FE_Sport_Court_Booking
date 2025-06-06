@@ -1,3 +1,4 @@
+
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Home from './Pages/home';
 import Layout from './Components/layout';
@@ -7,36 +8,46 @@ import Dashboard from './Pages/dashboard/dashboard';
 import CourtManagement from './Pages/dashboard/CourtManagement';
 import UserManagement from './Pages/dashboard/UserManagement';
 import Statistic from './Pages/dashboard/Statistic';
+import Login from "./Pages/login";
+import Register from "./Pages/register";
 import BookingPage from './Pages/bookingPage';
 import ConfirmBooking from './Pages/confirmBooking';
-import GuidePage from './Pages/GuidePage';
+import GuidePage from './Pages/guidePage';
 
 function App() {
   const router = createBrowserRouter([
     {
+      path: "login",
+      element: <Login />,
+    },
+    {
       path: "",
-      element: <Layout/>,
+      element: <Layout />,
       children: [
-        {path:"", element: <Home/>}, 
+        { path: "", element: <Home /> },
         {path:"booking", element: <BookingPage/>}, 
         {path:"confirm-booking", element: <ConfirmBooking/>}, 
         {path:"guide", element: <GuidePage/>}, 
       ],
     },
     {
-      path: "/dashboard",
+      path: "register",
+      element: <Register />,
+    },
+    {
+      path: "dashboard",
       element: <DashboardLayout />,
       children: [
-        {path:"", element: <Dashboard/>},
-        {path:"/dashboard/booking", element: <BookingManagement/>}, 
-        {path:"/dashboard/court", element: <CourtManagement/>}, 
-        {path:"/dashboard/user", element: <UserManagement/>}, 
-        {path:"/dashboard/statistic", element: <Statistic/>}, 
+        { path: "", element: <Dashboard /> },
+        { path: "/dashboard/booking", element: <BookingManagement /> },
+        { path: "/dashboard/court", element: <CourtManagement /> },
+        { path: "/dashboard/user", element: <UserManagement /> },
+        { path: "/dashboard/statistic", element: <Statistic /> },
       ],
     },
-  ]); 
+  ]);
 
-  return  <RouterProvider router={router} />
+  return <RouterProvider router={router} />;
 }
 
-export default App
+export default App;
