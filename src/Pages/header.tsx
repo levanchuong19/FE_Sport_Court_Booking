@@ -6,11 +6,10 @@ function Header() {
             <span className="text-2xl font-bold text-emerald-600">SportZone</span>
           </div>
           <nav className="hidden md:flex gap-6">
-            <a href="#" className="hover:text-emerald-600 font-medium">Trang chủ</a>
+            <a href="/" className="hover:text-emerald-600 font-medium">Trang chủ</a>
             <a href="#" className="hover:text-emerald-600 font-medium">Tìm sân</a>
             <a href="#" className="hover:text-emerald-600 font-medium">Thể loại</a>
-            <a href="#" className="hover:text-emerald-600 font-medium">Hướng dẫn</a>
-            <a href="#" className="hover:text-emerald-600 font-medium">Liên hệ</a>
+            <a href="/guide" className="hover:text-emerald-600 font-medium">Hướng dẫn & Liên hệ</a>
           </nav>
           <div className="flex gap-2">
             <button className="hidden sm:inline-block px-4 py-2 text-sm font-medium hover:text-emerald-600">Đăng nhập</button>

@@ -1,5 +1,3 @@
-
-
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
@@ -30,26 +28,26 @@ export default function Home() {
 
         {/* Search Section */}
         <section className="container mx-auto -mt-12 z-10 relative px-4">
-          <div className="bg-white rounded-xl shadow-lg p-6 border max-w-4xl mx-auto">
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 max-w-4xl mx-auto">
             <div className="grid gap-4 md:grid-cols-4">
               <div>
                 <label className="text-sm font-medium">Môn thể thao</label>
-                <select className="w-full h-10 mt-1 border rounded-md px-3 text-sm focus:ring-2 focus:ring-emerald-500">
+                <select className="w-full h-10 mt-1 border border-gray-200 rounded-md px-3 text-sm focus:ring-2 focus:ring-emerald-500">
                   <option>Tất cả môn</option>
                   <option>Bóng đá</option>
                   <option>Bóng rổ</option>
                   <option>Tennis</option>
                   <option>Cầu lông</option>
-                  <option>Bơi lội</option>
+                  <option>PickerBall</option>
                 </select>
               </div>
               <div>
                 <label className="text-sm font-medium">Địa điểm</label>
-                <input type="text" placeholder="Nhập địa điểm" className="w-full h-10 mt-1 border rounded-md px-3 text-sm focus:ring-2 focus:ring-emerald-500" />
+                <input type="text" placeholder="Nhập địa điểm" className="w-full h-10 mt-1 border border-gray-200 rounded-md px-3 text-sm focus:ring-2 focus:ring-emerald-500" />
               </div>
               <div>
                 <label className="text-sm font-medium">Ngày</label>
-                <input type="date" className="w-full h-10 mt-1 border rounded-md px-3 text-sm focus:ring-2 focus:ring-emerald-500" />
+                <input type="date" className="w-full h-10 mt-1 border border-gray-200 rounded-md px-3 text-sm focus:ring-2 focus:ring-emerald-500" />
               </div>
               <div className="flex items-end">
                 <button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-10 rounded-md font-semibold">Tìm kiếm</button>
@@ -70,7 +68,7 @@ export default function Home() {
               { name: "Bóng rổ", icon: "🏀", color: "bg-orange-100" },
               { name: "Tennis", icon: "🎾", color: "bg-yellow-100" },
               { name: "Cầu lông", icon: "🏸", color: "bg-blue-100" },
-              { name: "Bơi lội", icon: "🏊", color: "bg-cyan-100" },
+              { name: "PickerBall", icon: "🥎", color: "bg-cyan-100" },
               { name: "Bóng chuyền", icon: "🏐", color: "bg-purple-100" },
               { name: "Golf", icon: "⛳", color: "bg-emerald-100" },
               { name: "Bóng bàn", icon: "🏓", color: "bg-pink-100" },
@@ -159,7 +157,7 @@ export default function Home() {
                 desc: "Đến sân theo lịch đã đặt và tận hưởng thời gian chơi thể thao cùng bạn bè.",
               },
             ].map((step, idx) => (
-              <div key={idx} className="bg-white border rounded-xl p-8 text-center shadow">
+              <div key={idx} className="bg-white border border-gray-200 rounded-xl p-8 text-center shadow">
                 <div className="text-4xl mb-4">{step.icon}</div>
                 <h3 className="font-bold text-xl mb-2">{step.title}</h3>
                 <p className="text-gray-500">{step.desc}</p>
@@ -217,30 +215,7 @@ export default function Home() {
             </div>
           </div>
         </section>
-
-        {/* App Download */}
-        <section className="py-16 bg-slate-50">
-          <div className="container mx-auto grid md:grid-cols-2 gap-8 items-center px-4 max-w-5xl">
-            <div className="space-y-6">
-              <h2 className="text-3xl md:text-4xl font-bold">Tải ứng dụng SportZone</h2>
-              <p className="text-lg text-gray-600">Đặt sân thể thao mọi lúc, mọi nơi với ứng dụng di động của chúng tôi. Dễ dàng tìm kiếm, đặt lịch và quản lý các đặt chỗ của bạn.</p>
-              <div className="flex gap-4">
-                <button className="border border-gray-300 px-5 py-3 rounded-md flex items-center gap-2 font-semibold hover:bg-gray-100">
-                  <span></span> App Store
-                </button>
-                <button className="border border-gray-300 px-5 py-3 rounded-md flex items-center gap-2 font-semibold hover:bg-gray-100">
-                  <span>▶</span> Google Play
-                </button>
-              </div>
-            </div>
-            <div className="flex justify-center">
-              <img src="/placeholder.svg?height=500&width=400" alt="Mobile app" className="object-contain w-full max-w-xs md:max-w-sm" />
-            </div>
-          </div>
-        </section>
       </main>
-
-      
     </div>
   );
 }

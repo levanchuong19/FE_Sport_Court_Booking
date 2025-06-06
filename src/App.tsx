@@ -7,6 +7,9 @@ import Dashboard from './Pages/dashboard/dashboard';
 import CourtManagement from './Pages/dashboard/CourtManagement';
 import UserManagement from './Pages/dashboard/UserManagement';
 import Statistic from './Pages/dashboard/Statistic';
+import BookingPage from './Pages/bookingPage';
+import ConfirmBooking from './Pages/confirmBooking';
+import GuidePage from './Pages/GuidePage';
 
 function App() {
   const router = createBrowserRouter([
@@ -15,6 +18,9 @@ function App() {
       element: <Layout/>,
       children: [
         {path:"", element: <Home/>}, 
+        {path:"booking", element: <BookingPage/>}, 
+        {path:"confirm-booking", element: <ConfirmBooking/>}, 
+        {path:"guide", element: <GuidePage/>}, 
       ],
     },
     {
