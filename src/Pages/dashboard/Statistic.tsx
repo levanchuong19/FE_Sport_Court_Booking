@@ -64,6 +64,7 @@ export default function Statistic() {
         { name: "Tennis", value: 9000000 },
         { name: "Cầu lông", value: 6000000 },
         { name: "Bóng rổ", value: 5000000 },
+        { name: "PickerBall", value: 4000000 },
       ]);
       setWeeklyData([
         { day: "T2", customers: 12 },
