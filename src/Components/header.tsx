@@ -64,7 +64,7 @@ function Header() {
         </div>
 
         <nav className="hidden md:flex gap-6">
-          <a href="#" className="hover:text-emerald-600 font-medium">
+          <a href="/" className="hover:text-emerald-600 font-medium">
             Trang chủ
           </a>
           <a href="#" className="hover:text-emerald-600 font-medium">
@@ -73,11 +73,8 @@ function Header() {
           <a href="#" className="hover:text-emerald-600 font-medium">
             Thể loại
           </a>
-          <a href="#" className="hover:text-emerald-600 font-medium">
-            Hướng dẫn
-          </a>
-          <a href="#" className="hover:text-emerald-600 font-medium">
-            Liên hệ
+          <a href="/guide" className="hover:text-emerald-600 font-medium">
+            Hướng dẫn & Liên hệ
           </a>
         </nav>
 
