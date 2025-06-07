@@ -31,7 +31,7 @@ function Login() {
     try {
       const response = await api.post("api/auth/login", formData);
       if (response.status === 200) {
-        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("token", response.data.data.token);
         navigate("/");
       }
     } catch (err: any) {
