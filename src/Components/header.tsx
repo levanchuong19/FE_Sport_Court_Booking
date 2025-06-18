@@ -6,11 +6,9 @@ function Header() {
   const [token, setToken] = useState<string | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  console.log(token);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
-    console.log(storedToken);
 
     setToken(storedToken);
   }, []);
@@ -67,7 +65,10 @@ function Header() {
           <a href="/" className="hover:text-emerald-600 font-medium">
             Trang chủ
           </a>
-          <a href="#" className="hover:text-emerald-600 font-medium">
+          <a
+            href="/court-booking"
+            className="hover:text-emerald-600 font-medium"
+          >
             Tìm sân
           </a>
           <a href="#" className="hover:text-emerald-600 font-medium">
