@@ -30,6 +30,7 @@ function Login() {
     setIsLoading(true);
     try {
       const response = await api.post("api/auth/login", formData);
+      console.log(response.data);
       if (response.status === 200) {
         localStorage.setItem("token", response.data.data.token);
         navigate("/");
