@@ -52,11 +52,18 @@ export default function Home() {
               </div>
               <div>
                 <label className="text-sm font-medium">Địa điểm</label>
-                <input type="text" placeholder="Nhập địa điểm" className="w-full h-10 mt-1 border border-gray-200 rounded-md px-3 text-sm focus:ring-2 focus:ring-emerald-500" />
+                <input
+                  type="text"
+                  placeholder="Nhập địa điểm"
+                  className="w-full h-10 mt-1 border border-gray-200 rounded-md px-3 text-sm focus:ring-2 focus:ring-emerald-500"
+                />
               </div>
               <div>
                 <label className="text-sm font-medium">Ngày</label>
-                <input type="date" className="w-full h-10 mt-1 border border-gray-200 rounded-md px-3 text-sm focus:ring-2 focus:ring-emerald-500" />
+                <input
+                  type="date"
+                  className="w-full h-10 mt-1 border border-gray-200 rounded-md px-3 text-sm focus:ring-2 focus:ring-emerald-500"
+                />
               </div>
               <div className="flex items-end">
                 <button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-10 rounded-md font-semibold">
@@ -199,7 +206,10 @@ export default function Home() {
                 desc: "Đến sân theo lịch đã đặt và tận hưởng thời gian chơi thể thao cùng bạn bè.",
               },
             ].map((step, idx) => (
-              <div key={idx} className="bg-white border border-gray-200 rounded-xl p-8 text-center shadow">
+              <div
+                key={idx}
+                className="bg-white border border-gray-200 rounded-xl p-8 text-center shadow"
+              >
                 <div className="text-4xl mb-4">{step.icon}</div>
                 <h3 className="font-bold text-xl mb-2">{step.title}</h3>
                 <p className="text-gray-500">{step.desc}</p>
