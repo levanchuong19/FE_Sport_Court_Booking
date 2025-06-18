@@ -1,3 +1,6 @@
+import type { BusinessLocation } from "./businessLocation";
+import type { Images } from "./image";
+import type { Price } from "./price";
 import type { Slot } from "./slot";
 import type { User } from "./user";
 
@@ -5,8 +8,7 @@ export interface Court {
   id: number;
   courtName: string;
   address: string;
-  price: number;
-  image: string[];
+  images: Images[];
   description: string;
   status: string;
   createdAt: Date;
@@ -19,9 +21,8 @@ export interface Court {
   length: number;
   width: number;
   maxPlayers: number;
-  images: string[];
   courtManager: User;
   slots: Slot[];
-  prices: number[];
-  businessLocation: string;
+  prices: Price[];
+  businessLocation: BusinessLocation;
 }

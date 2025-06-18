@@ -49,6 +49,7 @@
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.6.0",
     "recharts": "^2.15.3",
+    "swiper": "^11.2.8",
     "tailwind-merge": "^3.3.0",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^1.1.2"
@@ -57,6 +58,7 @@
     "@eslint/js": "^9.25.0",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
+    "@types/swiper": "^5.4.3",
     "@vitejs/plugin-react": "^4.4.1",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.25.0",
