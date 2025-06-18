@@ -1,3 +1,6 @@
+import type { Court } from "./court";
+import type { Slot } from "./slot";
+
 export interface User {
   id: string;
   fullName: string;
@@ -11,4 +14,9 @@ export interface User {
   role: "GUEST" | "CUSTOMER" | "MANAGER" | "STAFF" | "ADMIN";
   createdAt: string;
   updatedAt: string;
+  isDelete: boolean;
+  balance: number;
+  courts: Court[];
+  slots: Slot[];
 }
+

@@ -1,4 +1,19 @@
-export default function Home() {
+import { useEffect, useState } from "react";
+import api from "../Config/api";
+import type { Court } from "../Model/court";
+import CourtCard from "../Components/courtCard";
+
+ function Home() {
+  const [court, setCourt] = useState<Court[]>([]);
+  
+    const fetchCourt = async () => {
+      const response = await api.get("api/court/top3-court-bookings");
+      setCourt(response.data.data);
+      console.log(response.data.data);
+    };
+    useEffect(() => {
+      fetchCourt();
+  }, []);
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
@@ -112,60 +127,9 @@ export default function Home() {
               </a>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[
-                {
-                  name: "Sân bóng đá Mini Thống Nhất",
-                  location: "Quận 1, TP.HCM",
-                  rating: 4.8,
-                  image: "/placeholder.svg?height=200&width=300",
-                  price: "300.000đ/giờ",
-                },
-                {
-                  name: "Sân Tennis Phú Nhuận",
-                  location: "Quận Phú Nhuận, TP.HCM",
-                  rating: 4.6,
-                  image: "/placeholder.svg?height=200&width=300",
-                  price: "250.000đ/giờ",
-                },
-                {
-                  name: "Sân cầu lông Tân Bình",
-                  location: "Quận Tân Bình, TP.HCM",
-                  rating: 4.7,
-                  image: "/placeholder.svg?height=200&width=300",
-                  price: "150.000đ/giờ",
-                },
-              ].map((venue, idx) => (
-                <div
-                  key={idx}
-                  className="bg-white rounded-xl shadow hover:shadow-md flex flex-col"
-                >
-                  <img
-                    src={venue.image}
-                    alt={venue.name}
-                    className="object-cover w-full h-48 rounded-t-xl"
-                  />
-                  <div className="p-5 flex flex-col flex-1 justify-between">
-                    <div>
-                      <div className="flex justify-between items-center mb-2">
-                        <h3 className="font-bold text-lg">{venue.name}</h3>
-                        <span className="text-yellow-500 font-semibold">
-                          ★ {venue.rating}
-                        </span>
-                      </div>
-                      <div className="text-gray-500 text-sm mb-4">
-                        {venue.location}
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center mt-auto">
-                      <span className="font-medium text-emerald-600">
-                        {venue.price}
-                      </span>
-                      <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md text-sm font-semibold">
-                        Đặt ngay
-                      </button>
-                    </div>
-                  </div>
-                </div>
+             
+              {court.map((court) => (
+                <CourtCard key={court.id} court={court} />
               ))}
             </div>
           </div>
@@ -255,7 +219,7 @@ export default function Home() {
                         <span key={i} className="text-yellow-500 text-xl">
                           ★
                         </span>
-                      ))}
+                    ))}
                   </div>
                   <p className="italic mb-4 text-center">"{t.comment}"</p>
                   <div className="flex items-center gap-3">
@@ -276,3 +240,5 @@ export default function Home() {
     </div>
   );
 }
+
+export default Home;
