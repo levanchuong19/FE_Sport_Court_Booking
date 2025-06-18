@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import api from "../Config/api";
-import type { Court } from "../Model/court";
-import CourtCard from "../Components/courtCard";
+import LocationCard from "../Components/locationCard";
+import type { BusinessLocation } from "../Model/businessLocation";
 
  function Home() {
-  const [court, setCourt] = useState<Court[]>([]);
+  const [location, setLocation] = useState<BusinessLocation[]>([]);
   
     const fetchCourt = async () => {
-      const response = await api.get("api/court/top3-court-bookings");
-      setCourt(response.data.data);
+      const response = await api.get("api/location/top3-BusinessLocations");
+      setLocation(response.data.data);
       console.log(response.data.data);
     };
     useEffect(() => {
@@ -135,8 +135,8 @@ import CourtCard from "../Components/courtCard";
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
              
-              {court.map((court) => (
-                <CourtCard key={court.id} court={court} />
+              {location.map((location) => (
+                <LocationCard key={location.id} location={location} />
               ))}
             </div>
           </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Card, Row, Col, Tag, Typography, Divider, Empty } from "antd";
 import {
   DollarOutlined,
@@ -9,6 +9,7 @@ import {
 } from "@ant-design/icons";
 import type { Court } from "../Model/court";
 import api from "../Config/api";
+import { useNavigate } from "react-router-dom";
 
 const { Title, Text } = Typography;
 
@@ -32,6 +33,7 @@ const getSportColor = (sport: string) => {
 const CourtBooking: React.FC = () => {
   const [courts, setCourts] = useState<Court[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
+  const navigate = useNavigate();
 
   const handleSearch = async () => {
     try {
@@ -48,6 +50,10 @@ const CourtBooking: React.FC = () => {
   useEffect(() => {
     handleSearch();
   }, []);
+
+  const handleBooking = (court: Court) => {
+    navigate(`/booking/${court.id}`);
+  };
 
   const groupCourtsByType = (list: Court[]) => {
     return list.reduce((acc, court) => {
@@ -166,8 +172,8 @@ const CourtBooking: React.FC = () => {
                           <img
                             alt={court.courtName}
                             src={
-                              court.images?.[0]?.imageUrl?.startsWith("http")
-                                ? court.images[0].imageUrl
+                              court.images?.[0]?.imageUrl ? 
+                                court.images?.[0]?.imageUrl
                                 : "https://dungcutheduc.vn/images/San-bong-da-Futsal.jpg"
                             }
                             style={{
@@ -226,6 +232,7 @@ const CourtBooking: React.FC = () => {
                         </div>
                         <Divider style={{ margin: "16px 0" }} />
                         <Button
+                          onClick={() => handleBooking(court)}
                           type="primary"
                           block
                           style={{

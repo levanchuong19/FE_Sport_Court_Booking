@@ -25,7 +25,7 @@ function App() {
       element: <Layout />,
       children: [
         { path: "", element: <Home /> },
-        { path: "booking", element: <BookingPage /> },
+        { path: "/booking/:id", element: <BookingPage /> },
         { path: "confirm-booking", element: <ConfirmBooking /> },
         { path: "guide", element: <GuidePage /> },
         { path: "court-booking", element: <CourtBooking /> },
