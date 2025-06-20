@@ -1,21 +1,28 @@
-import type { Images } from "./images";
+import type { BusinessLocation } from "./businessLocation";
+import type { Images } from "./image";
+import type { Price } from "./price";
+import type { Slot } from "./slot";
+import type { User } from "./user";
 
 export interface Court {
-  courtType: string;
+  id: number;
   courtName: string;
-  description: string;
-  manager_id: string;
-  prices: [
-    {
-      priceType: string;
-      price: number;
-    }
-  ];
+  address: string;
   images: Images[];
-
-  businessLocationId: string;
+  description: string;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+  createdBy: string;
+  updatedBy: string;
+  isDeleted: boolean;
+  courtType: string;
   yearBuild: number;
   length: number;
   width: number;
   maxPlayers: number;
+  courtManager: User;
+  slots: Slot[];
+  prices: Price[];
+  businessLocation: BusinessLocation;
 }
