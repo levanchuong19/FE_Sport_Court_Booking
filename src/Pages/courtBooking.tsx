@@ -166,9 +166,8 @@ const CourtBooking: React.FC = () => {
                           <img
                             alt={court.courtName}
                             src={
-                              court.images?.[0]?.imageUrl?.startsWith("http")
-                                ? court.images[0].imageUrl
-                                : "https://dungcutheduc.vn/images/San-bong-da-Futsal.jpg"
+                              court.images?.[0]?.imageUrl ||
+                              "https://dungcutheduc.vn/images/San-bong-da-Futsal.jpg"
                             }
                             style={{
                               width: "100%",
@@ -225,19 +224,31 @@ const CourtBooking: React.FC = () => {
                           </Text>
                         </div>
                         <Divider style={{ margin: "16px 0" }} />
-                        <Button
-                          type="primary"
-                          block
-                          style={{
-                            marginTop: "auto",
-                            background:
-                              "linear-gradient(135deg, #00b09b, #006E51)",
-                            border: "none",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          Đặt sân ngay
-                        </Button>
+                        <div style={{ display: "flex", gap: 12 }}>
+                          <Button
+                            type="primary"
+                            style={{
+                              flex: 1,
+                              background:
+                                "linear-gradient(135deg, #00b09b, #006E51)",
+                              border: "none",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            Đặt sân ngay
+                          </Button>
+                          <Button
+                            type="default"
+                            style={{
+                              flex: 1,
+                              fontWeight: "bold",
+                              borderColor: "#006E51",
+                              color: "#006E51",
+                            }}
+                          >
+                            Chi Tiết
+                          </Button>
+                        </div>
                       </div>
                     </Card>
                   </Col>

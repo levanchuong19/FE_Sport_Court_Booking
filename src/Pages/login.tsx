@@ -30,15 +30,15 @@ function Login() {
     setIsLoading(true);
     try {
       const response = await api.post("api/auth/login", formData);
-      if (response.status === 200) {
+      if (response.data.code === 200) {
         localStorage.setItem("token", response.data.data.token);
         navigate("/");
+      } else {
+        throw new Error(response.data.data);
       }
     } catch (err: any) {
-      setError(
-        err.response?.data?.message || "Đăng nhập thất bại. Vui lòng thử lại."
-      );
-      console.error("Login error:", err);
+      const message = "Đăng nhập thất bại. Vui lòng thử lại.";
+      setError(message);
     } finally {
       setIsLoading(false);
     }

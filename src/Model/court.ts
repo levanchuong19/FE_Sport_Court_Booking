@@ -1,3 +1,5 @@
+import type { Images } from "./images";
+
 export interface Court {
   courtType: string;
   courtName: string;
@@ -9,12 +11,7 @@ export interface Court {
       price: number;
     }
   ];
-  images: [
-    {
-      id: string;
-      imageUrl: string;
-    }
-  ];
+  images: Images[];
 
   businessLocationId: string;
   yearBuild: number;
