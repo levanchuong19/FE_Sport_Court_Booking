@@ -13,6 +13,7 @@ import BookingPage from "./Pages/bookingPage";
 import ConfirmBooking from "./Pages/confirmBooking";
 import GuidePage from "./Pages/guidePage";
 import CourtBooking from "./Pages/courtBooking";
+import RegisterPartner from "./Pages/registerPartner";
 
 function App() {
   const router = createBrowserRouter([
@@ -28,7 +29,8 @@ function App() {
         { path: "/booking/:id", element: <BookingPage /> },
         { path: "confirm-booking", element: <ConfirmBooking /> },
         { path: "guide", element: <GuidePage /> },
-        { path: "court-booking", element: <CourtBooking /> },
+        { path: "court", element: <CourtBooking /> },
+        { path: "registerPartner", element: <RegisterPartner /> },
       ],
     },
     {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button, Card, Row, Col, Tag, Typography, Divider, Empty } from "antd";
+import { Button, Card, Row, Col, Tag, Typography, Divider, Empty, Input, Select } from "antd";
 import {
   DollarOutlined,
   UserOutlined,
@@ -10,8 +10,11 @@ import {
 import type { Court } from "../Model/court";
 import api from "../Config/api";
 import { useNavigate } from "react-router-dom";
+import { MapPin, Search, Filter, ListFilter } from "lucide-react";
+import CourtCard from "../Components/courtCard";
 
 const { Title, Text } = Typography;
+const { Option } = Select;
 
 const sportMap: Record<string, string> = {
   FOOTBALL: "Bóng đá",
@@ -30,14 +33,24 @@ const getSportColor = (sport: string) => {
   return colors[sport] || "default";
 };
 
+const sortOptions = [
+  { value: "featured", label: "Nổi bật" },
+  { value: "name_asc", label: "Tên từ A-Z" },
+  { value: "name_desc", label: "Tên từ Z-A" },
+  { value: "price_asc", label: "Giá tăng dần" },
+  { value: "price_desc", label: "Giá giảm dần" },
+];
+
 const CourtBooking: React.FC = () => {
   const [courts, setCourts] = useState<Court[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
+  const [selectedType, setSelectedType] = useState<string | undefined>(undefined);
+  const [sortType, setSortType] = useState<string>("featured");
   const navigate = useNavigate();
 
   const handleSearch = async () => {
     try {
-      const res = await api.get("/api/court/getAll");
+      const res = await api.get("court/getAll");
       setCourts(res.data?.data?.content || []);
     } catch (err) {
       console.error("Lỗi khi gọi API:", err);
@@ -51,10 +64,26 @@ const CourtBooking: React.FC = () => {
     handleSearch();
   }, []);
 
-  const handleBooking = (court: Court) => {
-    navigate(`/booking/${court.id}`);
-  };
+  // Lọc theo loại sân
+  const filteredCourts = selectedType
+    ? courts.filter((court) => court.courtType === selectedType)
+    : courts;
 
+  // Sắp xếp
+  const sortedCourts = [...filteredCourts].sort((a, b) => {
+    const getPrice = (court: Court) => court.prices?.find(p => p.priceType === "HOURLY")?.price || 0;
+    const getRating = (court: Court) => court.businessLocation?.rating || 0;
+    if (sortType === "price_asc") return getPrice(a) - getPrice(b);
+    if (sortType === "price_desc") return getPrice(b) - getPrice(a);
+    if (sortType === "rating_desc") return getRating(b) - getRating(a);
+    if (sortType === "rating_asc") return getRating(a) - getRating(b);
+    if (sortType === "name_asc") return a.courtName.localeCompare(b.courtName);
+    if (sortType === "name_desc") return b.courtName.localeCompare(a.courtName);
+    // 'featured' giữ nguyên thứ tự gốc
+    return 0;
+  });
+
+  // Gom nhóm lại theo loại sân (sau khi đã lọc/sắp xếp)
   const groupCourtsByType = (list: Court[]) => {
     return list.reduce((acc, court) => {
       const key = court.courtType;
@@ -64,70 +93,89 @@ const CourtBooking: React.FC = () => {
     }, {} as Record<string, Court[]>);
   };
 
-  const groupedCourts = groupCourtsByType(courts);
+  // Nếu đã chọn loại sân thì chỉ hiển thị 1 nhóm, còn không thì hiển thị tất cả nhóm
+  const groupedCourts = selectedType
+    ? { [selectedType]: sortedCourts }
+    : groupCourtsByType(sortedCourts);
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background:
-          "linear-gradient(180deg, rgba(0,208,132,1) 0%, rgba(0,208,132,0) 100%)",
-        padding: "24px 0",
-      }}
-    >
-      {/* Header hero animated */}
-      <div
-        className="animate__animated animate__fadeInUp"
-        style={{
-          maxWidth: "1100px",
-          margin: "0 auto 48px",
-          borderRadius: 24,
-          overflow: "hidden",
-          background: "linear-gradient(135deg, #e0f7f4, #ccf0e9)",
-          display: "flex",
-          boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
-        }}
-      >
-        <div
-          style={{
-            flex: 1,
-            padding: "40px 32px",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-          }}
-        >
-          <Title
-            style={{ fontSize: "2.4rem", color: "#006e51", marginBottom: 12 }}
-          >
-            🏟️ Tìm Sân Thể Thao
-          </Title>
-          <Text style={{ fontSize: 16, color: "#333" }}>
-            Đặt sân thể thao tiện lợi, nhanh chóng và hiện đại tại TP.HCM với
-            SportZone.
-          </Text>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+      <section className="py-12 bg-gradient-to-r from-green-600 to-blue-600 text-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">Tất cả loại sân thể thao</h1>
+            <p className="text-xl opacity-90 max-w-2xl mx-auto">
+              Khám phá và đặt sân thể thao yêu thích của bạn với giá tốt nhất
+            </p>
+          </div>
+
+          {/* Search Bar */}
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white rounded-lg p-4 shadow-lg">
+              <div className="grid md:grid-cols-4 gap-4 items-center">
+                <div className="md:col-span-2">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <Input placeholder="Tìm kiếm sân theo tên, địa điểm..." className="pl-10 h-10 border-gray-300" />
+                  </div>
+                </div>
+                <div>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <Input placeholder="Khu vực" className="pl-10 h-10 border-gray-300" />
+                  </div>
+                </div>
+                <button className="bg-green-600 h-10 pl-10 pr-10 py-4 flex items-center justify-center border border-gray-300 rounded-lg hover:bg-green-700">
+                  <Search className="w-4 h-4 mr-2 text-white"/>
+                  <span className="text-white text-xs">Tìm kiếm</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-        <div
-          style={{
-            flex: 1.2,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: "24px",
-          }}
-        >
-          <img
-            src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjvZyHRhnoFpPhEYu5EZBgUOCcwoHU8bz5wJtZpvShtATAY6f8tqPm0cvnZXR0CmnJVjwN2Xwsdp4XNHVgUeQuISupRB_URCkCjWiUsKhBGX1nXmgQ_KxZxahRHsRa0_3dcvcxw7JYQiw2bIVYjhuFJfpbvyP6T7rVQDkhDf07eXI9HoCYknl5M_KkLO9Q/s1600/(%20Anhpng.com%20)%20B%C3%93NG%20%C4%90%C3%81%20(89).png"
-            alt="sports illustration"
-            style={{
-              width: "100%",
-              maxWidth: "400px",
-              height: "auto",
-              objectFit: "contain",
-              display: "block",
-              margin: "0 auto",
-            }}
-          />
+      </section>
+
+      {/* Filter & Sort row - BELOW section */}
+      <div className="flex justify-between items-center max-w-6xl mx-auto px-4 border-b border-gray-300 pb-2 mb-8">
+      <div className="flex flex-wrap gap-4 mt-8 mb-6 items-center justify-center">
+        {/* Filter button */}
+        <Button className="flex items-center gap-2 border rounded-lg px-4 py-2 bg-white hover:bg-gray-50 shadow-none">
+          <Filter className="w-5 h-5" />
+          <span className="font-medium">Bộ lọc</span>
+        </Button>
+        {/* Sort dropdown */}
+        <div className="flex items-center gap-2">
+          <ListFilter className="w-5 h-5 text-gray-700" />
+          <span className="font-medium text-gray-700">Xếp theo:</span>
+          <Select
+            value={sortType}
+            style={{ minWidth: 140 }}
+            onChange={v => setSortType(v)}
+            dropdownMatchSelectWidth={false}
+          >
+            {sortOptions.map(opt => (
+              <Option value={opt.value} key={opt.value}>{opt.label}</Option>
+            ))}
+          </Select>
+        </div>
+        {/* Court type filter (optional, can be moved into filter modal if needed) */}
+        <div className="flex items-center gap-2">
+          <span className="font-medium text-gray-700">Loại sân:</span>
+          <Select
+            allowClear
+            placeholder="Tất cả"
+            style={{ minWidth: 120 }}
+            value={selectedType}
+            onChange={v => setSelectedType(v)}
+          >
+            {Object.entries(sportMap).map(([key, label]) => (
+              <Option value={key} key={key}>{label}</Option>
+            ))}
+          </Select>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 mr-8 align-middle">
+          <span className="font-medium text-gray-700">Tìm thấy {courts.length} sân thể thao</span>
         </div>
       </div>
 
@@ -157,96 +205,7 @@ const CourtBooking: React.FC = () => {
                     key={index}
                     style={{ display: "flex" }}
                   >
-                    <Card
-                      hoverable
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "space-between",
-                        borderRadius: "16px",
-                        boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
-                        width: "100%",
-                      }}
-                      cover={
-                        <div style={{ position: "relative", height: "200px" }}>
-                          <img
-                            alt={court.courtName}
-                            src={
-                              court.images?.[0]?.imageUrl ? 
-                                court.images?.[0]?.imageUrl
-                                : "https://dungcutheduc.vn/images/San-bong-da-Futsal.jpg"
-                            }
-                            style={{
-                              width: "100%",
-                              height: "100%",
-                              objectFit: "cover",
-                              borderTopLeftRadius: "16px",
-                              borderTopRightRadius: "16px",
-                            }}
-                          />
-                          <Tag
-                            color={getSportColor(sportMap[court.courtType])}
-                            style={{ position: "absolute", top: 12, right: 12 }}
-                          >
-                            {sportMap[court.courtType]}
-                          </Tag>
-                        </div>
-                      }
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: 12,
-                        }}
-                      >
-                        <Title level={4} style={{ margin: 0 }}>
-                          {court.courtName}
-                        </Title>
-                        <div>
-                          <InfoCircleOutlined />{" "}
-                          <Text type="secondary">{court.description}</Text>
-                        </div>
-                        <div>
-                          <UserOutlined />{" "}
-                          <Text type="secondary">{court.maxPlayers} người</Text>
-                        </div>
-                        <div>
-                          <ExpandOutlined />{" "}
-                          <Text type="secondary">
-                            {court.length}m x {court.width}m
-                          </Text>
-                        </div>
-                        <div>
-                          <DollarOutlined />{" "}
-                          <Text strong style={{ color: "#f5222d" }}>
-                            {court.prices?.[0]?.price?.toLocaleString("vi-VN")}
-                            đ/giờ
-                          </Text>
-                        </div>
-                        <div>
-                          <HomeOutlined />{" "}
-                          <Text type="secondary">
-                            Xây dựng năm {court.yearBuild}
-                          </Text>
-                        </div>
-                        <Divider style={{ margin: "16px 0" }} />
-                        <Button
-                          onClick={() => handleBooking(court)}
-                          type="primary"
-                          block
-                          style={{
-                            marginTop: "auto",
-                            background:
-                              "linear-gradient(135deg, #00b09b, #006E51)",
-                            border: "none",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          Đặt sân ngay
-                        </Button>
-                      </div>
-                    </Card>
+                    <CourtCard court={court} />
                   </Col>
                 ))}
               </Row>

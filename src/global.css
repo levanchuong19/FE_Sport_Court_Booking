@@ -2,3 +2,41 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+    --background: 255 255 255;
+    --foreground: 0 0 0;
+    --destructive: 239 68 68;
+    --destructive-foreground: 255 255 255;
+    --primary: 16 185 129;
+    --primary-foreground: 255 255 255;
+    --secondary: 59 130 246;
+    --secondary-foreground: 255 255 255;
+    --muted: 243 244 246;
+    --muted-foreground: 107 114 128;
+    --accent: 16 185 129;
+    --accent-foreground: 255 255 255;
+    --popover: 255 255 255;
+    --popover-foreground: 0 0 0;
+    --card: 255 255 255;
+    --card-foreground: 0 0 0;
+}
+
+.dark {
+    --background: 24 24 27;
+    --foreground: 255 255 255;
+    --destructive: 239 68 68;
+    --destructive-foreground: 255 255 255;
+    --primary: 16 185 129;
+    --primary-foreground: 255 255 255;
+    --secondary: 59 130 246;
+    --secondary-foreground: 255 255 255;
+    --muted: 55 65 81;
+    --muted-foreground: 156 163 175;
+    --accent: 16 185 129;
+    --accent-foreground: 255 255 255;
+    --popover: 39 39 42;
+    --popover-foreground: 255 255 255;
+    --card: 39 39 42;
+    --card-foreground: 255 255 255;
+}
