@@ -1,22 +1,96 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Calendar, MapPin, Clock } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import type { Court } from "../Model/court";
+import api from "../Config/api";
+import formatVND from "../Utils/currency";
+import { Radio } from "antd";
+import { customAlert } from "../Components/customAlert";
+import { useSelector } from "react-redux";
+import type { RootState } from "../redux/store";
+import { jwtDecode } from "jwt-decode";
 
 const fieldTypes = [
-  { key: "soccer", label: "Sân bóng đá", icon: <svg width="40" height="40" fill="none"><circle cx="20" cy="20" r="16" stroke="#22c55e" strokeWidth="2"/><circle cx="20" cy="20" r="8" stroke="#22c55e" strokeWidth="2"/></svg> },
-  { key: "tennis", label: "Sân tennis", icon: <svg width="40" height="40" fill="none"><rect x="8" y="8" width="24" height="24" rx="6" stroke="#22c55e" strokeWidth="2"/><rect x="16" y="16" width="8" height="8" rx="2" stroke="#22c55e" strokeWidth="2"/></svg> },
-  { key: "badminton", label: "Sân cầu lông", icon: <svg width="40" height="40" fill="none"><circle cx="20" cy="20" r="16" stroke="#22c55e" strokeWidth="2"/><line x1="12" y1="28" x2="28" y2="12" stroke="#22c55e" strokeWidth="2"/></svg> },
+  {
+    key: "soccer",
+    label: "Sân bóng đá",
+    icon: (
+      <svg width="40" height="40" fill="none">
+        <circle cx="20" cy="20" r="16" stroke="#22c55e" strokeWidth="2" />
+        <circle cx="20" cy="20" r="8" stroke="#22c55e" strokeWidth="2" />
+      </svg>
+    ),
+  },
+  {
+    key: "tennis",
+    label: "Sân tennis",
+    icon: (
+      <svg width="40" height="40" fill="none">
+        <rect
+          x="8"
+          y="8"
+          width="24"
+          height="24"
+          rx="6"
+          stroke="#22c55e"
+          strokeWidth="2"
+        />
+        <rect
+          x="16"
+          y="16"
+          width="8"
+          height="8"
+          rx="2"
+          stroke="#22c55e"
+          strokeWidth="2"
+        />
+      </svg>
+    ),
+  },
+  {
+    key: "badminton",
+    label: "Sân cầu lông",
+    icon: (
+      <svg width="40" height="40" fill="none">
+        <circle cx="20" cy="20" r="16" stroke="#22c55e" strokeWidth="2" />
+        <line
+          x1="12"
+          y1="28"
+          x2="28"
+          y2="12"
+          stroke="#22c55e"
+          strokeWidth="2"
+        />
+      </svg>
+    ),
+  },
 ];
 
-const weekDays = [
-  { label: "Thứ 5", date: "05", month: "thg 6" },
-  { label: "Thứ 6", date: "06", month: "thg 6" },
-  { label: "Thứ 7", date: "07", month: "thg 6" },
-  { label: "CN", date: "08", month: "thg 6" },
-  { label: "Thứ 2", date: "09", month: "thg 6" },
-  { label: "Thứ 3", date: "10", month: "thg 6" },
-  { label: "Thứ 4", date: "11", month: "thg 6" },
-];
+const getNext7Days = (offset = 0) => {
+  const days = [];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const weekDayLabels = [
+    "CN",
+    "Thứ 2",
+    "Thứ 3",
+    "Thứ 4",
+    "Thứ 5",
+    "Thứ 6",
+    "Thứ 7",
+  ];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + offset + i);
+    days.push({
+      label: weekDayLabels[d.getDay()],
+      date: d.getDate().toString().padStart(2, "0"),
+      month: `thg ${d.getMonth() + 1}`,
+      fullDate: d,
+    });
+  }
+  return days;
+};
 
 const timeSlots = [
   { label: "Buổi sáng", slots: ["07:00", "08:00", "09:00", "10:00", "11:00"] },
@@ -24,87 +98,412 @@ const timeSlots = [
   { label: "Buổi tối", slots: ["18:00", "19:00", "20:00", "21:00", "22:00"] },
 ];
 
-const bookedSlots = ["09:00", "14:00", "19:00"];
+// Hàm lấy ngày local dạng YYYY-MM-DD
+const getLocalDateString = (date: Date) => {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const day = date.getDate().toString().padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
 
-const bookingTypes = [
-  {
-    key: "hour",
-    label: "Theo giờ",
-    desc: "Đặt sân theo từng giờ",
-    price: "200.000đ/giờ",
-    icon: <svg width="32" height="32" fill="none"><circle cx="16" cy="16" r="14" stroke="#22c55e" strokeWidth="2"/><path d="M16 8v8l6 3" stroke="#22c55e" strokeWidth="2" strokeLinecap="round"/></svg>
-  },
-  {
-    key: "day",
-    label: "Theo ngày",
-    desc: "Đặt sân cả ngày (8h-22h)",
-    price: "2.000.000đ/ngày",
-    icon: <svg width="32" height="32" fill="none"><rect x="4" y="6" width="24" height="20" rx="4" stroke="#22c55e" strokeWidth="2"/><rect x="10" y="12" width="8" height="8" rx="2" stroke="#22c55e" strokeWidth="2"/></svg>
-  },
-  {
-    key: "week",
-    label: "Theo tuần",
-    desc: "Đặt sân cả tuần (7 ngày)",
-    price: "12.000.000đ/tuần",
-    icon: <svg width="32" height="32" fill="none"><rect x="4" y="6" width="24" height="20" rx="4" stroke="#22c55e" strokeWidth="2"/><rect x="8" y="10" width="16" height="12" rx="2" stroke="#22c55e" strokeWidth="2"/></svg>
-  },
-  {
-    key: "month",
-    label: "Theo tháng",
-    desc: "Đặt sân cả tháng (30 ngày)",
-    price: "45.000.000đ/tháng",
-    icon: <svg width="32" height="32" fill="none"><rect x="4" y="6" width="24" height="20" rx="4" stroke="#22c55e" strokeWidth="2"/><rect x="12" y="12" width="8" height="8" rx="2" stroke="#22c55e" strokeWidth="2"/></svg>
-  },
-];
+// Hàm chuẩn hóa ngày về YYYY-MM-DD
+const normalizeDate = (dateStr: string) => {
+  if (!dateStr) return "";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "";
+  return getLocalDateString(d);
+};
+
+interface JwtPayload {
+  email: string;
+  exp: number;
+  fullName: string;
+  iat: number;
+  role: string;
+  sub: string;
+}
 
 export default function BookingPage() {
   const [tab, setTab] = useState("date");
   const [selectedDay, setSelectedDay] = useState(0);
-  const [selectedField, setSelectedField] = useState("soccer");
-  const [selectedSlot, setSelectedSlot] = useState("");
-  const [bookingType, setBookingType] = useState("hour");
+  // const [selectedField, setSelectedField] = useState("soccer");
+  // const [selectedSlot, setSelectedSlot] = useState("");
+  const [bookingType, setBookingType] = useState("HOURLY");
+  const [court, setCourt] = useState<Court>();
   const navigate = useNavigate();
+  const { id } = useParams();
 
-  const handleConfirm = () => {
-    const priceNum = bookingType === "day" ? 2000000 : bookingType === "week" ? 12000000 : bookingType === "month" ? 45000000 : 200000;
-    const bookingInfo = {
-      date: `${weekDays[selectedDay].date}/06/2025`,
-      type: fieldTypes.find(f => f.key === selectedField)?.label,
-      time:
-        bookingType === "day"
-          ? "08:00 - 22:00 (14 giờ)"
-          : bookingType === "week"
-          ? "02/06-08/06"
-          : bookingType === "month"
-          ? "30 ngày liên tiếp"
-          : selectedSlot,
-      price: priceNum,
-      serviceFee: 200000,
-      total: priceNum + 200000,
-      bookingType,
+  const [startDayOffset, setStartDayOffset] = useState(0);
+  const [weekDays, setWeekDays] = useState(getNext7Days(0));
+  const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
+  const [fullDay, setFullDay] = useState(true);
+  const [selectedFixedSlot, setSelectedFixedSlot] = useState<string>("");
+
+  const bookingTypes = [
+    {
+      key: "HOURLY",
+      label: "Theo giờ",
+      desc: "Đặt sân theo từng giờ",
+      price:
+        formatVND(
+          court?.prices?.find((p) => p.priceType === "HOURLY")?.price || 0
+        ) + "/giờ" || "N/A",
+      icon: (
+        <svg width="32" height="32" fill="none">
+          <circle cx="16" cy="16" r="14" stroke="#22c55e" strokeWidth="2" />
+          <path
+            d="M16 8v8l6 3"
+            stroke="#22c55e"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+        </svg>
+      ),
+    },
+    {
+      key: "DAILY",
+      label: "Theo ngày",
+      desc: "Đặt sân cả ngày (8h-22h)",
+      price:
+        formatVND(
+          court?.prices?.find((p) => p.priceType === "DAILY")?.price || 0
+        ) + "/ngày" || "N/A",
+      icon: (
+        <svg width="32" height="32" fill="none">
+          <rect
+            x="4"
+            y="6"
+            width="24"
+            height="20"
+            rx="4"
+            stroke="#22c55e"
+            strokeWidth="2"
+          />
+          <rect
+            x="10"
+            y="12"
+            width="8"
+            height="8"
+            rx="2"
+            stroke="#22c55e"
+            strokeWidth="2"
+          />
+        </svg>
+      ),
+    },
+    {
+      key: "WEEKLY",
+      label: "Theo tuần",
+      desc: "Đặt sân cả tuần (7 ngày)",
+      price:
+        formatVND(
+          court?.prices?.find((p) => p.priceType === "WEEKLY")?.price || 0
+        ) + "/tuần" || "N/A",
+      icon: (
+        <svg width="32" height="32" fill="none">
+          <rect
+            x="4"
+            y="6"
+            width="24"
+            height="20"
+            rx="4"
+            stroke="#22c55e"
+            strokeWidth="2"
+          />
+          <rect
+            x="8"
+            y="10"
+            width="16"
+            height="12"
+            rx="2"
+            stroke="#22c55e"
+            strokeWidth="2"
+          />
+        </svg>
+      ),
+    },
+    {
+      key: "MONTHLY",
+      label: "Theo tháng",
+      desc: "Đặt sân cả tháng (30 ngày)",
+      price:
+        formatVND(
+          court?.prices?.find((p) => p.priceType === "MONTHLY")?.price || 0
+        ) + "/tháng" || "N/A",
+      icon: (
+        <svg width="32" height="32" fill="none">
+          <rect
+            x="4"
+            y="6"
+            width="24"
+            height="20"
+            rx="4"
+            stroke="#22c55e"
+            strokeWidth="2"
+          />
+          <rect
+            x="12"
+            y="12"
+            width="8"
+            height="8"
+            rx="2"
+            stroke="#22c55e"
+            strokeWidth="2"
+          />
+        </svg>
+      ),
+    },
+  ];
+
+  const selectedDateStr = getLocalDateString(weekDays[selectedDay]?.fullDate);
+  const todayStr = getLocalDateString(new Date());
+  const isToday = selectedDateStr === todayStr;
+  // Lọc các slot đã đặt cho ngày này
+  const bookedSlots =
+    court?.slots
+      ?.filter(
+        (s) =>
+          typeof s.startDate === "string" &&
+          s.startDate === selectedDateStr &&
+          s.bookingStatus !== "OVERDUE"
+      )
+      ?.map((s: any) =>
+        typeof s.startTime === "string" ? s.startTime.slice(0, 5) : null
+      )
+      .filter(Boolean) || [];
+
+  const token = localStorage.getItem("token");
+  let user: string;
+  if (token) {
+    const decodedToken: JwtPayload = jwtDecode(token);
+    user = decodedToken.sub;
+    console.log(user);
+  }
+
+  const fetchCourt = async () => {
+    const response = await api.get(`court/get/{courtId}?courtId=${id}`);
+    setCourt(response.data.data);
+  };
+
+  useEffect(() => {
+    fetchCourt();
+  }, [id]);
+
+  const handleNextWeek = () => {
+    if (startDayOffset + 7 < 30) {
+      setStartDayOffset(startDayOffset + 7);
+      setWeekDays(getNext7Days(startDayOffset + 7));
+      setSelectedDay(0);
+      setSelectedSlots([]);
+    }
+  };
+  const handlePrevWeek = () => {
+    if (startDayOffset - 7 >= 0) {
+      setStartDayOffset(startDayOffset - 7);
+      setWeekDays(getNext7Days(startDayOffset - 7));
+      setSelectedDay(0);
+      setSelectedSlots([]);
+    }
+  };
+
+  const handleSlotClick = (slot: string) => {
+    if (bookedSlots.includes(slot)) return;
+    if (selectedSlots.includes(slot)) {
+      setSelectedSlots(selectedSlots.filter((s) => s !== slot));
+    } else {
+      if (selectedSlots.length === 0) {
+        setSelectedSlots([slot]);
+      } else {
+        const toMinutes = (t: string) => {
+          const [h, m] = t.split(":");
+          return parseInt(h) * 60 + parseInt(m);
+        };
+        const slotMinutes = toMinutes(slot);
+        const selectedMinutes = selectedSlots
+          .map(toMinutes)
+          .sort((a, b) => a - b);
+        const min = selectedMinutes[0];
+        const max = selectedMinutes[selectedMinutes.length - 1];
+        if (slotMinutes === min - 60 || slotMinutes === max + 60) {
+          setSelectedSlots(
+            slotMinutes === min - 60
+              ? [slot, ...selectedSlots]
+              : [...selectedSlots, slot]
+          );
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    setSelectedSlots([]);
+  }, [selectedDay, weekDays]);
+
+  const handleConfirm = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      customAlert(
+        "Lỗi",
+        "Vui lòng đăng nhập trước khi thực hiện !",
+        "destructive"
+      );
+      navigate("/login");
+      return;
+    }
+
+    const selectedBookingType = bookingTypes.find((t) => t.key === bookingType);
+    if (bookingType === "HOURLY" && selectedSlots.length === 0) {
+      customAlert(
+        "Lỗi đặt sân",
+        "Vui lòng chọn ít nhất một khung giờ để đặt sân",
+        "destructive"
+      );
+      return;
+    }
+
+    let time = "";
+    let startTime = "";
+    let endTime = "";
+    let startDate = getLocalDateString(weekDays[selectedDay].fullDate);
+    let endDate = startDate;
+    // HOURLY
+    if (bookingType === "HOURLY") {
+      const sorted = [...selectedSlots].sort();
+      if (sorted.length === 1) {
+        const [h, m] = sorted[0].split(":");
+        const end = (parseInt(h) + 1).toString().padStart(2, "0") + ":" + m;
+        time = `${sorted[0]} - ${end}`;
+        startTime = sorted[0];
+        endTime = end;
+      } else if (sorted.length > 1) {
+        const [start] = sorted;
+        const [endH, endM] = sorted[sorted.length - 1].split(":");
+        const end =
+          (parseInt(endH) + 1).toString().padStart(2, "0") + ":" + endM;
+        time = `${start} - ${end}`;
+        startTime = start;
+        endTime = end;
+      }
+    }
+    // DAILY
+    if (bookingType === "DAILY") {
+      time = "08:00 - 22:00";
+      startTime = "08:00";
+      endTime = "22:00";
+    }
+    // WEEKLY/MONTHLY
+    if (bookingType === "WEEKLY" || bookingType === "MONTHLY") {
+      const start = weekDays[selectedDay].fullDate;
+      const days = bookingType === "WEEKLY" ? 7 : 30;
+      const end = new Date(start);
+      end.setDate(end.getDate() + days - 1);
+      startDate = getLocalDateString(start);
+      endDate = getLocalDateString(end);
+      const dateRange = `(từ ${start.toLocaleDateString(
+        "vi-VN"
+      )} đến ${end.toLocaleDateString("vi-VN")})`;
+      if (fullDay) {
+        time = `08:00 - 22:00 mỗi ngày ${dateRange}`;
+        startTime = "08:00";
+        endTime = "22:00";
+      } else if (selectedFixedSlot) {
+        time = `${selectedFixedSlot} mỗi ngày ${dateRange}`;
+        startTime = selectedFixedSlot;
+        endTime = selectedFixedSlot;
+      }
+    }
+
+    if (
+      !fullDay &&
+      !selectedFixedSlot &&
+      (bookingType === "WEEKLY" || bookingType === "MONTHLY")
+    ) {
+      customAlert(
+        "Lỗi đặt sân",
+        "Vui lòng chọn thời gian hợp lệ",
+        "destructive"
+      );
+      return;
+    }
+
+    if (!user) {
+      customAlert("Lỗi", "Không tìm thấy thông tin người dùng.", "destructive");
+      return;
+    }
+    if (!court || typeof court !== "object" || !("id" in court) || !court.id) {
+      customAlert("Lỗi", "Không tìm thấy thông tin sân.", "destructive");
+      return;
+    }
+
+    // Chuẩn bị payload gửi lên API
+    const payload = {
+      slotType: bookingType,
+      account: user,
+      court: (court as any).id,
+      startDate,
+      endDate,
+      startTime: startTime + ":00",
+      endTime: endTime + ":00",
+      paymentMethod: "VNPAY",
     };
-    navigate("/confirm-booking", { state: bookingInfo });
+
+    try {
+      const response = await api.post("slot/create", payload);
+      console.log(response.data.data);
+      customAlert("Thành công", "Đặt sân thành công", "default");
+      const bookingInfo = {
+        date: `${weekDays[selectedDay].date}/${
+          weekDays[selectedDay].month.split(" ")[1]
+        }/2025`,
+        type: court.courtType,
+        time,
+        price: selectedBookingType?.price,
+        bookingType,
+      };
+      navigate("/confirm-booking", { state: bookingInfo });
+    } catch (error: any) {
+      customAlert(
+        "Lỗi",
+        error?.response?.data?.message || "Đặt sân thất bại",
+        "destructive"
+      );
+    }
   };
 
   return (
     <div className="max-w-6xl mx-auto py-8">
-      <h1 className="text-4xl font-bold text-center mb-6">Đặt Lịch Sân Thể Thao</h1>
+      <h1 className="text-4xl font-bold text-center mb-6">
+        Đặt Lịch Sân Thể Thao
+      </h1>
       {/* Tabs */}
       <div className="flex mb-6">
         <button
-          className={`flex-1 py-3 rounded-t-lg text-lg font-semibold ${tab === "date" ? "bg-white text-black shadow" : "bg-gray-100 text-gray-400"}`}
+          className={`flex-1 py-3 rounded-t-lg text-lg font-semibold ${
+            tab === "date"
+              ? "bg-white text-black shadow"
+              : "bg-gray-100 text-gray-400"
+          }`}
           onClick={() => setTab("date")}
         >
           Chọn ngày
         </button>
         <button
-          className={`flex-1 py-3 rounded-t-lg text-lg font-semibold ${tab === "list" ? "bg-white text-black shadow" : "bg-gray-100 text-gray-400"}`}
+          className={`flex-1 py-3 rounded-t-lg text-lg font-semibold ${
+            tab === "list"
+              ? "bg-white text-black shadow"
+              : "bg-gray-100 text-gray-400"
+          }`}
           onClick={() => setTab("list")}
         >
           Danh sách sân
         </button>
         <button
-          className={`flex-1 py-3 rounded-t-lg text-lg font-semibold ${tab === "map" ? "bg-white text-black shadow" : "bg-gray-100 text-gray-400"}`}
+          className={`flex-1 py-3 rounded-t-lg text-lg font-semibold ${
+            tab === "map"
+              ? "bg-white text-black shadow"
+              : "bg-gray-100 text-gray-400"
+          }`}
           onClick={() => setTab("map")}
         >
           Bản đồ
@@ -121,8 +520,18 @@ export default function BookingPage() {
               <span className="font-semibold text-lg">Chọn ngày</span>
             </div>
             <div className="flex gap-2">
-              <button className="w-10 h-10 rounded-lg border flex items-center justify-center text-xl text-gray-400 hover:bg-gray-100">&lt;</button>
-              <button className="w-10 h-10 rounded-lg border flex items-center justify-center text-xl text-gray-400 hover:bg-gray-100">&gt;</button>
+              <button
+                onClick={handlePrevWeek}
+                className="w-10 h-10 rounded-lg border flex items-center justify-center text-xl text-gray-400 hover:bg-gray-100"
+              >
+                &lt;
+              </button>
+              <button
+                onClick={handleNextWeek}
+                className="w-10 h-10 rounded-lg border flex items-center justify-center text-xl text-gray-400 hover:bg-gray-100"
+              >
+                &gt;
+              </button>
             </div>
           </div>
           {/* Dãy ngày: */}
@@ -131,9 +540,10 @@ export default function BookingPage() {
               <button
                 key={idx}
                 className={`flex flex-col items-center px-4 py-2 rounded-lg border transition-all w-full
-                  ${selectedDay === idx
-                    ? "bg-green-500 text-white border-green-500"
-                    : "bg-white text-black border-gray-200 hover:bg-gray-100"
+                  ${
+                    selectedDay === idx
+                      ? "bg-green-500 text-white border-green-500"
+                      : "bg-white text-black border-gray-200 hover:bg-gray-100"
                   }`}
                 onClick={() => setSelectedDay(idx)}
               >
@@ -145,7 +555,7 @@ export default function BookingPage() {
           </div>
         </div>
         {/* Chọn loại sân */}
-        <div>
+        {/* <div>
           <div className="flex items-center gap-2 mb-4">
             <MapPin className="text-green-600" />
             <span className="font-semibold text-lg">Chọn loại sân</span>
@@ -166,7 +576,7 @@ export default function BookingPage() {
               </button>
             ))}
           </div>
-        </div>
+        </div> */}
         {/* Loại đặt sân */}
         <div>
           <div className="flex items-center gap-2 mb-4 mt-8">
@@ -178,29 +588,34 @@ export default function BookingPage() {
               <button
                 key={type.key}
                 className={`flex flex-col items-center justify-center border-2 rounded-xl py-6 transition-all w-full
-                  ${bookingType === type.key
-                    ? "border-green-500 text-green-600 bg-green-50"
-                    : "border-gray-200 text-black bg-white hover:bg-gray-50"
+                  ${
+                    bookingType === type.key
+                      ? "border-green-500 text-green-600 bg-green-50"
+                      : "border-gray-200 text-black bg-white hover:bg-gray-50"
                   }`}
                 onClick={() => setBookingType(type.key)}
               >
                 <div className="mb-2">{type.icon}</div>
                 <span className="font-semibold">{type.label}</span>
                 <span className="text-sm text-gray-500">{type.desc}</span>
-                <span className="mt-2 text-green-600 font-bold">{type.price}</span>
+                <span className="mt-2 text-green-600 font-bold">
+                  {type.price}
+                </span>
               </button>
             ))}
           </div>
         </div>
         {/* Chọn giờ hoặc xác nhận đặt */}
-        {bookingType === "hour" && (
+        {bookingType === "HOURLY" && (
           <div>
             <div className="flex items-center gap-2 mb-4">
               <Clock className="text-green-600" />
               <span className="font-semibold text-lg">Chọn giờ</span>
             </div>
             <div className="mb-2 text-gray-500 text-sm">
-              Ngày: {weekDays[selectedDay].date}/06/2025 - Loại sân: {fieldTypes.find(f => f.key === selectedField)?.label}
+              {/* Ngày: {weekDays[selectedDay].date}/06/2025 - Loại sân: {fieldTypes.find(f => f.key === selectedField)?.label} */}
+              Ngày: {weekDays[selectedDay].date}/06/2025 - Loại sân:{" "}
+              {court?.courtType}
             </div>
             {timeSlots.map((group, idx) => (
               <div key={idx} className="mb-4">
@@ -208,20 +623,42 @@ export default function BookingPage() {
                 <div className="mb-6 w-full grid grid-cols-5 gap-2">
                   {group.slots.map((slot) => {
                     const isBooked = bookedSlots.includes(slot);
+                    let isPast = false;
+                    if (isToday) {
+                      const [h, m] = slot.split(":");
+                      const now = new Date();
+                      const currentHour = now.getHours();
+                      const currentMinute = now.getMinutes();
+                      isPast =
+                        parseInt(h) < currentHour ||
+                        (parseInt(h) === currentHour &&
+                          parseInt(m) <= currentMinute);
+                    }
+                    const isDisabled = isBooked || isPast;
                     return (
                       <button
                         key={slot}
                         className={`px-6 py-2 rounded-lg border text-lg font-semibold transition-all
-                          ${isBooked
-                            ? "bg-gray-50 text-red-400 border-gray-200 cursor-not-allowed"
-                            : selectedSlot === slot
-                            ? "bg-green-500 text-white border-green-500"
-                            : "bg-white text-black border-gray-200 hover:bg-green-50"}
+                          ${
+                            isBooked
+                              ? "bg-gray-50 text-red-400 border-gray-200 cursor-not-allowed"
+                              : isPast
+                              ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
+                              : selectedSlots.includes(slot)
+                              ? "bg-green-500 text-white border-green-500"
+                              : "bg-white text-black border-gray-200 hover:bg-green-50"
+                          }
                         `}
-                        disabled={isBooked}
-                        onClick={() => setSelectedSlot(slot)}
+                        disabled={isDisabled}
+                        onClick={() => handleSlotClick(slot)}
                       >
-                        {slot} {isBooked && <span className="text-xs ml-1">Đã đặt</span>}
+                        {slot}{" "}
+                        {isBooked && (
+                          <span className="text-xs ml-1">Đã đặt</span>
+                        )}
+                        {isPast && !isBooked && (
+                          <span className="text-xs ml-1">Quá giờ</span>
+                        )}
                       </button>
                     );
                   })}
@@ -231,43 +668,130 @@ export default function BookingPage() {
             <button
               className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-900 transition mt-4"
               onClick={handleConfirm}
-              disabled={!selectedSlot}
             >
               Xác nhận đặt giờ
             </button>
           </div>
         )}
-        {bookingType !== "hour" && (
+        {bookingType === "DAILY" && (
           <div className="mt-8">
             <div className="flex items-center gap-2 mb-4">
               <Clock className="text-green-600" />
               <span className="font-semibold text-lg">
-                Xác nhận đặt {bookingType === "day" ? "cả ngày" : bookingType === "week" ? "cả tuần" : "cả tháng"}
+                Xác nhận đặt cả ngày
               </span>
             </div>
             <div className="bg-white border rounded-xl shadow p-6 max-w-lg mx-auto">
-              <div className="text-xl font-semibold mb-2">
-                Đặt sân {bookingType === "day" ? "cả ngày" : bookingType === "week" ? "cả tuần" : "cả tháng"}
-              </div>
+              <div className="text-xl font-semibold mb-2">Đặt sân cả ngày</div>
               <div className="text-gray-600 mb-1">
                 Ngày: {weekDays[selectedDay].date}/06/2025
               </div>
               <div className="text-gray-600 mb-1">
-                Loại sân: {fieldTypes.find(f => f.key === selectedField)?.label}
+                Loại sân: {court?.courtType}
               </div>
-              <div className="text-gray-600 mb-1">
-                Thời gian: {bookingType === "day" && "08:00 - 22:00 (14 giờ)"}
-                {bookingType === "week" && "7 ngày liên tiếp"}
-                {bookingType === "month" && "30 ngày liên tiếp"}
-              </div>
+              <div className="text-gray-600 mb-1">Thời gian: 08:00 - 22:00</div>
               <div className="text-gray-900 font-bold mb-4">
-                Giá: {bookingTypes.find(t => t.key === bookingType)?.price}
+                Giá: {bookingTypes.find((t) => t.key === "DAILY")?.price}
               </div>
               <button
                 className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-900 transition"
+                onClick={() => {
+                  const selectedBookingType = bookingTypes.find(
+                    (t) => t.key === "DAILY"
+                  );
+                  const priceStr = selectedBookingType?.price;
+                  const bookingInfo = {
+                    date: `${weekDays[selectedDay].date}/${
+                      weekDays[selectedDay].month.split(" ")[1]
+                    }/2025`,
+                    type: court?.courtType,
+                    time: "08:00 - 22:00",
+                    price: priceStr,
+                    bookingType: "DAILY",
+                  };
+                  navigate("/confirm-booking", { state: bookingInfo });
+                }}
+              >
+                Xác nhận đặt cả ngày
+              </button>
+            </div>
+          </div>
+        )}
+        {(bookingType === "WEEKLY" || bookingType === "MONTHLY") && (
+          <div className="mt-8">
+            <div className="flex items-center gap-2 mb-4">
+              <Clock className="text-green-600" />
+              <span className="font-semibold text-lg">
+                Chọn kiểu đặt cho {bookingType === "WEEKLY" ? "tuần" : "tháng"}
+              </span>
+            </div>
+            <Radio.Group
+              value={fullDay ? "full" : "slot"}
+              onChange={(e) => {
+                setFullDay(e.target.value === "full");
+                setSelectedFixedSlot("");
+              }}
+              className="flex gap-8 mb-6"
+            >
+              <Radio value="full">
+                Đặt nguyên ngày (08:00 - 22:00 mỗi ngày)
+              </Radio>
+              <Radio value="slot">Chọn 1 khung giờ cố định mỗi ngày</Radio>
+            </Radio.Group>
+            {!fullDay && (
+              <div className="mb-6 mt-6">
+                <div className="font-semibold mb-2">Chọn 1 khung giờ:</div>
+                {timeSlots.map((group, idx) => (
+                  <div key={idx} className="mb-4">
+                    <div className="font-semibold mb-2">{group.label}</div>
+                    <div className="grid grid-cols-5 gap-2">
+                      {group.slots.map((slot) => (
+                        <button
+                          key={slot}
+                          className={`px-6 py-2 rounded-lg border text-lg font-semibold transition-all
+                            ${
+                              selectedFixedSlot === slot
+                                ? "bg-green-500 text-white border-green-500"
+                                : "bg-white text-black border-gray-200 hover:bg-green-50"
+                            }
+                          `}
+                          onClick={() => setSelectedFixedSlot(slot)}
+                          type="button"
+                        >
+                          {slot}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="bg-white border rounded-xl shadow p-6 max-w-lg mx-auto">
+              <div className="text-xl font-semibold mb-2">
+                Đặt sân {bookingType === "WEEKLY" ? "cả tuần" : "cả tháng"}
+              </div>
+              <div className="text-gray-600 mb-1">
+                Ngày bắt đầu: {weekDays[selectedDay].date}/06/2025
+              </div>
+              <div className="text-gray-600 mb-1">
+                Loại sân: {court?.courtType}
+              </div>
+              <div className="text-gray-600 mb-1">
+                Thời gian:{" "}
+                {fullDay
+                  ? "08:00 - 22:00 mỗi ngày"
+                  : selectedFixedSlot
+                  ? `${selectedFixedSlot} mỗi ngày`
+                  : "Chưa chọn khung giờ"}
+              </div>
+              <div className="text-gray-900 font-bold mb-4">
+                Giá: {bookingTypes.find((t) => t.key === bookingType)?.price}
+              </div>
+              <button
+                className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-900 transition cursor-pointer"
                 onClick={handleConfirm}
               >
-                Xác nhận đặt {bookingType === "day" ? "cả ngày" : bookingType === "week" ? "cả tuần" : "cả tháng"}
+                Xác nhận đặt {bookingType === "WEEKLY" ? "cả tuần" : "cả tháng"}
               </button>
             </div>
           </div>
