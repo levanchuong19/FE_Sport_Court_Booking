@@ -65,10 +65,7 @@ function Header() {
           <a href="/" className="hover:text-emerald-600 font-medium">
             Trang chủ
           </a>
-          <a
-            href="/court-booking"
-            className="hover:text-emerald-600 font-medium"
-          >
+          <a href="/show-court" className="hover:text-emerald-600 font-medium">
             Tìm sân
           </a>
           <a href="#" className="hover:text-emerald-600 font-medium">

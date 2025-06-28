@@ -1,9 +1,9 @@
-import { Avatar, Button, Card, Rate, Tag, Tooltip } from "antd";
-import 'swiper/css';
-import 'swiper/css/pagination';
+import { Button, Card, Tag, Tooltip } from "antd";
+import "swiper/css";
+import "swiper/css/pagination";
 import type { Court } from "../Model/court";
 import Meta from "antd/es/card/Meta";
-import { Car, Clock, MapPin, Users, Wifi, Zap } from "lucide-react";
+import { Clock, MapPin, Users } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, Navigation } from "swiper/modules";
 import { useNavigate } from "react-router-dom";
@@ -16,12 +16,12 @@ function CourtCard({ court }: { court: Court }) {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'AVAILABLE':
-        return 'success';
-      case 'BOOKED':
-        return 'error';
+      case "AVAILABLE":
+        return "success";
+      case "BOOKED":
+        return "error";
       default:
-        return 'default';
+        return "default";
     }
   };
 
@@ -29,18 +29,18 @@ function CourtCard({ court }: { court: Court }) {
     {
       icon: <MapPin className="h-4 w-4" />,
       label: court.businessLocation?.name || court.address,
-      tooltip: "Địa điểm"
+      tooltip: "Địa điểm",
     },
     {
       icon: <Users className="h-4 w-4" />,
       label: `${court.maxPlayers} người`,
-      tooltip: "Sức chứa"
+      tooltip: "Sức chứa",
     },
     {
       icon: <Clock className="h-4 w-4" />,
       label: "24/7",
-      tooltip: "Thời gian hoạt động"
-    }
+      tooltip: "Thời gian hoạt động",
+    },
   ];
 
   const handleBooking = () => {
@@ -67,8 +67,8 @@ function CourtCard({ court }: { court: Court }) {
           >
             {court?.images?.map((image) => (
               <SwiperSlide key={image?.id}>
-                <img 
-                  src={image?.imageUrl} 
+                <img
+                  src={image?.imageUrl}
                   alt={court?.courtName}
                   className="w-full h-full object-cover"
                 />
@@ -76,17 +76,11 @@ function CourtCard({ court }: { court: Court }) {
             ))}
           </Swiper>
           <div className="absolute top-0 left-0 right-0 p-2 flex justify-between z-20">
-            <Tag 
-              color={getStatusColor(court.courtType)}
-              className="m-0"
-            >
+            <Tag color={getStatusColor(court.courtType)} className="m-0">
               {court.courtType}
             </Tag>
-            <Tag 
-              color={getStatusColor(court.status)}
-              className="m-0"
-            >
-              {court.status === 'AVAILABLE' ? 'Có sẵn' : 'Đã đặt'}
+            <Tag color={getStatusColor(court.status)} className="m-0">
+              {court.status === "AVAILABLE" ? "Có sẵn" : "Đã đặt"}
             </Tag>
           </div>
         </div>
@@ -95,11 +89,11 @@ function CourtCard({ court }: { court: Court }) {
         <Button
           type="primary"
           className="w-11/12 mx-auto"
-          disabled={court.status !== 'AVAILABLE'}
+          disabled={court.status !== "AVAILABLE"}
           onClick={handleBooking}
         >
-          {court.status === 'AVAILABLE' ? 'Đặt sân ngay' : 'Đã được đặt'}
-        </Button>
+          {court.status === "AVAILABLE" ? "Đặt sân ngay" : "Đã được đặt"}
+        </Button>,
       ]}
     >
       <Meta
@@ -107,10 +101,13 @@ function CourtCard({ court }: { court: Court }) {
           <div className="flex justify-between items-start mb-2">
             <div>
               <h3 className="text-lg font-semibold">{court.courtName}</h3>
-              <p className="text-sm text-gray-500">{court.businessLocation?.address}</p>
+              <p className="text-sm text-gray-500">
+                {court.businessLocation?.address}
+              </p>
             </div>
             <div className="text-lg font-bold text-emerald-600">
-              {formatVND(court.prices?.[0].price)}<span className="text-sm text-gray-500">/giờ</span>
+              {formatVND(court.prices?.[0].price)}
+              <span className="text-sm text-gray-500">/giờ</span>
             </div>
           </div>
         }
