@@ -15,17 +15,15 @@ import { useNavigate } from "react-router-dom";
 import type { BusinessLocation } from "../Model/businessLocation";
 import formatDate from "../Utils/date";
 
-// import "./styles.css";
-
 function LocationCard({ location }: { location: BusinessLocation }) {
   const navigate = useNavigate();
 
   const getStatusColor = (status: string) => {
     switch (status.toUpperCase()) {
-      case "AVAILABLE":
-        return "success";
-      case "BOOKED":
-        return "error";
+      case "ACTIVE":
+        return "green";
+      case "INACTIVE":
+        return "red";
       default:
         return "default";
     }
@@ -130,13 +128,12 @@ function LocationCard({ location }: { location: BusinessLocation }) {
     >
       <Meta
         title={
-          <div className="flex justify-between items-start mb-2">
-            {/* <h3 className="text-lg font-semibold text-black">{location.name}</h3> */}
+          <div className="flex flex-col justify-between items-start mb-2">
+            <h3 className="text-lg font-semibold text-black">
+              {location.name}
+            </h3>
             <div className="flex items-center justify-between w-full">
-              <h3 className="font-semibold text-lg text-gray-900 mb-1 line-clamp-1">
-                {location.name}
-              </h3>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center ">
                 <div className="flex items-center space-x-1">
                   <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                   {/* <span className="text-sm font-medium">{location.rating}</span>

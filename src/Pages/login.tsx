@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../Config/api";
+import { useDispatch } from "react-redux";
+import { login } from "../redux/features/userSlice";
 
 interface LoginProps {
   phone: string;
@@ -16,6 +18,8 @@ function Login() {
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const dispatch = useDispatch();
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -29,9 +33,11 @@ function Login() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await api.post("api/auth/login", formData);
-      if (response.data.code === 200) {
+      const response = await api.post("auth/login", formData);
+      if (response.status === 200) {
         localStorage.setItem("token", response.data.data.token);
+        localStorage.setItem("user", JSON.stringify(response.data.data));
+        dispatch(login(response.data.data.user));
         navigate("/");
       } else {
         throw new Error(response.data.data);

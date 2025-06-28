@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import api from "../Config/api";
 import LocationCard from "../Components/locationCard";
 import type { BusinessLocation } from "../Model/businessLocation";
+import { useNavigate } from "react-router-dom";
 
  function Home() {
   const [location, setLocation] = useState<BusinessLocation[]>([]);
-  
+  const navigate = useNavigate();
     const fetchCourt = async () => {
-      const response = await api.get("api/location/top3-BusinessLocations");
+      const response = await api.get("location/top3-BusinessLocations");
       setLocation(response.data.data);
       console.log(response.data.data);
     };
@@ -32,10 +33,10 @@ import type { BusinessLocation } from "../Model/businessLocation";
                 nhấp chuột. Hàng nghìn sân thể thao đang chờ bạn khám phá.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-md font-semibold">
+                <button onClick={() => navigate("/court")} className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-md font-semibold">
                   Tìm sân ngay
                 </button>
-                <button className="border border-emerald-600 text-emerald-600 px-6 py-3 rounded-md font-semibold hover:bg-emerald-50">
+                <button onClick={() => navigate("/guide")} className="border border-emerald-600 text-emerald-600 px-6 py-3 rounded-md font-semibold hover:bg-emerald-50">
                   Tìm hiểu thêm
                 </button>
               </div>

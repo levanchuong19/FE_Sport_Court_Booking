@@ -1,15 +1,17 @@
 import { useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { logout } from "../redux/features/userSlice";
 
 function Header() {
   const navigate = useNavigate();
   const [token, setToken] = useState<string | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
-
     setToken(storedToken);
   }, []);
 
@@ -23,6 +25,8 @@ function Header() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    dispatch(logout());
     setToken(null);
     setShowDropdown(false);
     navigate("/");
@@ -58,18 +62,26 @@ function Header() {
     <header className="w-full bg-white shadow sticky top-0 z-50">
       <div className="container mx-auto flex justify-between items-center h-16 px-4">
         <div className="flex items-center gap-2">
-          <span className="text-2xl font-bold text-emerald-600">SportZone</span>
+          <span
+            onClick={() => navigate("/")}
+            className="text-2xl font-bold text-emerald-600 cursor-pointer"
+          >
+            SportZone
+          </span>
         </div>
 
         <nav className="hidden md:flex gap-6">
           <a href="/" className="hover:text-emerald-600 font-medium">
             Trang chủ
           </a>
-          <a href="/show-court" className="hover:text-emerald-600 font-medium">
+          <a href="/court" className="hover:text-emerald-600 font-medium">
             Tìm sân
           </a>
-          <a href="#" className="hover:text-emerald-600 font-medium">
-            Thể loại
+          <a
+            href="/registerPartner"
+            className="hover:text-emerald-600 font-medium"
+          >
+            Trở thành đối tác
           </a>
           <a href="/guide" className="hover:text-emerald-600 font-medium">
             Hướng dẫn & Liên hệ

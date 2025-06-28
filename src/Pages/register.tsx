@@ -41,7 +41,7 @@ function Register() {
         password: formData.password,
       };
 
-      const response = await api.post("api/auth/register", requestData);
+      const response = await api.post("auth/register", requestData);
       if (response.status === 200 || response.status === 201) {
         alert("Đăng ký thành công!");
         navigate("/login");

@@ -1,5 +1,8 @@
 import { Calendar, Clock, MapPin } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
+import formatVND from "../Utils/currency";
+import api from "../Config/api";
+import type { Slot } from "../Model/slot";
 
 // Giả lập lấy user từ account đăng nhập
 const user = {
@@ -8,10 +11,17 @@ const user = {
   email: "nguyenvana@gmail.com"
 };
 
+
 export default function ConfirmBooking() {
   const location = useLocation();
   const navigate = useNavigate();
   const bookingInfo = location.state;
+  console.log(bookingInfo.time)
+
+  // Xử lý giá từ BE (string, có thể có dấu phẩy)
+  const priceNum = bookingInfo?.price ? parseInt(String(bookingInfo.price).replace(/,/g, "")) : 0;
+  const serviceFee = 0; // hoặc 200000 tuỳ chính sách
+  const total = priceNum + serviceFee;
 
   if (!bookingInfo) {
     return (
@@ -22,8 +32,16 @@ export default function ConfirmBooking() {
     );
   }
 
+  const handleBooking = async(values : Slot) => {
+   const response = await api.post("slot/create", values);
+   console.log(response.data);
+  }
+
+
+  
+
   return (
-    <div className="max-w-5xl border border-gray-200 rounded-xl shadow-lg p-8 mt-10 mx-auto py-8">
+    <div className="max-w-5xl border border-gray-200 rounded-xl shadow-lg p-8 mt-10 mx-auto py-8 mb-10">
       <button className="mb-6 flex items-center gap-2 text-gray-600 hover:underline" onClick={() => navigate(-1)}>
         <span className="text-xl">&larr;</span> Quay lại
       </button>
@@ -78,7 +96,7 @@ export default function ConfirmBooking() {
               Thursday, {bookingInfo.date}
             </div>
             <div className="flex items-center gap-2 mb-2 text-green-600">
-              <Clock /> <span className="font-semibold">Thời gian ({bookingInfo.bookingType === "week" ? "Cả tuần" : bookingInfo.bookingType === "day" ? "Cả ngày" : bookingInfo.bookingType === "month" ? "Cả tháng" : bookingInfo.bookingType === "hour" ? "Theo giờ" : ""})</span>
+              <Clock /> <span className="font-semibold">Thời gian ({bookingInfo.bookingType === "WEEKLY" ? "Cả tuần" : bookingInfo.bookingType === "DAILY" ? "Cả ngày" : bookingInfo.bookingType === "MONTHLY" ? "Cả tháng" : bookingInfo.bookingType === "HOURLY" ? "Theo giờ" : ""})</span>
             </div>
             <div className="mb-4 text-gray-700">
               {bookingInfo.time}
@@ -91,16 +109,16 @@ export default function ConfirmBooking() {
             </div>
             <div className="border-t pt-4 mt-4">
               <div className="flex justify-between mb-2">
-                <span>Giá thuê sân ({bookingInfo.bookingType === "week" ? "Cả tuần" : bookingInfo.bookingType === "day" ? "Cả ngày" : bookingInfo.bookingType === "month" ? "Cả tháng" : bookingInfo.bookingType === "hour" ? "Theo giờ" : ""})</span>
-                <span className="font-semibold">{Number(bookingInfo.price).toLocaleString()}đ</span>
+                <span>Giá thuê sân ({bookingInfo.bookingType === "WEEKLY" ? "Cả tuần" : bookingInfo.bookingType === "DAILY" ? "Cả ngày" : bookingInfo.bookingType === "MONTHLY" ? "Cả tháng" : bookingInfo.bookingType === "HOURLY" ? "Theo giờ" : ""})</span>
+                <span className="font-semibold">{formatVND(bookingInfo.price)}</span>
               </div>
               <div className="flex justify-between mb-2 text-gray-500">
                 <span>Phí dịch vụ</span>
-                <span>{Number(bookingInfo.serviceFee).toLocaleString()}đ</span>
+                <span>{serviceFee.toLocaleString()}đ</span>
               </div>
               <div className="flex justify-between mt-4 text-lg font-bold">
                 <span>Tổng cộng</span>
-                <span className="text-green-600">{Number(bookingInfo.total).toLocaleString()}đ</span>
+                <span className="text-green-600">{total.toLocaleString()} đ</span>
               </div>
             </div>
           </div>
