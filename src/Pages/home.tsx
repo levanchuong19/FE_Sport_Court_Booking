@@ -3,17 +3,51 @@ import api from "../Config/api";
 import LocationCard from "../Components/locationCard";
 import type { BusinessLocation } from "../Model/businessLocation";
 import { useNavigate } from "react-router-dom";
+import { Modal } from "antd";
+import { CheckCircleOutlined } from "@ant-design/icons";
 
- function Home() {
+function Home() {
   const [location, setLocation] = useState<BusinessLocation[]>([]);
+  const [showPaymentSuccessModal, setShowPaymentSuccessModal] = useState(false);
+  const [paymentBookingCode, setPaymentBookingCode] = useState<string | null>(
+    null
+  );
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    console.log("params:", params);
+    const code = params.get("bookingID");
+    console.log("code:", code);
+    if (code) {
+      setPaymentBookingCode(code);
+      setShowPaymentSuccessModal(true);
+    }
+  }, [location]);
+
+  const updatePaymentStatus = async (code: string) => {
+    console.log("code:", code);
+    try {
+      const response = await api.post(`payment/transaction/${code}`);
+      console.log("Payment status updated:", response.data);
+    } catch (error) {
+      console.error("Error updating payment status:", error);
+    }
+  };
+
+  const handlePaymentSuccessModalClose = () => {
+    setShowPaymentSuccessModal(false);
+    if (paymentBookingCode) {
+      updatePaymentStatus(paymentBookingCode);
+    }
+  };
   const navigate = useNavigate();
-    const fetchCourt = async () => {
-      const response = await api.get("location/top3-BusinessLocations");
-      setLocation(response.data.data);
-      console.log(response.data.data);
-    };
-    useEffect(() => {
-      fetchCourt();
+  const fetchCourt = async () => {
+    const response = await api.get("location/top3-BusinessLocations");
+    setLocation(response.data.data);
+    console.log(response.data.data);
+  };
+  useEffect(() => {
+    fetchCourt();
   }, []);
   return (
     <div className="flex flex-col min-h-screen">
@@ -33,10 +67,16 @@ import { useNavigate } from "react-router-dom";
                 nhấp chuột. Hàng nghìn sân thể thao đang chờ bạn khám phá.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                <button onClick={() => navigate("/court")} className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-md font-semibold">
+                <button
+                  onClick={() => navigate("/court")}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-md font-semibold"
+                >
                   Tìm sân ngay
                 </button>
-                <button onClick={() => navigate("/guide")} className="border border-emerald-600 text-emerald-600 px-6 py-3 rounded-md font-semibold hover:bg-emerald-50">
+                <button
+                  onClick={() => navigate("/guide")}
+                  className="border border-emerald-600 text-emerald-600 px-6 py-3 rounded-md font-semibold hover:bg-emerald-50"
+                >
                   Tìm hiểu thêm
                 </button>
               </div>
@@ -135,7 +175,6 @@ import { useNavigate } from "react-router-dom";
               </a>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-             
               {location.map((location) => (
                 <LocationCard key={location.id} location={location} />
               ))}
@@ -230,7 +269,7 @@ import { useNavigate } from "react-router-dom";
                         <span key={i} className="text-yellow-500 text-xl">
                           ★
                         </span>
-                    ))}
+                      ))}
                   </div>
                   <p className="italic mb-4 text-center">"{t.comment}"</p>
                   <div className="flex items-center gap-3">
@@ -248,6 +287,18 @@ import { useNavigate } from "react-router-dom";
           </div>
         </section>
       </main>
+      <Modal
+        open={showPaymentSuccessModal}
+        onOk={handlePaymentSuccessModalClose}
+        onCancel={handlePaymentSuccessModalClose}
+        title="Thanh toán thành công"
+      >
+        <div className="flex flex-col items-center justify-center">
+          <CheckCircleOutlined className="text-green-500 text-4xl" />
+          {/* <p>Thanh toán thành công!</p> */}
+          <p>Vui lòng đến sân đúng thời gian đã đặt để tận hưởng trải nghiệm</p>
+        </div>
+      </Modal>
     </div>
   );
 }

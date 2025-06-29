@@ -2,7 +2,7 @@ import type { Court } from "./court";
 import type { User } from "./user";
 
 export interface Slot {
-    id: number;
+    id: string;
     account: User;
     court: Court;
     createAt: Date;
