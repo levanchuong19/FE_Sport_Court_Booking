@@ -6,10 +6,10 @@ export interface Slot {
     account: User;
     court: Court;
     createAt: Date;
-    startDate: Date;
-    endDate: Date;
-    startTime: Date;
-    endTime: Date;
+    startDate: string;
+    endDate: string;
+    startTime: string;
+    endTime: string;
     slotType: string;
     status: string;
     bookingStatus: string;
