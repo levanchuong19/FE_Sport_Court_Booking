@@ -27,7 +27,7 @@ function App() {
       children: [
         { path: "", element: <Home /> },
         { path: "/booking/:id", element: <BookingPage /> },
-        { path: "confirm-booking", element: <ConfirmBooking /> },
+        { path: "confirm-booking/:id", element: <ConfirmBooking /> },
         { path: "guide", element: <GuidePage /> },
         { path: "court", element: <CourtBooking /> },
         { path: "registerPartner", element: <RegisterPartner /> },
