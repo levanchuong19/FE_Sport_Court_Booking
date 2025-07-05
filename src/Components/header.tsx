@@ -39,7 +39,7 @@ function Header() {
 
   const goToHistory = () => {
     setShowDropdown(false);
-    navigate("/history");
+    navigate("/bookingHistory");
   };
 
   useEffect(() => {

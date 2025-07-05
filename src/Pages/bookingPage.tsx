@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
-import { Calendar, MapPin, Clock } from "lucide-react";
+import { Calendar, Clock } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import type { Court } from "../Model/court";
 import api from "../Config/api";
 import formatVND from "../Utils/currency";
 import { Radio } from "antd";
 import { customAlert } from "../Components/customAlert";
-import { useSelector } from "react-redux";
-import type { RootState } from "../redux/store";
 import { jwtDecode } from "jwt-decode";
+import type { JwtPayload } from "../Model/user";
 
 const fieldTypes = [
   {
@@ -114,15 +113,6 @@ const normalizeDate = (dateStr: string) => {
   if (isNaN(d.getTime())) return "";
   return getLocalDateString(d);
 };
-
-interface JwtPayload {
-  email: string;
-  exp: number;
-  fullName: string;
-  iat: number;
-  role: string;
-  sub: string;
-}
 
 export default function BookingPage() {
   const [tab, setTab] = useState("date");
@@ -259,26 +249,37 @@ export default function BookingPage() {
   const selectedDateStr = getLocalDateString(weekDays[selectedDay]?.fullDate);
   const todayStr = getLocalDateString(new Date());
   const isToday = selectedDateStr === todayStr;
-  // Lọc các slot đã đặt cho ngày này
-  const bookedSlots =
-    court?.slots
-      ?.filter(
-        (s) =>
-          typeof s.startDate === "string" &&
-          s.startDate === selectedDateStr &&
-          s.bookingStatus !== "OVERDUE"
-      )
-      ?.map((s: any) =>
-        typeof s.startTime === "string" ? s.startTime.slice(0, 5) : null
-      )
-      .filter(Boolean) || [];
+
+  // Lọc các slot đã đặt cho ngày này (bao gồm cả booking theo giờ và theo tuần/tháng)
+  const bookedSlots = (() => {
+    const slots =
+      court?.slots?.filter((s) => s.bookingStatus !== "OVERDUE") || [];
+    const bookedTimes: string[] = [];
+
+    slots.forEach((slot: any) => {
+      const slotStartDate =
+        typeof slot.startDate === "string" ? slot.startDate : "";
+      const slotEndDate = typeof slot.endDate === "string" ? slot.endDate : "";
+      const slotStartTime =
+        typeof slot.startTime === "string" ? slot.startTime.slice(0, 5) : "";
+
+      // Kiểm tra xem ngày được chọn có nằm trong khoảng thời gian của booking này không
+      const isDateInRange =
+        slotStartDate <= selectedDateStr && selectedDateStr <= slotEndDate;
+
+      if (isDateInRange && slotStartTime) {
+        bookedTimes.push(slotStartTime);
+      }
+    });
+
+    return bookedTimes;
+  })();
 
   const token = localStorage.getItem("token");
   let user: string;
   if (token) {
     const decodedToken: JwtPayload = jwtDecode(token);
     user = decodedToken.sub;
-    console.log(user);
   }
 
   const fetchCourt = async () => {
@@ -408,9 +409,13 @@ export default function BookingPage() {
         startTime = "08:00";
         endTime = "22:00";
       } else if (selectedFixedSlot) {
-        time = `${selectedFixedSlot} mỗi ngày ${dateRange}`;
+        // Tính endTime = startTime + 1 giờ
+        const [h, m] = selectedFixedSlot.split(":");
+        const endHour = (parseInt(h) + 1).toString().padStart(2, "0");
+        const endSlot = `${endHour}:${m}`;
+        time = `${selectedFixedSlot} - ${endSlot} mỗi ngày ${dateRange}`;
         startTime = selectedFixedSlot;
-        endTime = selectedFixedSlot;
+        endTime = endSlot;
       }
     }
 
@@ -450,18 +455,18 @@ export default function BookingPage() {
 
     try {
       const response = await api.post("slot/create", payload);
-      console.log(response.data.data);
       customAlert("Thành công", "Đặt sân thành công", "default");
       const bookingInfo = {
         date: `${weekDays[selectedDay].date}/${
           weekDays[selectedDay].month.split(" ")[1]
-        }/2025`,
+        }/${weekDays[selectedDay].fullDate.getFullYear()}`,
         type: court.courtType,
         time,
         price: selectedBookingType?.price,
         bookingType,
       };
-      navigate("/confirm-booking", { state: bookingInfo });
+      console.log("bookingInfo", bookingInfo);
+      navigate(`/confirm-booking/${response.data.data.id}`);
     } catch (error: any) {
       customAlert(
         "Lỗi",
@@ -614,7 +619,9 @@ export default function BookingPage() {
             </div>
             <div className="mb-2 text-gray-500 text-sm">
               {/* Ngày: {weekDays[selectedDay].date}/06/2025 - Loại sân: {fieldTypes.find(f => f.key === selectedField)?.label} */}
-              Ngày: {weekDays[selectedDay].date}/06/2025 - Loại sân:{" "}
+              Ngày: {weekDays[selectedDay].date}/
+              {weekDays[selectedDay].month.split(" ")[1]}/
+              {weekDays[selectedDay].fullDate.getFullYear()} - Loại sân:{" "}
               {court?.courtType}
             </div>
             {timeSlots.map((group, idx) => (
@@ -684,7 +691,9 @@ export default function BookingPage() {
             <div className="bg-white border rounded-xl shadow p-6 max-w-lg mx-auto">
               <div className="text-xl font-semibold mb-2">Đặt sân cả ngày</div>
               <div className="text-gray-600 mb-1">
-                Ngày: {weekDays[selectedDay].date}/06/2025
+                Ngày: {weekDays[selectedDay].date}/
+                {weekDays[selectedDay].month.split(" ")[1]}/
+                {weekDays[selectedDay].fullDate.getFullYear()}
               </div>
               <div className="text-gray-600 mb-1">
                 Loại sân: {court?.courtType}
@@ -695,22 +704,7 @@ export default function BookingPage() {
               </div>
               <button
                 className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-900 transition"
-                onClick={() => {
-                  const selectedBookingType = bookingTypes.find(
-                    (t) => t.key === "DAILY"
-                  );
-                  const priceStr = selectedBookingType?.price;
-                  const bookingInfo = {
-                    date: `${weekDays[selectedDay].date}/${
-                      weekDays[selectedDay].month.split(" ")[1]
-                    }/2025`,
-                    type: court?.courtType,
-                    time: "08:00 - 22:00",
-                    price: priceStr,
-                    bookingType: "DAILY",
-                  };
-                  navigate("/confirm-booking", { state: bookingInfo });
-                }}
+                onClick={handleConfirm}
               >
                 Xác nhận đặt cả ngày
               </button>
@@ -745,22 +739,70 @@ export default function BookingPage() {
                   <div key={idx} className="mb-4">
                     <div className="font-semibold mb-2">{group.label}</div>
                     <div className="grid grid-cols-5 gap-2">
-                      {group.slots.map((slot) => (
-                        <button
-                          key={slot}
-                          className={`px-6 py-2 rounded-lg border text-lg font-semibold transition-all
-                            ${
-                              selectedFixedSlot === slot
-                                ? "bg-green-500 text-white border-green-500"
-                                : "bg-white text-black border-gray-200 hover:bg-green-50"
+                      {group.slots.map((slot) => {
+                        // Kiểm tra xem slot này có bị đặt trong khoảng thời gian tuần/tháng không
+                        const isSlotBookedInRange = (() => {
+                          const slots =
+                            court?.slots?.filter(
+                              (s) => s.bookingStatus !== "OVERDUE"
+                            ) || [];
+                          const start = weekDays[selectedDay].fullDate;
+                          const days = bookingType === "WEEKLY" ? 7 : 30;
+                          const end = new Date(start);
+                          end.setDate(end.getDate() + days - 1);
+                          const startDateStr = getLocalDateString(start);
+                          const endDateStr = getLocalDateString(end);
+
+                          return slots.some((slotData: any) => {
+                            const slotStartDate =
+                              typeof slotData.startDate === "string"
+                                ? slotData.startDate
+                                : "";
+                            const slotEndDate =
+                              typeof slotData.endDate === "string"
+                                ? slotData.endDate
+                                : "";
+                            const slotStartTime =
+                              typeof slotData.startTime === "string"
+                                ? slotData.startTime.slice(0, 5)
+                                : "";
+
+                            // Kiểm tra xem có overlap về thời gian và ngày không
+                            const hasDateOverlap = !(
+                              slotEndDate < startDateStr ||
+                              slotStartDate > endDateStr
+                            );
+                            const hasTimeOverlap = slotStartTime === slot;
+
+                            return hasDateOverlap && hasTimeOverlap;
+                          });
+                        })();
+
+                        return (
+                          <button
+                            key={slot}
+                            className={`px-6 py-2 rounded-lg border text-lg font-semibold transition-all
+                              ${
+                                isSlotBookedInRange
+                                  ? "bg-gray-50 text-red-400 border-gray-200 cursor-not-allowed"
+                                  : selectedFixedSlot === slot
+                                  ? "bg-green-500 text-white border-green-500"
+                                  : "bg-white text-black border-gray-200 hover:bg-green-50"
+                              }
+                            `}
+                            disabled={isSlotBookedInRange}
+                            onClick={() =>
+                              !isSlotBookedInRange && setSelectedFixedSlot(slot)
                             }
-                          `}
-                          onClick={() => setSelectedFixedSlot(slot)}
-                          type="button"
-                        >
-                          {slot}
-                        </button>
-                      ))}
+                            type="button"
+                          >
+                            {slot}
+                            {isSlotBookedInRange && (
+                              <span className="text-xs ml-1">Đã đặt</span>
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 ))}
@@ -771,7 +813,9 @@ export default function BookingPage() {
                 Đặt sân {bookingType === "WEEKLY" ? "cả tuần" : "cả tháng"}
               </div>
               <div className="text-gray-600 mb-1">
-                Ngày bắt đầu: {weekDays[selectedDay].date}/06/2025
+                Ngày bắt đầu: {weekDays[selectedDay].date}/
+                {weekDays[selectedDay].month.split(" ")[1]}/
+                {weekDays[selectedDay].fullDate.getFullYear()}
               </div>
               <div className="text-gray-600 mb-1">
                 Loại sân: {court?.courtType}

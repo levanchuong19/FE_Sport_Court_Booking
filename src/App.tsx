@@ -14,6 +14,7 @@ import ConfirmBooking from "./Pages/confirmBooking";
 import GuidePage from "./Pages/guidePage";
 import CourtBooking from "./Pages/courtBooking";
 import RegisterPartner from "./Pages/registerPartner";
+import BookingHistory from "./Pages/bookingHistory";
 import DetailCourt from "./Pages/detailCourt";
 
 function App() {
@@ -28,11 +29,12 @@ function App() {
       children: [
         { path: "", element: <Home /> },
         { path: "/booking/:id", element: <BookingPage /> },
-        { path: "confirm-booking", element: <ConfirmBooking /> },
+        { path: "confirm-booking/:id", element: <ConfirmBooking /> },
         { path: "guide", element: <GuidePage /> },
         { path: "court", element: <CourtBooking /> },
         { path: "detail-court/:id", element: <DetailCourt /> },
         { path: "registerPartner", element: <RegisterPartner /> },
+        { path: "bookingHistory", element: <BookingHistory /> },
       ],
     },
     {

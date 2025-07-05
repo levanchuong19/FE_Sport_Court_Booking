@@ -20,3 +20,11 @@ export interface User {
   slots: Slot[];
 }
 
+export interface JwtPayload {
+  email: string;
+  exp: number;
+  fullName: string;
+  iat: number;
+  role: string;
+  sub: string;
+}
