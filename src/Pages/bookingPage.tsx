@@ -189,7 +189,7 @@ export default function BookingPage() {
       price:
         formatVND(
           court?.prices?.find((p) => p.priceType === "WEEKLY")?.price || 0
-        ) + "/tuần" || "N/A",
+        ) + "/giờ/tuần" || "N/A",
       icon: (
         <svg width="32" height="32" fill="none">
           <rect
@@ -220,7 +220,7 @@ export default function BookingPage() {
       price:
         formatVND(
           court?.prices?.find((p) => p.priceType === "MONTHLY")?.price || 0
-        ) + "/tháng" || "N/A",
+        ) + "/giờ/tháng" || "N/A",
       icon: (
         <svg width="32" height="32" fill="none">
           <rect
@@ -352,86 +352,6 @@ export default function BookingPage() {
       navigate("/login");
       return;
     }
-
-    const selectedBookingType = bookingTypes.find((t) => t.key === bookingType);
-    if (bookingType === "HOURLY" && selectedSlots.length === 0) {
-      customAlert(
-        "Lỗi đặt sân",
-        "Vui lòng chọn ít nhất một khung giờ để đặt sân",
-        "destructive"
-      );
-      return;
-    }
-
-    let time = "";
-    let startTime = "";
-    let endTime = "";
-    let startDate = getLocalDateString(weekDays[selectedDay].fullDate);
-    let endDate = startDate;
-    // HOURLY
-    if (bookingType === "HOURLY") {
-      const sorted = [...selectedSlots].sort();
-      if (sorted.length === 1) {
-        const [h, m] = sorted[0].split(":");
-        const end = (parseInt(h) + 1).toString().padStart(2, "0") + ":" + m;
-        time = `${sorted[0]} - ${end}`;
-        startTime = sorted[0];
-        endTime = end;
-      } else if (sorted.length > 1) {
-        const [start] = sorted;
-        const [endH, endM] = sorted[sorted.length - 1].split(":");
-        const end =
-          (parseInt(endH) + 1).toString().padStart(2, "0") + ":" + endM;
-        time = `${start} - ${end}`;
-        startTime = start;
-        endTime = end;
-      }
-    }
-    // DAILY
-    if (bookingType === "DAILY") {
-      time = "08:00 - 22:00";
-      startTime = "08:00";
-      endTime = "22:00";
-    }
-    // WEEKLY/MONTHLY
-    if (bookingType === "WEEKLY" || bookingType === "MONTHLY") {
-      const start = weekDays[selectedDay].fullDate;
-      const days = bookingType === "WEEKLY" ? 7 : 30;
-      const end = new Date(start);
-      end.setDate(end.getDate() + days - 1);
-      startDate = getLocalDateString(start);
-      endDate = getLocalDateString(end);
-      const dateRange = `(từ ${start.toLocaleDateString(
-        "vi-VN"
-      )} đến ${end.toLocaleDateString("vi-VN")})`;
-      if (fullDay) {
-        time = `08:00 - 22:00 mỗi ngày ${dateRange}`;
-        startTime = "08:00";
-        endTime = "22:00";
-      } else if (selectedFixedSlot) {
-        // Tính endTime = startTime + 1 giờ
-        const [h, m] = selectedFixedSlot.split(":");
-        const endHour = (parseInt(h) + 1).toString().padStart(2, "0");
-        const endSlot = `${endHour}:${m}`;
-        time = `${selectedFixedSlot} - ${endSlot} mỗi ngày ${dateRange}`;
-        startTime = selectedFixedSlot;
-        endTime = endSlot;
-      }
-    }
-
-    if (
-      !fullDay &&
-      !selectedFixedSlot &&
-      (bookingType === "WEEKLY" || bookingType === "MONTHLY")
-    ) {
-      customAlert(
-        "Lỗi đặt sân",
-        "Vui lòng chọn thời gian hợp lệ",
-        "destructive"
-      );
-      return;
-    }
-
     if (!user) {
       customAlert("Lỗi", "Không tìm thấy thông tin người dùng.", "destructive");
       return;
@@ -440,32 +360,65 @@ export default function BookingPage() {
       customAlert("Lỗi", "Không tìm thấy thông tin sân.", "destructive");
       return;
     }
-
-    // Chuẩn bị payload gửi lên API
+    // Kiểm tra hợp lệ cho từng chế độ
+    if (bookingType === "HOURLY" && selectedSlots.length === 0) {
+      customAlert(
+        "Lỗi đặt sân",
+        "Vui lòng chọn ít nhất một khung giờ để đặt sân",
+        "destructive"
+      );
+      return;
+    }
+    if (
+      (bookingType === "WEEKLY" || bookingType === "MONTHLY") &&
+      selectedSlots.length === 0
+    ) {
+      customAlert(
+        "Lỗi đặt sân",
+        "Vui lòng chọn ít nhất một khung giờ để đặt sân",
+        "destructive"
+      );
+      return;
+    }
+    // Tính toán các trường cho payload
+    let startDate = getLocalDateString(weekDays[selectedDay].fullDate);
+    let endDate = startDate;
+    let startTime = "";
+    let endTime = "";
+    let slotType = bookingType;
+    if (bookingType === "HOURLY") {
+      const sorted = [...selectedSlots].sort();
+      startTime = sorted[0];
+      const [endH, endM] = sorted[sorted.length - 1].split(":");
+      endTime = (parseInt(endH) + 1).toString().padStart(2, "0") + ":" + endM;
+    } else if (bookingType === "DAILY") {
+      startTime = "08:00";
+      endTime = "22:00";
+    } else if (bookingType === "WEEKLY" || bookingType === "MONTHLY") {
+      const sorted = [...selectedSlots].sort();
+      startTime = sorted[0];
+      const [endH, endM] = sorted[sorted.length - 1].split(":");
+      endTime = (parseInt(endH) + 1).toString().padStart(2, "0") + ":" + endM;
+      const days = bookingType === "WEEKLY" ? 7 : 30;
+      const start = weekDays[selectedDay].fullDate;
+      const end = new Date(start);
+      end.setDate(end.getDate() + days - 1);
+      startDate = getLocalDateString(start);
+      endDate = getLocalDateString(end);
+    }
     const payload = {
-      slotType: bookingType,
+      slotType,
       account: user,
-      court: (court as any).id,
+      court: court.id,
       startDate,
       endDate,
-      startTime: startTime + ":00",
-      endTime: endTime + ":00",
+      startTime,
+      endTime,
       paymentMethod: "VNPAY",
     };
-
     try {
       const response = await api.post("slot/create", payload);
       customAlert("Thành công", "Đặt sân thành công", "default");
-      const bookingInfo = {
-        date: `${weekDays[selectedDay].date}/${
-          weekDays[selectedDay].month.split(" ")[1]
-        }/${weekDays[selectedDay].fullDate.getFullYear()}`,
-        type: court.courtType,
-        time,
-        price: selectedBookingType?.price,
-        bookingType,
-      };
-      console.log("bookingInfo", bookingInfo);
       navigate(`/confirm-booking/${response.data.data.id}`);
     } catch (error: any) {
       customAlert(
@@ -474,6 +427,24 @@ export default function BookingPage() {
         "destructive"
       );
     }
+  };
+
+  // Thêm hàm dùng chung kiểm tra slot đã bị đặt:
+  const toHHmm = (t: string): string =>
+    t && t.length >= 5 ? t.slice(0, 5) : t;
+  const isSlotBooked = (slot: string, dateStr: string) => {
+    return (court?.slots || []).some((s) => {
+      const slotStartDate = typeof s.startDate === "string" ? s.startDate : "";
+      const slotEndDate = typeof s.endDate === "string" ? s.endDate : "";
+      const slotStartTime =
+        typeof s.startTime === "string" ? toHHmm(s.startTime) : "";
+      const slotEndTime =
+        typeof s.endTime === "string" ? toHHmm(s.endTime) : "";
+      if (slotStartDate <= dateStr && dateStr <= slotEndDate) {
+        return slot >= slotStartTime && slot < slotEndTime;
+      }
+      return false;
+    });
   };
 
   return (
@@ -629,7 +600,10 @@ export default function BookingPage() {
                 <div className="font-semibold mb-2">{group.label}</div>
                 <div className="mb-6 w-full grid grid-cols-5 gap-2">
                   {group.slots.map((slot) => {
-                    const isBooked = bookedSlots.includes(slot);
+                    const dateStr = getLocalDateString(
+                      weekDays[selectedDay].fullDate
+                    );
+                    const isBooked = isSlotBooked(slot, dateStr);
                     let isPast = false;
                     if (isToday) {
                       const [h, m] = slot.split(":");
@@ -702,12 +676,66 @@ export default function BookingPage() {
               <div className="text-gray-900 font-bold mb-4">
                 Giá: {bookingTypes.find((t) => t.key === "DAILY")?.price}
               </div>
-              <button
-                className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-900 transition"
-                onClick={handleConfirm}
-              >
-                Xác nhận đặt cả ngày
-              </button>
+              {(() => {
+                const today = new Date();
+                const selectedDate = weekDays[selectedDay].fullDate;
+                const isToday =
+                  getLocalDateString(selectedDate) ===
+                  getLocalDateString(today);
+                const nowHour = today.getHours();
+                const isPast5PM = isToday && nowHour >= 17;
+                // Kiểm tra đã có slot nào được đặt trong ngày này chưa
+                const dateStr = getLocalDateString(selectedDate);
+                const hasAnyBooking = (court?.slots || []).some((s) => {
+                  const slotStartDate =
+                    typeof s.startDate === "string" ? s.startDate : "";
+                  const slotEndDate =
+                    typeof s.endDate === "string" ? s.endDate : "";
+                  return (
+                    slotStartDate <= dateStr &&
+                    dateStr <= slotEndDate &&
+                    s.bookingStatus !== "OVERDUE"
+                  );
+                });
+                if (isPast5PM) {
+                  return (
+                    <>
+                      <button
+                        className="w-full bg-gray-400 text-white py-3 rounded-lg font-semibold cursor-not-allowed mt-2"
+                        disabled
+                      >
+                        Không thể đặt nguyên ngày (đã qua 17:00)
+                      </button>
+                      <div className="text-red-500 text-center mt-2 text-sm">
+                        Bạn chỉ có thể đặt nguyên ngày trước 17:00.
+                      </div>
+                    </>
+                  );
+                }
+                if (hasAnyBooking) {
+                  return (
+                    <>
+                      <button
+                        className="w-full bg-gray-400 text-white py-3 rounded-lg font-semibold cursor-not-allowed mt-2"
+                        disabled
+                      >
+                        Không thể đặt nguyên ngày (đã có slot được đặt)
+                      </button>
+                      <div className="text-red-500 text-center mt-2 text-sm">
+                        Vui lòng chọn ngày kế tiếp hoặc đặt sân theo giờ.
+                      </div>
+                    </>
+                  );
+                }
+                return (
+                  <button
+                    className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-900 transition"
+                    onClick={handleConfirm}
+                  >
+                    Xác nhận đặt cả ngày
+                  </button>
+                );
+              })()}
             </div>
           </div>
         )}
@@ -716,128 +744,96 @@ export default function BookingPage() {
             <div className="flex items-center gap-2 mb-4">
               <Clock className="text-green-600" />
               <span className="font-semibold text-lg">
-                Chọn kiểu đặt cho {bookingType === "WEEKLY" ? "tuần" : "tháng"}
+                Chọn khung giờ cho tất cả các ngày trong{" "}
+                {bookingType === "WEEKLY" ? "tuần" : "tháng"}
               </span>
             </div>
-            <Radio.Group
-              value={fullDay ? "full" : "slot"}
-              onChange={(e) => {
-                setFullDay(e.target.value === "full");
-                setSelectedFixedSlot("");
-              }}
-              className="flex gap-8 mb-6"
-            >
-              <Radio value="full">
-                Đặt nguyên ngày (08:00 - 22:00 mỗi ngày)
-              </Radio>
-              <Radio value="slot">Chọn 1 khung giờ cố định mỗi ngày</Radio>
-            </Radio.Group>
-            {!fullDay && (
-              <div className="mb-6 mt-6">
-                <div className="font-semibold mb-2">Chọn 1 khung giờ:</div>
-                {timeSlots.map((group, idx) => (
-                  <div key={idx} className="mb-4">
-                    <div className="font-semibold mb-2">{group.label}</div>
-                    <div className="grid grid-cols-5 gap-2">
-                      {group.slots.map((slot) => {
-                        // Kiểm tra xem slot này có bị đặt trong khoảng thời gian tuần/tháng không
-                        const isSlotBookedInRange = (() => {
-                          const slots =
-                            court?.slots?.filter(
-                              (s) => s.bookingStatus !== "OVERDUE"
-                            ) || [];
-                          const start = weekDays[selectedDay].fullDate;
-                          const days = bookingType === "WEEKLY" ? 7 : 30;
-                          const end = new Date(start);
-                          end.setDate(end.getDate() + days - 1);
-                          const startDateStr = getLocalDateString(start);
-                          const endDateStr = getLocalDateString(end);
-
-                          return slots.some((slotData: any) => {
-                            const slotStartDate =
-                              typeof slotData.startDate === "string"
-                                ? slotData.startDate
-                                : "";
-                            const slotEndDate =
-                              typeof slotData.endDate === "string"
-                                ? slotData.endDate
-                                : "";
-                            const slotStartTime =
-                              typeof slotData.startTime === "string"
-                                ? slotData.startTime.slice(0, 5)
-                                : "";
-
-                            // Kiểm tra xem có overlap về thời gian và ngày không
-                            const hasDateOverlap = !(
-                              slotEndDate < startDateStr ||
-                              slotStartDate > endDateStr
-                            );
-                            const hasTimeOverlap = slotStartTime === slot;
-
-                            return hasDateOverlap && hasTimeOverlap;
-                          });
-                        })();
-
-                        return (
-                          <button
-                            key={slot}
-                            className={`px-6 py-2 rounded-lg border text-lg font-semibold transition-all
-                              ${
-                                isSlotBookedInRange
-                                  ? "bg-gray-50 text-red-400 border-gray-200 cursor-not-allowed"
-                                  : selectedFixedSlot === slot
-                                  ? "bg-green-500 text-white border-green-500"
-                                  : "bg-white text-black border-gray-200 hover:bg-green-50"
-                              }
-                            `}
-                            disabled={isSlotBookedInRange}
-                            onClick={() =>
-                              !isSlotBookedInRange && setSelectedFixedSlot(slot)
+            <div>
+              {timeSlots.map((group, idx) => (
+                <div key={idx} className="mb-4">
+                  <div className="font-semibold mb-2">{group.label}</div>
+                  <div className="mb-6 w-full grid grid-cols-5 gap-2">
+                    {group.slots.map((slot) => {
+                      const dateStr = getLocalDateString(
+                        weekDays[selectedDay].fullDate
+                      );
+                      let isPast = false;
+                      if (dateStr === todayStr) {
+                        const [h, m] = slot.split(":");
+                        const now = new Date();
+                        const currentHour = now.getHours();
+                        const currentMinute = now.getMinutes();
+                        if (
+                          parseInt(h) < currentHour ||
+                          (parseInt(h) === currentHour &&
+                            parseInt(m) <= currentMinute)
+                        ) {
+                          isPast = true;
+                        }
+                      }
+                      const isBooked = isSlotBooked(slot, dateStr);
+                      const isSelected = selectedSlots.includes(slot);
+                      const isDisabled = isBooked || isPast;
+                      return (
+                        <button
+                          key={slot}
+                          className={`px-6 py-2 rounded-lg border text-lg font-semibold transition-all
+                            ${
+                              isBooked
+                                ? "bg-gray-50 text-red-400 border-gray-200 cursor-not-allowed"
+                                : isPast
+                                ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
+                                : isSelected
+                                ? "bg-green-500 text-white border-green-500"
+                                : "bg-white text-black border-gray-200 hover:bg-green-50"
                             }
-                            type="button"
-                          >
-                            {slot}
-                            {isSlotBookedInRange && (
-                              <span className="text-xs ml-1">Đã đặt</span>
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
+                          `}
+                          disabled={isDisabled}
+                          onClick={() => {
+                            if (isDisabled) return;
+                            if (isSelected) {
+                              setSelectedSlots(
+                                selectedSlots.filter((s) => s !== slot)
+                              );
+                            } else {
+                              // Chỉ cho phép chọn liên tục và tối đa 5 slot
+                              let next = [...selectedSlots, slot];
+                              const toMinutes = (t: string) => {
+                                const [h, m] = t.split(":");
+                                return parseInt(h) * 60 + parseInt(m);
+                              };
+                              const sorted = next
+                                .map(toMinutes)
+                                .sort((a, b) => a - b);
+                              if (next.length > 5) return;
+                              for (let i = 1; i < sorted.length; i++) {
+                                if (sorted[i] - sorted[i - 1] !== 60) return;
+                              }
+                              setSelectedSlots(next);
+                            }
+                          }}
+                          type="button"
+                        >
+                          {slot}
+                          {isBooked && (
+                            <span className="text-xs ml-1">Đã đặt</span>
+                          )}
+                          {isPast && !isBooked && (
+                            <span className="text-xs ml-1">Quá giờ</span>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
-                ))}
-              </div>
-            )}
-            <div className="bg-white border rounded-xl shadow p-6 max-w-lg mx-auto">
-              <div className="text-xl font-semibold mb-2">
-                Đặt sân {bookingType === "WEEKLY" ? "cả tuần" : "cả tháng"}
-              </div>
-              <div className="text-gray-600 mb-1">
-                Ngày bắt đầu: {weekDays[selectedDay].date}/
-                {weekDays[selectedDay].month.split(" ")[1]}/
-                {weekDays[selectedDay].fullDate.getFullYear()}
-              </div>
-              <div className="text-gray-600 mb-1">
-                Loại sân: {court?.courtType}
-              </div>
-              <div className="text-gray-600 mb-1">
-                Thời gian:{" "}
-                {fullDay
-                  ? "08:00 - 22:00 mỗi ngày"
-                  : selectedFixedSlot
-                  ? `${selectedFixedSlot} mỗi ngày`
-                  : "Chưa chọn khung giờ"}
-              </div>
-              <div className="text-gray-900 font-bold mb-4">
-                Giá: {bookingTypes.find((t) => t.key === bookingType)?.price}
-              </div>
-              <button
-                className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-900 transition cursor-pointer"
-                onClick={handleConfirm}
-              >
-                Xác nhận đặt {bookingType === "WEEKLY" ? "cả tuần" : "cả tháng"}
-              </button>
+                </div>
+              ))}
             </div>
+            <button
+              className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-900 transition mt-4"
+              onClick={handleConfirm}
+            >
+              Xác nhận đặt {bookingType === "WEEKLY" ? "cả tuần" : "cả tháng"}
+            </button>
           </div>
         )}
       </div>
