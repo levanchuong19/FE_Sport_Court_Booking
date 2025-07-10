@@ -12,8 +12,8 @@ export interface User {
   image: string;
   address: string;
   role: "GUEST" | "CUSTOMER" | "MANAGER" | "STAFF" | "ADMIN";
-  createdAt: string;
-  updatedAt: string;
+  createAt: Date;
+  modifyAt: Date;
   isDelete: boolean;
   balance: number;
   courts: Court[];

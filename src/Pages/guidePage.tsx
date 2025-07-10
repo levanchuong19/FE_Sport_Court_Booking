@@ -126,7 +126,7 @@ export default function GuidePage() {
               <span className="inline-block bg-gray-100 px-2 py-1 rounded mr-2 text-xs">
                 Thời gian
               </span>{" "}
-              Sân mở cửa từ 5:00 - 23:00 hàng ngày. Đặt sân tối thiểu 1 giờ.
+              Sân mở cửa từ 08:00 - 23:00 hàng ngày. Đặt sân tối thiểu 1 giờ.
             </div>
             <div className="mb-2">
               <span className="inline-block bg-gray-100 px-2 py-1 rounded mr-2 text-xs">
