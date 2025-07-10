@@ -39,12 +39,12 @@ function Login() {
         localStorage.setItem("user", JSON.stringify(response.data.data));
         dispatch(login(response.data.data.user));
         navigate("/");
+      } else {
+        throw new Error(response.data.data);
       }
     } catch (err: any) {
-      setError(
-        err.response?.data?.message || "Đăng nhập thất bại. Vui lòng thử lại."
-      );
-      console.error("Login error:", err);
+      const message = "Đăng nhập thất bại. Vui lòng thử lại.";
+      setError(message);
     } finally {
       setIsLoading(false);
     }
