@@ -2,6 +2,7 @@ import { useState } from "react";
 import { FiUser, FiMail, FiPhone, FiLock } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import api from "../Config/api";
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 
 interface RegisterFormData {
   fullName: string;
@@ -193,6 +194,38 @@ function Register() {
               {isLoading ? "Đang xử lý..." : "Đăng ký"}
             </button>
           </form>
+          {/* Form Đăng Nhập Google :D */}
+          <div className="flex justify-center mt-6">
+            <GoogleOAuthProvider clientId="136882428338-vclkmobr196nsjj3g9eldo1nt6vm4fq2.apps.googleusercontent.com">
+              <GoogleLogin
+                onSuccess={async (credentialResponse) => {
+                  console.log("Google credential:", credentialResponse.credential);
+                  try {
+                    const res = await api.post("auth/google/login", {
+                      token: credentialResponse.credential,
+                    });
+
+                    const token = res.data?.data?.token;
+
+                    if (token) {
+                      localStorage.setItem("accessToken", token);
+                      localStorage.setItem("token", res.data.data.token);
+                      localStorage.setItem("user", JSON.stringify(res.data.data));
+                      alert("Đăng Nhập thành công!");
+                      navigate("/");
+                    } else {
+                      alert("Không tìm thấy token trong phản hồi từ server.");
+                    }
+                  } catch (err) {
+                    console.error(err);
+                    alert("Đăng Nhập thất bại!");
+                  }
+                }}
+                onError={() => alert("Google login failed")}
+                useOneTap
+              />
+            </GoogleOAuthProvider>  
+          </div>
         </div>
       </div>
     </div>
