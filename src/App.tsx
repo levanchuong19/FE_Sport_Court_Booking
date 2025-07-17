@@ -16,6 +16,9 @@ import CourtBooking from "./Pages/courtBooking";
 import RegisterPartner from "./Pages/registerPartner";
 import BookingHistory from "./Pages/bookingHistory";
 import DetailCourt from "./Pages/detailCourt";
+import BusinessLocationPage from "./Pages/businessLocation";
+import BusinessLocationDetail from "./Pages/businessLocationDetail";
+import SearchPage from "./Pages/search";
 
 function App() {
   const router = createBrowserRouter([
@@ -35,6 +38,9 @@ function App() {
         { path: "detail-court/:id", element: <DetailCourt /> },
         { path: "registerPartner", element: <RegisterPartner /> },
         { path: "bookingHistory", element: <BookingHistory /> },
+        { path: "businessLocation", element: <BusinessLocationPage /> },
+        { path: "businessLocation/:id", element: <BusinessLocationDetail /> },
+        { path: "search", element: <SearchPage /> }
       ],
     },
     {

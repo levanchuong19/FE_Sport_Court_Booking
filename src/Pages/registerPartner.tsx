@@ -27,7 +27,10 @@ const RegisterPartner: React.FC = () => {
     utilities: [""],
     businessLicense: "",
     courtNum: 1,
+    latitude: "",
+    longitude: "",
   });
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
 
   const handleInputChange = (field: string, value: any) => {
     setFormData((prev) => ({
@@ -62,8 +65,34 @@ const RegisterPartner: React.FC = () => {
     }
   };
 
+  const handleGetCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Trình duyệt không hỗ trợ định vị vị trí.");
+      return;
+    }
+    setIsGettingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setFormData((prev) => ({
+          ...prev,
+          latitude: position.coords.latitude.toString(),
+          longitude: position.coords.longitude.toString(),
+        }));
+        setIsGettingLocation(false);
+      },
+      (error) => {
+        alert("Không thể lấy vị trí hiện tại. Vui lòng thử lại.");
+        setIsGettingLocation(false);
+      }
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.latitude || !formData.longitude) {
+      customAlert("Error", "Vui lòng lấy vị trí hiện tại trước khi đăng ký!", "destructive");
+      return;
+    }
     const token = localStorage.getItem("token");
     if (!token) {
       customAlert(
@@ -79,6 +108,8 @@ const RegisterPartner: React.FC = () => {
       await api.post("location/create", {
         ...formData,
         owner: userId,
+        latitude: formData.latitude ? parseFloat(formData.latitude) : undefined,
+        longitude: formData.longitude ? parseFloat(formData.longitude) : undefined,
       });
       customAlert(
         "Success",
@@ -178,6 +209,36 @@ const RegisterPartner: React.FC = () => {
                 placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố"
                 required
               />
+              <button
+                type="button"
+                onClick={handleGetCurrentLocation}
+                className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-60"
+                disabled={isGettingLocation}
+              >
+                {isGettingLocation ? "Đang lấy vị trí..." : "Lấy vị trí hiện tại"}
+              </button>
+              <div className="flex gap-4 mt-2">
+                <div className="flex-1">
+                  <label className="block text-xs text-gray-500">Vĩ độ (Latitude)</label>
+                  <input
+                    type="text"
+                    value={formData.latitude}
+                    readOnly
+                    className="w-full border border-gray-200 rounded-md px-3 py-1 bg-gray-100"
+                    placeholder="Vĩ độ"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-xs text-gray-500">Kinh độ (Longitude)</label>
+                  <input
+                    type="text"
+                    value={formData.longitude}
+                    readOnly
+                    className="w-full border border-gray-200 rounded-md px-3 py-1 bg-gray-100"
+                    placeholder="Kinh độ"
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Hình ảnh */}
