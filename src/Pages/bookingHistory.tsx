@@ -6,11 +6,13 @@ import { jwtDecode } from "jwt-decode";
 import type { BookingHistory } from "../Model/bookingHistory";
 import formatVND from "../Utils/currency";
 import formatDate from "../Utils/date";
+import React from "react";
+import { Calendar, Clock, MapPinned, RefreshCcw, Star } from "lucide-react";
 
 const statusColor = {
   COMPLETED: "bg-green-100 text-green-700",
   UPCOMING: "bg-blue-100 text-blue-700",
-  CANCELLED: "bg-red-100 text-red-700",
+  CANCELED: "bg-red-100 text-red-700",
   NO_SHOW: "bg-yellow-100 text-yellow-700",
 };
 
@@ -18,18 +20,26 @@ export default function BookingHistory() {
   const [user, setUser] = useState<User>();
   const [bookings, setBookings] = useState<BookingHistory>();
   const navigate = useNavigate();
+  // State cho modal đánh giá
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackBooking, setFeedbackBooking] = useState<any>(null);
+  const [feedbackForm, setFeedbackForm] = useState({
+    overallRating: 5,
+    courtQualityRating: 5,
+    cleanlinessRating: 5,
+    bookingExperienceRating: 5,
+    comment: "",
+    anonymous: false,
+  });
 
   // Thống kê nhanh
   const quickStats = {
     COMPLETED:
-      bookings?.bookings.filter((b) => b.bookingStatus === "COMPLETED")
-        .length || 0,
+      bookings?.bookings.filter((b) => b.status === "COMPLETED").length || 0,
     UPCOMING:
-      bookings?.bookings.filter((b) => b.bookingStatus === "UPCOMING").length ||
-      0,
-    CANCELLED:
-      bookings?.bookings.filter((b) => b.bookingStatus === "CANCELLED")
-        .length || 0,
+      bookings?.bookings.filter((b) => b.status === "BOOKED").length || 0,
+    CANCELED:
+      bookings?.bookings.filter((b) => b.status === "CANCELED").length || 0,
     TOTAL: bookings?.bookings.length || 0,
   };
 
@@ -51,10 +61,42 @@ export default function BookingHistory() {
     handleGetProfile();
     const handleGetBookingHistory = async () => {
       const res = await api.get(`slot/getBookingByAccount/${userId}`);
+      console.log(res.data.data);
       setBookings(res.data.data);
     };
     handleGetBookingHistory();
   }, [navigate]);
+
+  // Hàm submit feedback
+  const handleSubmitFeedback = async () => {
+    if (!feedbackBooking) return;
+    const payload = {
+      overallRating: feedbackForm.overallRating,
+      comment: feedbackForm.comment,
+      courtQualityRating: feedbackForm.courtQualityRating,
+      cleanlinessRating: feedbackForm.cleanlinessRating,
+      bookingExperienceRating: feedbackForm.bookingExperienceRating,
+      playedDate: feedbackBooking.startDate,
+      anonymous: feedbackForm.anonymous,
+      courtId: feedbackBooking.court?.id,
+    };
+    try {
+      await api.post("/feedback", payload);
+      alert("Gửi đánh giá thành công!");
+      setShowFeedback(false);
+      setFeedbackBooking(null);
+      setFeedbackForm({
+        overallRating: 5,
+        courtQualityRating: 5,
+        cleanlinessRating: 5,
+        bookingExperienceRating: 5,
+        comment: "",
+        anonymous: false,
+      });
+    } catch (e) {
+      alert("Gửi đánh giá thất bại!");
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto py-8 px-4">
@@ -87,7 +129,7 @@ export default function BookingHistory() {
               <div className="font-bold text-lg">{user?.fullName}</div>
               <div className="text-gray-500 mb-2">
                 Thành viên từ{" "}
-                {user?.createdAt ? formatDate(new Date(user.createdAt)) : ""}
+                {user?.createAt ? formatDate(new Date(user.createAt)) : ""}
               </div>
               <div className="flex flex-col gap-1 text-sm w-full">
                 <div>
@@ -127,7 +169,7 @@ export default function BookingHistory() {
               </div>
               <div className="bg-red-50 rounded-lg py-3">
                 <div className="text-red-600 font-bold text-xl">
-                  {quickStats.CANCELLED}
+                  {quickStats.CANCELED}
                 </div>
                 <div className="text-xs text-red-700">Đã hủy</div>
               </div>
@@ -213,7 +255,7 @@ export default function BookingHistory() {
                     >
                       {b.status === "BOOKED" && "Đã đặt"}
                       {b.status === "CHECKED_IN" && "Đã check in"}
-                      {b.status === "CANCELLED" && "Đã hủy"}
+                      {b.status === "CANCELED" && "Đã hủy"}
                       {b.status === "COMPLETED" && "Hoàn thành"}
                       {b.status === "IN_USE" && "Đang sử dụng"}
                     </span>
@@ -229,44 +271,52 @@ export default function BookingHistory() {
                     {b.court?.businessLocation?.address || "Không có địa chỉ"}
                   </div>
                   <div className="flex items-center gap-2 text-sm mt-1">
-                    <span>
-                      📅 {b?.startDate ? formatDate(new Date(b.startDate)) : ""}
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-4 h-4 text-gray-500" />{" "}
+                      {b?.startDate ? formatDate(new Date(b.startDate)) : ""}
                     </span>
-                    <span>
-                      🕒 {b?.startTime?.slice(0, 5)} - {b?.endTime?.slice(0, 5)}
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-4 h-4 text-gray-500" />{" "}
+                      {b?.startTime?.slice(0, 5)} - {b?.endTime?.slice(0, 5)}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-xs mt-1">
-                    <span>{b.paymentMethod}</span>
+                    {
+                      ("paymentMethod" in b ? (
+                        <span>{(b as any).paymentMethod}</span>
+                      ) : null) as React.ReactNode
+                    }
                     {b.status === "PAID" && (
                       <span className="bg-green-100 text-green-700 px-2 py-1 rounded">
                         Đã thanh toán
                       </span>
                     )}
-                    {b.status === "CANCELLED" && b.cancelReason && (
-                      <span className="bg-red-100 text-red-700 px-2 py-1 rounded">
-                        Lý do: {b.cancelReason}
-                      </span>
-                    )}
+                    {b.status === "CANCELED" &&
+                      "cancelReason" in b &&
+                      (b as any).cancelReason && (
+                        <span className="bg-red-100 text-red-700 px-2 py-1 rounded">
+                          Lý do: {(b as any).cancelReason}
+                        </span>
+                      )}
                   </div>
                   {/* Đánh giá */}
-                  {b.rating && (
-                    <div className="mt-2 flex items-center gap-2">
-                      <span className="text-yellow-500">★★★★★</span>
-                      <span className="text-xs">Đánh giá của bạn</span>
-                      <span className="text-xs italic">"{b.comment}"</span>
-                    </div>
-                  )}
+                  {
+                    ("rating" in b && (b as any).rating ? (
+                      <div className="mt-2 flex items-center gap-2">
+                        <span className="text-yellow-500">★★★★★</span>
+                        <span className="text-xs">Đánh giá của bạn</span>
+                        {"comment" in b ? (
+                          <span className="text-xs italic">
+                            "{(b as any).comment}"
+                          </span>
+                        ) : null}
+                      </div>
+                    ) : null) as React.ReactNode
+                  }
                   {/* Nút liên hệ, chỉ đường, chia sẻ */}
                   <div className="flex gap-3 mt-2 text-sm">
                     <button className="flex items-center gap-1 hover:underline">
-                      💬 Liên hệ
-                    </button>
-                    <button className="flex items-center gap-1 hover:underline">
-                      📍 Chỉ đường
-                    </button>
-                    <button className="flex items-center gap-1 hover:underline">
-                      🔗 Chia sẻ
+                      <MapPinned className="w-4 h-4 text-gray-500" /> Chỉ đường
                     </button>
                   </div>
                 </div>
@@ -276,21 +326,34 @@ export default function BookingHistory() {
                     {formatVND(b?.price || 0)}
                   </div>
                   <div className="flex flex-col gap-2">
-                    <button className="px-4 py-2 border border-gray-200 rounded hover:bg-gray-50 flex items-center gap-1">
-                      👁️ Chi tiết
-                    </button>
-                    {b.bookingStatus === "COMPLETED" && (
+                    <div className="flex gap-2">
                       <button className="px-4 py-2 border border-gray-200 rounded hover:bg-gray-50 flex items-center gap-1">
-                        🔄 Đặt lại
+                        Chi tiết
+                      </button>
+                      <button
+                        className="px-4 w-[100px] py-2 flex items-center justify-center border border-gray-200 rounded hover:bg-gray-50 flex items-center gap-1"
+                        onClick={() => navigate(`/booking/${b.court?.id}`)}
+                      >
+                        Đặt lại
+                      </button>
+                    </div>
+                    {b.status === "COMPLETED" && "Hoàn thành" && (
+                      <button
+                        className="px-4 py-2 gap-3 border justify-center border-gray-200 rounded hover:bg-gray-50 flex items-center gap-1"
+                        onClick={() => {
+                          setFeedbackBooking(b);
+                          setShowFeedback(true);
+                        }}
+                      >
+                        <Star className="w-5 h-5 text-yellow-500" />
+                        <span>Thêm đánh giá</span>
                       </button>
                     )}
-                    {b.bookingStatus === "UPCOMING" && (
+                    {b.status === "BOOKED" && (
                       <>
-                        <button className="px-4 py-2 border border-gray-200 rounded hover:bg-gray-50 text-red-500 flex items-center gap-1">
-                          ✖ Hủy sân
-                        </button>
-                        <button className="px-4 py-2 border border-gray-200 rounded hover:bg-gray-50 flex items-center gap-1">
-                          🔁 Đổi lịch
+                        <button className="px-4 py-2 gap-3 border justify-center border-gray-200 rounded hover:bg-gray-50 flex items-center gap-1">
+                          <RefreshCcw className="w-4 h-4 text-gray-500" />
+                          Đổi lịch
                         </button>
                       </>
                     )}
@@ -301,6 +364,119 @@ export default function BookingHistory() {
           ))}
         </div>
       </div>
+      {/* Modal nhập đánh giá */}
+      {showFeedback && feedbackBooking && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md relative">
+            <button
+              className="absolute top-2 right-2 text-gray-400 hover:text-black"
+              onClick={() => setShowFeedback(false)}
+            >
+              ✖
+            </button>
+            <h2 className="text-xl font-bold mb-4">Đánh giá sân</h2>
+            <div className="mb-3">
+              <label className="block mb-1 font-medium">
+                Đánh giá tổng thể
+              </label>
+              <input
+                type="number"
+                min={1}
+                max={5}
+                value={feedbackForm.overallRating}
+                onChange={(e) =>
+                  setFeedbackForm((f) => ({
+                    ...f,
+                    overallRating: Number(e.target.value),
+                  }))
+                }
+                className="w-full border rounded px-2 py-1"
+              />
+            </div>
+            <div className="mb-3">
+              <label className="block mb-1 font-medium">Chất lượng sân</label>
+              <input
+                type="number"
+                min={1}
+                max={5}
+                value={feedbackForm.courtQualityRating}
+                onChange={(e) =>
+                  setFeedbackForm((f) => ({
+                    ...f,
+                    courtQualityRating: Number(e.target.value),
+                  }))
+                }
+                className="w-full border rounded px-2 py-1"
+              />
+            </div>
+            <div className="mb-3">
+              <label className="block mb-1 font-medium">Độ sạch sẽ</label>
+              <input
+                type="number"
+                min={1}
+                max={5}
+                value={feedbackForm.cleanlinessRating}
+                onChange={(e) =>
+                  setFeedbackForm((f) => ({
+                    ...f,
+                    cleanlinessRating: Number(e.target.value),
+                  }))
+                }
+                className="w-full border rounded px-2 py-1"
+              />
+            </div>
+            <div className="mb-3">
+              <label className="block mb-1 font-medium">
+                Trải nghiệm đặt sân
+              </label>
+              <input
+                type="number"
+                min={1}
+                max={5}
+                value={feedbackForm.bookingExperienceRating}
+                onChange={(e) =>
+                  setFeedbackForm((f) => ({
+                    ...f,
+                    bookingExperienceRating: Number(e.target.value),
+                  }))
+                }
+                className="w-full border rounded px-2 py-1"
+              />
+            </div>
+            <div className="mb-3">
+              <label className="block mb-1 font-medium">Bình luận</label>
+              <textarea
+                value={feedbackForm.comment}
+                onChange={(e) =>
+                  setFeedbackForm((f) => ({ ...f, comment: e.target.value }))
+                }
+                className="w-full border rounded px-2 py-1"
+                rows={3}
+              />
+            </div>
+            <div className="mb-3 flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={feedbackForm.anonymous}
+                onChange={(e) =>
+                  setFeedbackForm((f) => ({
+                    ...f,
+                    anonymous: e.target.checked,
+                  }))
+                }
+                id="anonymous"
+              />
+              <label htmlFor="anonymous">Ẩn danh</label>
+            </div>
+            <button
+              className="w-full bg-green-600 text-white py-2 rounded font-semibold mt-2"
+              onClick={handleSubmitFeedback}
+            >
+              Gửi đánh giá
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -15,7 +15,9 @@ export interface BusinessLocation {
     images: string;
     status: string;
     description: string;
-    priceRange: "$";
     rating: number;
     reviews: number;
+    latitude?: number;
+    longitude?: number;
+    distance: number;
 }
