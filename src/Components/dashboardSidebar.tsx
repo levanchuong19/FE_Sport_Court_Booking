@@ -1,13 +1,24 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { CalendarDays, ChartNoAxesCombined, LayoutDashboard, MapPinned, Settings, Users } from 'lucide-react';
 
 function DashboardSidebar() {
+  const navigate = useNavigate();
+
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        navigate('/')
+        
+    }
+
     const linkClass =
         "flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors";
     const activeClass =
         "bg-green-600 text-white shadow hover:bg-green-600";
     const inactiveClass =
         "hover:bg-gray-100 text-gray-700";
+
+        
 
     return (
         <aside className="h-screen w-64 bg-white border-r-2 border-gray-200 shadow-md flex flex-col justify-between fixed left-0 top-0">
@@ -37,7 +48,7 @@ function DashboardSidebar() {
                 </nav>
             </div>
             <div className="p-4 border-t border-gray-200">
-                <button className="w-full border border-red-500 text-red-500 rounded-lg py-2 hover:bg-red-50 font-semibold">Đăng xuất</button>
+                <button onClick={handleLogout} className="w-full border border-red-500 text-red-500 rounded-lg py-2 hover:bg-red-50 font-semibold">Đăng xuất</button>
             </div>
         </aside>
     );

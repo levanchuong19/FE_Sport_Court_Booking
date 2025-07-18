@@ -37,10 +37,6 @@ function Header() {
     navigate("/profile");
   };
 
-  const goToHistory = () => {
-    setShowDropdown(false);
-    navigate("/bookingHistory");
-  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -57,6 +53,9 @@ function Header() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  const userStr = localStorage.getItem("user");
+  const user = userStr ? JSON.parse(userStr) : null;
 
   return (
     <header className="w-full bg-white shadow sticky top-0 z-50">
@@ -93,7 +92,7 @@ function Header() {
             <>
               <img
                 onClick={() => setShowDropdown(!showDropdown)}
-                src="https://icons.veryicon.com/png/o/miscellaneous/rookie-official-icon-gallery/225-default-avatar.png"
+                src={user.image ? user.image :"/avt_blank_black.png"}
                 alt="avatar"
                 className="w-9 h-9 rounded-full cursor-pointer object-cover"
               />
@@ -104,12 +103,6 @@ function Header() {
                     className="block w-full px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
                   >
                     Trang cá nhân
-                  </button>
-                  <button
-                    onClick={goToHistory}
-                    className="block w-full px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
-                  >
-                    Lịch sử đặt sân
                   </button>
                   <div className="my-1 border-t border-gray-200" />
                   <button

@@ -58,11 +58,12 @@ function SearchPage() {
       const response = await api.post("/search", searchData);
       console.log("Search response:", response.data.data);
       
-      if (response.data) {
+      if (response.data && Array.isArray(response.data.data) && response.data.data.length > 0) {
         const locations = response.data.data.filter((location: BusinessLocation) => location.status === "ACTIVE");
         setIsLocation(locations);
       } else {
-        setIsLocation([]);
+        // Nếu không có kết quả, hiển thị tất cả sân
+        fetchLocation();
       }
     } catch (error) {
       console.error("Error searching:", error);
