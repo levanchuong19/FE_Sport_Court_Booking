@@ -207,22 +207,24 @@ function Home() {
   // Handle search
   const handleSearch = async () => {
     let center = undefined;
+    let latitude = 0;
+    let longitude = 0;
+
     if (currentLocation) {
       center = { lat: currentLocation.lat, lng: currentLocation.lng };
+      latitude = currentLocation.lat;
+      longitude = currentLocation.lng;
     } else if (searchLocation) {
       // Gọi Nominatim để lấy lat/lng từ searchLocation
       try {
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-            searchLocation
-          )}&countrycodes=vn&limit=1`
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchLocation)}&countrycodes=vn&limit=1`
         );
         const data = await res.json();
         if (data && data.length > 0) {
-          center = {
-            lat: parseFloat(data[0].lat),
-            lng: parseFloat(data[0].lon),
-          };
+          center = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+          latitude = parseFloat(data[0].lat);
+          longitude = parseFloat(data[0].lon);
         }
       } catch (e) {
         // Nếu lỗi thì bỏ qua, center sẽ undefined
@@ -231,20 +233,18 @@ function Home() {
 
     const searchData = {
       location: currentLocation ? "" : searchLocation,
-      latitude: currentLocation?.lat || 0,
-      longitude: currentLocation?.lng || 0,
+      latitude,
+      longitude
     };
 
     try {
       const response = await api.post("/search", searchData);
-      navigate("/search", {
-        state: {
-          searchResults: response.data.data.filter(
-            (location: BusinessLocation) => location.status === "ACTIVE"
-          ),
+      navigate("/search", { 
+        state: { 
+          searchResults: response.data.data.filter((location: BusinessLocation) => location.status === "ACTIVE"),
           searchData: searchData,
-          center, // luôn truyền center nếu có
-        },
+          center // luôn truyền center nếu có
+        } 
       });
     } catch (error) {
       alert("Có lỗi xảy ra khi tìm kiếm. Vui lòng thử lại.");

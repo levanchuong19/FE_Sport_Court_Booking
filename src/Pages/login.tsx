@@ -39,7 +39,12 @@ function Login() {
         localStorage.setItem("token", response.data.data.token);
         localStorage.setItem("user", JSON.stringify(response.data.data));
         dispatch(login(response.data.data.user));
-        navigate("/");
+        if(response.data.data.role === "ADMIN" || response.data.data.role === "MANAGER"){
+          console.log(response.data.data.role)
+          navigate("/dashboard", { replace: true });
+        }else{
+        navigate("/", { replace: true });
+        }
       } else {
         throw new Error(response.data.data);
       }
@@ -153,7 +158,7 @@ function Login() {
                       localStorage.setItem("token", res.data.data.token);
                       localStorage.setItem("user", JSON.stringify(res.data.data));
                       alert("Đăng Nhập thành công!");
-                      navigate("/");
+                      navigate("/", { replace: true });
                     } else {
                       alert("Không tìm thấy token trong phản hồi từ server.");
                     }
