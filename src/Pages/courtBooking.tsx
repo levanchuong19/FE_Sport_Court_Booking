@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Button, Card, Row, Col, Typography, Empty, Input, Select } from "antd";
+import { Button, Card, Row, Col, Typography, Empty, Select } from "antd";
 import type { Court } from "../Model/court";
 import api from "../Config/api";
-import { MapPin, Search, Filter, ListFilter } from "lucide-react";
+import { Filter, ListFilter } from "lucide-react";
 import CourtCard from "../Components/courtCard";
 
 const { Title } = Typography;

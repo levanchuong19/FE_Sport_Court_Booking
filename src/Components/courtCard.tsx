@@ -1,4 +1,3 @@
-import { Button } from "antd";
 import {
   Calendar,
   Car,
@@ -31,7 +30,6 @@ function CourtCard({ court }: { court: Court }) {
 
   const rating = court.businessLocation?.rating || 4.8;
   const reviews = court.businessLocation?.reviews || 124;
-  const distance = "1.5 km";
   const price = court.prices?.find((p) => p.priceType === "HOURLY")?.price;
 
   const handleBooking = () => {
@@ -53,12 +51,12 @@ function CourtCard({ court }: { court: Court }) {
   };
 
   return (
-    <div className="rounded-2xl bg-green-50 border border-green-100 shadow-sm p-4 max-w-xs w-full mx-auto flex flex-col justify-between min-h-[440px]">
+    <div className="h-full flex flex-col justify-between rounded-2xl bg-emerald-50 border border-gray-200 shadow hover:shadow-lg transition p-4">
       {/* Image Slider */}
-      <div className="relative rounded-xl overflow-hidden h-40 bg-gray-100 flex items-center justify-center mb-3">
+      <div className="relative h-40 rounded-xl overflow-hidden mb-3 bg-gray-100">
         <Swiper
           spaceBetween={30}
-          centeredSlides={true}
+          centeredSlides
           modules={[Autoplay, Pagination, Navigation]}
           autoplay={{ delay: 2500, disableOnInteraction: false }}
           pagination={{ clickable: true }}
@@ -68,7 +66,7 @@ function CourtCard({ court }: { court: Court }) {
               <img
                 src={image.imageUrl}
                 alt={court.courtName || "placeholder"}
-                className="w-full h-full object-cover"
+                className="w-full h-40 object-cover"
               />
             </SwiperSlide>
           ))}
@@ -90,11 +88,11 @@ function CourtCard({ court }: { court: Court }) {
 
       {/* Info */}
       <div className="flex-1 flex flex-col gap-2">
-        <div className="font-semibold text-base text-gray-900 leading-tight line-clamp-2">
+        <h3 className="text-base font-semibold text-gray-900 leading-tight line-clamp-2">
           {court.courtName || "Tên sân"}
-        </div>
-        <div className="flex items-center text-gray-500 text-sm gap-1 truncate">
-          <MapPin className="w-4 h-4 mr-1" />
+        </h3>
+        <div className="flex items-center text-gray-500 text-sm truncate">
+          <MapPin className="w-4 h-4 mr-1 shrink-0" />
           <span className="truncate">
             {court.businessLocation?.address || court.address}
           </span>
@@ -105,11 +103,13 @@ function CourtCard({ court }: { court: Court }) {
             <span>{rating}</span>
             <span className="text-gray-400 text-xs">({reviews})</span>
           </div>
-          <span className="text-gray-400 text-xs">{distance}</span>
+          <div className="text-emerald-600 font-bold text-lg">
+            {formatVND(price || 0)}/giờ
+          </div>
         </div>
 
         {/* Amenities */}
-        <div className="flex flex-wrap gap-2 my-1">
+        <div className="flex flex-wrap gap-2 mt-2">
           {amenities.map((item, idx) => (
             <div
               key={idx}
@@ -122,27 +122,22 @@ function CourtCard({ court }: { court: Court }) {
         </div>
       </div>
 
-      {/* Price + Actions */}
-      <div className="mt-4 pt-2 border-t border-gray-200">
-        <div className="text-green-600 font-bold text-lg mb-3 text-center">
-          {formatVND(price || 0)}/giờ
-        </div>
-        <div className="flex gap-2 justify-center">
-          <button
-            className="bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg px-4 py-1.5 flex items-center gap-2 border-none shadow-none"
-            onClick={handleBooking}
-          >
-            <Calendar className="w-4 h-4" />
-            Đặt ngay
-          </button>
-          <button
-            className="border border-blue-400 text-blue-500 font-semibold rounded-lg px-4 py-1.5 flex items-center gap-2 bg-white hover:bg-blue-50"
-            onClick={handleDetail}
-          >
-            <Calendar className="w-4 h-4" />
-            Chi tiết
-          </button>
-        </div>
+      {/* Actions */}
+      <div className="mt-4 pt-3 border-t border-gray-200 flex gap-2 justify-center">
+        <button
+          onClick={handleBooking}
+          className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg px-4 py-1.5 flex items-center gap-2"
+        >
+          <Calendar className="w-4 h-4" />
+          Đặt ngay
+        </button>
+        <button
+          onClick={handleDetail}
+          className="border border-gray-300 text-gray-700 font-medium rounded-lg px-4 py-1.5 flex items-center gap-2 bg-white hover:bg-gray-50"
+        >
+          <Calendar className="w-4 h-4" />
+          Chi tiết
+        </button>
       </div>
     </div>
   );
