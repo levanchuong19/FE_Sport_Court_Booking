@@ -7,7 +7,17 @@ import type { BookingHistory } from "../Model/bookingHistory";
 import formatVND from "../Utils/currency";
 import formatDate from "../Utils/date";
 import React from "react";
-import { Calendar, Clock, MapPinned, RefreshCcw, Star, LogOut, KeyRound, Pencil, Settings } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  MapPinned,
+  RefreshCcw,
+  Star,
+  LogOut,
+  KeyRound,
+  Pencil,
+  Settings,
+} from "lucide-react";
 
 const statusColor = {
   COMPLETED: "bg-green-100 text-green-700",
@@ -31,7 +41,9 @@ export default function Profile() {
     comment: "",
     anonymous: false,
   });
-  const [tab, setTab] = useState<'overview' | 'history' | 'favorite' | 'settings'>('overview');
+  const [tab, setTab] = useState<
+    "overview" | "history" | "favorite" | "settings"
+  >("overview");
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
@@ -50,7 +62,8 @@ export default function Profile() {
   const filteredBookings = bookings?.bookings.filter((b) => {
     // Filter by status
     if (statusFilter !== "all") {
-      if (statusFilter === "completed" && b.status !== "COMPLETED") return false;
+      if (statusFilter === "completed" && b.status !== "COMPLETED")
+        return false;
       if (statusFilter === "upcoming" && b.status !== "BOOKED") return false;
       if (statusFilter === "canceled" && b.status !== "CANCELED") return false;
       if (statusFilter === "no_show" && b.status !== "NO_SHOW") return false;
@@ -60,7 +73,12 @@ export default function Profile() {
       const text = searchText.toLowerCase();
       const courtName = b.court?.courtName?.toLowerCase() || "";
       const location = b.court?.businessLocation?.name?.toLowerCase() || "";
-      const bookingCode = (typeof b === 'object' && 'bookingCode' in b && typeof (b as any).bookingCode === 'string') ? (b as any).bookingCode.toLowerCase() : "";
+      const bookingCode =
+        typeof b === "object" &&
+        "bookingCode" in b &&
+        typeof (b as any).bookingCode === "string"
+          ? (b as any).bookingCode.toLowerCase()
+          : "";
       return (
         courtName.includes(text) ||
         location.includes(text) ||
@@ -93,6 +111,13 @@ export default function Profile() {
     };
     handleGetBookingHistory();
   }, [navigate]);
+
+  const handleChangePassword = () => {
+    navigate("/change-password");
+  };
+  const handleLogout = () => {
+    navigate("/");
+  };
 
   // Hàm submit feedback
   const handleSubmitFeedback = async () => {
@@ -132,45 +157,96 @@ export default function Profile() {
         <div className="flex items-center gap-6 flex-1">
           <div className="w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden relative">
             {user?.image ? (
-              <img src={user.image} alt="avatar" className="w-full h-full rounded-full" />
+              <img
+                src={user.image}
+                alt="avatar"
+                className="w-full h-full rounded-full"
+              />
             ) : (
-              <img src="https://thanhtra.com.vn/images/avatar-default.png?id=420048c5169f5847774bafb5e8b641b4" alt="avatar" className="w-full h-full rounded-full" />
+              <img
+                src="https://thanhtra.com.vn/images/avatar-default.png?id=420048c5169f5847774bafb5e8b641b4"
+                alt="avatar"
+                className="w-full h-full rounded-full"
+              />
             )}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <span className="text-2xl font-bold truncate">{user?.fullName}</span>
-              <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-semibold">Đã xác thực</span>
-              <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-semibold">Premium</span>
+              <span className="text-2xl font-bold truncate">
+                {user?.fullName}
+              </span>
+              <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-semibold">
+                Đã xác thực
+              </span>
+              <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-semibold">
+                Premium
+              </span>
             </div>
             <div className="flex flex-wrap items-center gap-3 text-gray-600 text-sm mb-2">
               <span>{user?.email}</span>
               <span>•</span>
               <span>{user?.phone}</span>
               <span>•</span>
-              <span>Tham gia từ {user?.createAt ? formatDate(new Date(user.createAt)) : ""}</span>
+              <span>
+                Tham gia từ{" "}
+                {user?.createAt ? formatDate(new Date(user.createAt)) : ""}
+              </span>
             </div>
-            <div className="text-gray-700 mb-2 text-base truncate">Yêu thích thể thao, đặc biệt là bóng đá và tennis. Thường xuyên tham gia các hoạt động thể thao cuối tuần.</div>
+            <div className="text-gray-700 mb-2 text-base truncate">
+              Yêu thích thể thao, đặc biệt là bóng đá và tennis. Thường xuyên
+              tham gia các hoạt động thể thao cuối tuần.
+            </div>
           </div>
         </div>
         <div className="flex flex-col gap-2 items-end">
-          <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg font-semibold hover:bg-gray-50"><Pencil className="w-4 h-4" />Chỉnh sửa</button>
+          <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg font-semibold hover:bg-gray-50">
+            <Pencil className="w-4 h-4" />
+            Chỉnh sửa
+          </button>
           <button
             className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg font-semibold hover:bg-gray-50"
-            onClick={() => setTab('settings')}
+            onClick={() => setTab("settings")}
           >
-            <Settings className="w-4 h-4" />Cài đặt
+            <Settings className="w-4 h-4" />
+            Cài đặt
           </button>
         </div>
       </div>
       {/* Tabs */}
       <div className="flex mb-6 bg-gray-100 rounded-xl overflow-hidden">
-        <button onClick={() => setTab('overview')} className={`flex-1 px-6 py-3 font-semibold text-base ${tab === 'overview' ? ' border-b-2 border-emerald-600 text-emerald-600' : 'text-gray-600'}`}>Tổng quan</button>
-        <button onClick={() => setTab('history')} className={`flex-1 px-6 py-3 font-semibold text-base ${tab === 'history' ? ' border-b-2 border-emerald-600 text-emerald-600' : 'text-gray-600'}`}>Lịch sử đặt sân</button>
-        <button onClick={() => setTab('settings')} className={`flex-1 px-6 py-3 font-semibold text-base ${tab === 'settings' ? 'border-b-2 border-emerald-600 text-emerald-600' : 'text-gray-600'}`}>Cài đặt</button>
+        <button
+          onClick={() => setTab("overview")}
+          className={`flex-1 px-6 py-3 font-semibold text-base ${
+            tab === "overview"
+              ? " border-b-2 border-emerald-600 text-emerald-600"
+              : "text-gray-600"
+          }`}
+        >
+          Tổng quan
+        </button>
+        <button
+          onClick={() => setTab("history")}
+          className={`flex-1 px-6 py-3 font-semibold text-base ${
+            tab === "history"
+              ? " border-b-2 border-emerald-600 text-emerald-600"
+              : "text-gray-600"
+          }`}
+        >
+          Lịch sử đặt sân
+        </button>
+        <button
+          onClick={() => setTab("settings")}
+          className={`flex-1 px-6 py-3 font-semibold text-base ${
+            tab === "settings"
+              ? "border-b-2 border-emerald-600 text-emerald-600"
+              : "text-gray-600"
+          }`}
+        >
+          Cài đặt
+        </button>
       </div>
       {/* Tab content */}
-      {tab === 'overview' && (
+      {tab === "overview" && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Thông tin cá nhân + thống kê */}
           <div className="col-span-1 bg-white rounded-xl shadow p-6 flex flex-col items-center">
@@ -178,12 +254,25 @@ export default function Profile() {
             <div className="w-full bg-gray-50 rounded-xl p-4">
               <div className="font-bold mb-2">Thông tin cá nhân</div>
               <div className="text-sm text-gray-700 flex flex-col gap-4">
-                <div><b>Email:</b> {user?.email}</div>
-                <div><b>Điện thoại:</b> {user?.phone}</div>
-                <div><b>Địa chỉ:</b> 123 Đường Nguyễn Huệ, Quận 1, TP.HCM</div>
-                <div><b>Tổng đặt sân:</b> {bookings?.totalBookings}</div>
-                  <div><b>Tổng chi tiêu:</b>{" "}{formatVND(bookings?.totalSpending || 0)}</div>
-                  <div><b>Loại sân yêu thích:</b> {bookings?.favoriteCourtType}</div>
+                <div>
+                  <b>Email:</b> {user?.email}
+                </div>
+                <div>
+                  <b>Điện thoại:</b> {user?.phone}
+                </div>
+                <div>
+                  <b>Địa chỉ:</b> 123 Đường Nguyễn Huệ, Quận 1, TP.HCM
+                </div>
+                <div>
+                  <b>Tổng đặt sân:</b> {bookings?.totalBookings}
+                </div>
+                <div>
+                  <b>Tổng chi tiêu:</b>{" "}
+                  {formatVND(bookings?.totalSpending || 0)}
+                </div>
+                <div>
+                  <b>Loại sân yêu thích:</b> {bookings?.favoriteCourtType}
+                </div>
               </div>
             </div>
           </div>
@@ -192,15 +281,28 @@ export default function Profile() {
             <div className="font-bold text-lg mb-4">Hoạt động gần đây</div>
             <div className="flex flex-col gap-4">
               {bookings?.bookings.slice(0, 3).map((b, idx) => (
-                <div key={idx} className="flex items-center justify-between border-b pb-3 last:border-b-0 last:pb-0">
+                <div
+                  key={idx}
+                  className="flex items-center justify-between border-b pb-3 last:border-b-0 last:pb-0"
+                >
                   <div>
                     <div className="font-semibold">{b.court?.courtName}</div>
-                    <div className="text-gray-500 text-sm">{b.court?.businessLocation?.name} | {b.court?.businessLocation?.address}</div>
-                    <div className="text-gray-500 text-sm">{b?.startDate ? formatDate(new Date(b.startDate)) : ""} | {b?.startTime?.slice(0, 5)} - {b?.endTime?.slice(0, 5)}</div>
+                    <div className="text-gray-500 text-sm">
+                      {b.court?.businessLocation?.name} |{" "}
+                      {b.court?.businessLocation?.address}
+                    </div>
+                    <div className="text-gray-500 text-sm">
+                      {b?.startDate ? formatDate(new Date(b.startDate)) : ""} |{" "}
+                      {b?.startTime?.slice(0, 5)} - {b?.endTime?.slice(0, 5)}
+                    </div>
                   </div>
                   <div className="flex flex-col items-end">
-                    <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs mb-1">Hoàn thành</span>
-                    <span className="text-green-600 font-bold">{formatVND(b?.price || 0)}</span>
+                    <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs mb-1">
+                      Hoàn thành
+                    </span>
+                    <span className="text-green-600 font-bold">
+                      {formatVND(b?.price || 0)}
+                    </span>
                   </div>
                 </div>
               ))}
@@ -208,7 +310,7 @@ export default function Profile() {
           </div>
         </div>
       )}
-      {tab === 'history' && (
+      {tab === "history" && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {/* Thông tin user */}
           {/* Thống kê nhanh & Thao tác nhanh */}
@@ -216,12 +318,25 @@ export default function Profile() {
             <div className="col-span-1 bg-white rounded-xl shadow p-6">
               <div className="font-bold mb-2">Thông tin cá nhân</div>
               <div className="text-sm text-gray-700 flex flex-col gap-4">
-                <div><b>Email:</b> {user?.email}</div>
-                <div><b>Điện thoại:</b> {user?.phone}</div>
-                <div><b>Địa chỉ:</b> 123 Đường Nguyễn Huệ, Quận 1, TP.HCM</div>
-                <div><b>Tổng đặt sân:</b> {bookings?.totalBookings}</div>
-                  <div><b>Tổng chi tiêu:</b>{" "}{formatVND(bookings?.totalSpending || 0)}</div>
-                  <div><b>Loại sân yêu thích:</b> {bookings?.favoriteCourtType}</div>
+                <div>
+                  <b>Email:</b> {user?.email}
+                </div>
+                <div>
+                  <b>Điện thoại:</b> {user?.phone}
+                </div>
+                <div>
+                  <b>Địa chỉ:</b> 123 Đường Nguyễn Huệ, Quận 1, TP.HCM
+                </div>
+                <div>
+                  <b>Tổng đặt sân:</b> {bookings?.totalBookings}
+                </div>
+                <div>
+                  <b>Tổng chi tiêu:</b>{" "}
+                  {formatVND(bookings?.totalSpending || 0)}
+                </div>
+                <div>
+                  <b>Loại sân yêu thích:</b> {bookings?.favoriteCourtType}
+                </div>
               </div>
             </div>
             {/* Thống kê nhanh */}
@@ -263,12 +378,12 @@ export default function Profile() {
                 className="flex-1 border border-gray-200 rounded-lg px-3 py-2"
                 placeholder="Tìm kiếm theo tên sân..."
                 value={searchText}
-                onChange={e => setSearchText(e.target.value)}
+                onChange={(e) => setSearchText(e.target.value)}
               />
               <select
                 className="border border-gray-200 rounded-lg px-3 py-2"
                 value={statusFilter}
-                onChange={e => setStatusFilter(e.target.value)}
+                onChange={(e) => setStatusFilter(e.target.value)}
               >
                 <option value="all">Tất cả trạng thái</option>
                 <option value="completed">Hoàn thành</option>
@@ -282,7 +397,6 @@ export default function Profile() {
               >
                 Đặt sân mới
               </button>
-              
             </div>
             {/* Danh sách booking */}
             {filteredBookings?.map((b, idx) => (
@@ -322,7 +436,9 @@ export default function Profile() {
                         Mã: {b.bookingCode || "BKxxx"}
                       </span> */}
                     </div>
-                    <div className="font-bold text-lg">{b.court?.courtName}</div>
+                    <div className="font-bold text-lg">
+                      {b.court?.courtName}
+                    </div>
                     <div className="text-green-700">
                       {b.court?.businessLocation?.name}
                     </div>
@@ -375,7 +491,8 @@ export default function Profile() {
                     {/* Nút liên hệ, chỉ đường, chia sẻ */}
                     <div className="flex gap-3 mt-2 text-sm">
                       <button className="flex items-center gap-1 hover:underline">
-                        <MapPinned className="w-4 h-4 text-gray-500" /> Chỉ đường
+                        <MapPinned className="w-4 h-4 text-gray-500" /> Chỉ
+                        đường
                       </button>
                     </div>
                   </div>
@@ -424,32 +541,50 @@ export default function Profile() {
           </div>
         </div>
       )}
-      {tab === 'settings' && (
+      {tab === "settings" && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="col-span-1 bg-white rounded-xl shadow p-6">
-              <div className="font-bold mb-2">Thông tin cá nhân</div>
-              <div className="text-sm text-gray-700 flex flex-col gap-4">
-                <div><b>Email:</b> {user?.email}</div>
-                <div><b>Điện thoại:</b> {user?.phone}</div>
-                <div><b>Địa chỉ:</b> 123 Đường Nguyễn Huệ, Quận 1, TP.HCM</div>
-                <div><b>Tổng đặt sân:</b> {bookings?.totalBookings}</div>
-                  <div><b>Tổng chi tiêu:</b>{" "}{formatVND(bookings?.totalSpending || 0)}</div>
-                  <div><b>Loại sân yêu thích:</b> {bookings?.favoriteCourtType}</div>
+          <div className="col-span-1 bg-white rounded-xl shadow p-6">
+            <div className="font-bold mb-2">Thông tin cá nhân</div>
+            <div className="text-sm text-gray-700 flex flex-col gap-4">
+              <div>
+                <b>Email:</b> {user?.email}
+              </div>
+              <div>
+                <b>Điện thoại:</b> {user?.phone}
+              </div>
+              <div>
+                <b>Địa chỉ:</b> 123 Đường Nguyễn Huệ, Quận 1, TP.HCM
+              </div>
+              <div>
+                <b>Tổng đặt sân:</b> {bookings?.totalBookings}
+              </div>
+              <div>
+                <b>Tổng chi tiêu:</b> {formatVND(bookings?.totalSpending || 0)}
+              </div>
+              <div>
+                <b>Loại sân yêu thích:</b> {bookings?.favoriteCourtType}
               </div>
             </div>
+          </div>
           {/* Tài khoản */}
           <div className="col-span-2 bg-white rounded-xl shadow p-6">
             <div className="font-bold text-xl mb-4 flex items-center gap-2 text-red-600">
               <LogOut className="w-6 h-6" /> Tài khoản
             </div>
             <div className="flex flex-col gap-3">
-              <button className="flex items-center gap-3 px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 text-base">
+              <button
+                className="flex items-center gap-3 px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 text-base"
+                onClick={handleChangePassword}
+              >
                 <KeyRound className="w-5 h-5" /> Đổi mật khẩu
               </button>
               <button className="flex items-center gap-3 px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 text-base">
                 <Pencil className="w-5 h-5" /> Chỉnh sửa trang cá nhân
               </button>
-              <button className="flex items-center gap-3 px-4 py-3 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 text-base">
+              <button
+                className="flex items-center gap-3 px-4 py-3 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 text-base"
+                onClick={handleLogout}
+              >
                 <LogOut className="w-5 h-5" /> Đăng xuất
               </button>
             </div>

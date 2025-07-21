@@ -56,13 +56,22 @@ export default function BookingManagement() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">Quản lý đặt sân</h1>
         <button className="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 hover:bg-green-700">
-          <span><Plus /></span> Tạo đặt sân mới
+          <span>
+            <Plus />
+          </span>{" "}
+          Tạo đặt sân mới
         </button>
       </div>
       <div className="flex flex-wrap gap-2 mb-4">
-        <input className="border border-gray-200 rounded-lg px-3 py-2 w-64 " placeholder="Tìm kiếm đặt sân..." />
+        <input
+          className="border border-gray-200 rounded-lg px-3 py-2 w-64 "
+          placeholder="Tìm kiếm đặt sân..."
+        />
         <button className="border border-gray-200 px-3 py-2 rounded-lg hover:bg-gray-100 flex items-center gap-1">
-          <span><Search /></span> Lọc
+          <span>
+            <Search />
+          </span>{" "}
+          Lọc
         </button>
         <select className="border border-gray-200 rounded-lg px-3 py-2">
           <option>Tất cả trạng thái</option>
@@ -103,10 +112,16 @@ export default function BookingManagement() {
                 <td className="py-2 px-4">{b.time}</td>
                 <td className="py-2 px-4">{b.price}</td>
                 <td className="py-2 px-4">
-                  <span className={`px-3 py-1 rounded-full text-xs ${b.statusColor}`}>{b.status}</span>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs ${b.statusColor}`}
+                  >
+                    {b.status}
+                  </span>
                 </td>
                 <td className="py-2 px-4">
-                  <button className="px-2 py-1 rounded hover:bg-gray-100">...</button>
+                  <button className="px-2 py-1 rounded hover:bg-gray-100">
+                    ...
+                  </button>
                 </td>
               </tr>
             ))}
