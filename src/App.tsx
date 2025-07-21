@@ -16,12 +16,17 @@ import CourtBooking from "./Pages/courtBooking";
 import RegisterPartner from "./Pages/registerPartner";
 import BookingHistory from "./Pages/bookingHistory";
 import DetailCourt from "./Pages/detailCourt";
+import ForgotPassword from "./Pages/forgotPassword";
 
 function App() {
   const router = createBrowserRouter([
     {
       path: "login",
       element: <Login />,
+    },
+    {
+      path: "forgot-password",
+      element: <ForgotPassword />,
     },
     {
       path: "",
