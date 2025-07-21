@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../Config/api";
 import { useDispatch } from "react-redux";
 import { login } from "../redux/features/userSlice";
+import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { FaPhoneAlt, FaLock, FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 
 interface LoginProps {
@@ -41,7 +42,15 @@ function Login() {
         localStorage.setItem("token", response.data.data.token);
         localStorage.setItem("user", JSON.stringify(response.data.data));
         dispatch(login(response.data.data.user));
-        navigate("/");
+        if (
+          response.data.data.role === "ADMIN" ||
+          response.data.data.role === "MANAGER"
+        ) {
+          console.log(response.data.data.role);
+          navigate("/dashboard", { replace: true });
+        } else {
+          navigate("/", { replace: true });
+        }
       } else {
         throw new Error(response.data.data);
       }
@@ -179,6 +188,45 @@ function Login() {
               {isLoading ? "Đang xử lý..." : "Đăng nhập"}
             </button>
           </form>
+          {/* Form Đăng Nhập Google :d */}
+          <div className="flex justify-center mt-6">
+            <GoogleOAuthProvider clientId="136882428338-vclkmobr196nsjj3g9eldo1nt6vm4fq2.apps.googleusercontent.com">
+              <GoogleLogin
+                onSuccess={async (credentialResponse) => {
+                  console.log(
+                    "Google credential:",
+                    credentialResponse.credential
+                  );
+                  try {
+                    const res = await api.post("auth/google/login", {
+                      token: credentialResponse.credential,
+                    });
+
+                    const token = res.data?.data?.token;
+
+                    if (token) {
+                      localStorage.setItem("accessToken", token);
+                      localStorage.setItem("token", res.data.data.token);
+                      localStorage.setItem(
+                        "user",
+                        JSON.stringify(res.data.data)
+                      );
+                      alert("Đăng Nhập thành công!");
+                      navigate("/", { replace: true });
+                    } else {
+                      alert("Không tìm thấy token trong phản hồi từ server.");
+                    }
+                  } catch (err) {
+                    console.error(err);
+                    alert("Đăng Nhập thất bại!");
+                  }
+                }}
+                onError={() => alert("Google login failed")}
+                useOneTap
+              />
+            </GoogleOAuthProvider>
+          </div>
+
           <p className="mt-5 text-center text-sm text-gray-600">
             Bạn chưa có tài khoản?{" "}
             <span

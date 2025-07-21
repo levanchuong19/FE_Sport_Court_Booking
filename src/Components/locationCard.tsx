@@ -56,7 +56,7 @@ function LocationCard({ location }: { location: BusinessLocation }) {
   ];
 
   const handleBooking = () => {
-    navigate(`/location/${location.id}`);
+    navigate(`/businessLocation/${location.id}`);
   };
 
   return (
@@ -133,15 +133,16 @@ function LocationCard({ location }: { location: BusinessLocation }) {
               {location.name}
             </h3>
             <div className="flex items-center justify-between w-full">
-              <div className="flex items-center ">
-                <div className="flex items-center space-x-1">
+                  <div className="flex items-center space-x-1">
                   <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                   {/* <span className="text-sm font-medium">{location.rating}</span>
                         <span className="text-sm text-gray-500">({location.reviews})</span> */}
                   <span className="text-sm font-medium">4.8</span>
                   <span className="text-sm text-gray-500">(189 đánh giá)</span>
-                </div>
-              </div>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                  {location.distance ? <span className="text-sm text-gray-500">{location.distance.toFixed(1)} km</span> :""}
+                  </div>
             </div>
           </div>
         }

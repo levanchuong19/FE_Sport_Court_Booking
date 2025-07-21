@@ -31,23 +31,49 @@ export default function ConfirmBooking() {
     fetchBookingInfo();
   }, []);
 
-  // Xử lý giá từ BE (string, có thể có dấu phẩy)
-  const priceNum =
-    bookingInfo?.slotType === "WEEKLY"
-      ? bookingInfo.court.prices.find((price) => price.priceType === "WEEKLY")
-          ?.price
-      : bookingInfo?.slotType === "DAILY"
-      ? bookingInfo.court.prices.find((price) => price.priceType === "DAILY")
-          ?.price
-      : bookingInfo?.slotType === "MONTHLY"
-      ? bookingInfo.court.prices.find((price) => price.priceType === "MONTHLY")
-          ?.price
-      : bookingInfo?.slotType === "HOURLY"
-      ? bookingInfo.court.prices.find((price) => price.priceType === "HOURLY")
-          ?.price
-      : "";
+  // Tính số giờ hoặc số slot đã đặt
+  let total = 0;
+  let priceNum = 0;
+  if (bookingInfo) {
+    if (bookingInfo.slotType === "HOURLY") {
+      // Tính số giờ
+      const [startH, startM] = bookingInfo.startTime.split(":").map(Number);
+      const [endH, endM] = bookingInfo.endTime.split(":").map(Number);
+      let hours = endH - startH;
+      if (hours < 0) hours += 24;
+      priceNum =
+        bookingInfo.court.prices.find((p) => p.priceType === "HOURLY")?.price ||
+        0;
+      total = priceNum * hours;
+    } else if (bookingInfo.slotType === "DAILY") {
+      priceNum =
+        bookingInfo.court.prices.find((p) => p.priceType === "DAILY")?.price ||
+        0;
+      total = priceNum;
+    } else if (
+      bookingInfo.slotType === "WEEKLY" ||
+      bookingInfo.slotType === "MONTHLY"
+    ) {
+      // Tính số giờ (slot)
+      const [startH, startM] = bookingInfo.startTime.split(":").map(Number);
+      const [endH, endM] = bookingInfo.endTime.split(":").map(Number);
+      let slots = endH - startH;
+      if (slots < 0) slots += 24;
+      // Tính số ngày
+      const start = new Date(bookingInfo.startDate);
+      const end = new Date(bookingInfo.endDate);
+      const days =
+        Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) +
+        1;
+      priceNum =
+        bookingInfo.court.prices.find(
+          (p) => p.priceType === bookingInfo.slotType
+        )?.price || 0;
+      total = priceNum * slots * days;
+    }
+  }
   const serviceFee = 0; // hoặc 200000 tuỳ chính sách
-  const total = Number(priceNum) + Number(serviceFee);
+  const totalPay = Number(total) + Number(serviceFee);
 
   if (!bookingInfo) {
     return (
@@ -180,14 +206,59 @@ export default function ConfirmBooking() {
                   {formatVND(Number(priceNum))}
                 </span>
               </div>
-              <div className="flex justify-between mb-2 text-gray-500">
-                <span>Phí dịch vụ</span>
-                <span>{formatVND(Number(serviceFee))}</span>
-              </div>
+              {/* Đơn giá: số giờ x giá 1 giờ */}
+              {bookingInfo.slotType === "HOURLY" && (
+                <div className="flex justify-between mb-2 text-gray-500">
+                  <span>Đơn giá</span>
+                  <span>
+                    {(() => {
+                      const [startH] = bookingInfo.startTime
+                        .split(":")
+                        .map(Number);
+                      const [endH] = bookingInfo.endTime.split(":").map(Number);
+                      let hours = endH - startH;
+                      if (hours < 0) hours += 24;
+                      return `${hours} giờ x ${formatVND(Number(priceNum))}`;
+                    })()}
+                  </span>
+                </div>
+              )}
+              {(bookingInfo.slotType === "WEEKLY" ||
+                bookingInfo.slotType === "MONTHLY") && (
+                <div className="flex justify-between mb-2 text-gray-500">
+                  <span>Đơn giá</span>
+                  <span>
+                    {(() => {
+                      const [startH] = bookingInfo.startTime
+                        .split(":")
+                        .map(Number);
+                      const [endH] = bookingInfo.endTime.split(":").map(Number);
+                      let slots = endH - startH;
+                      if (slots < 0) slots += 24;
+                      // Tính số ngày
+                      const start = new Date(bookingInfo.startDate);
+                      const end = new Date(bookingInfo.endDate);
+                      const days =
+                        Math.round(
+                          (end.getTime() - start.getTime()) /
+                            (1000 * 60 * 60 * 24)
+                        ) + 1;
+                      if (days > 1) {
+                        return `${slots} giờ x ${days} ngày x ${formatVND(
+                          Number(priceNum)
+                        )}`;
+                      } else {
+                        return `${slots} giờ x ${formatVND(Number(priceNum))}`;
+                      }
+                    })()}
+                  </span>
+                </div>
+              )}
+              {/* DAILY không cần đơn giá */}
               <div className="flex justify-between mt-4 text-lg font-bold">
                 <span>Tổng cộng</span>
                 <span className="text-green-600">
-                  {formatVND(Number(total))}
+                  {formatVND(Number(totalPay))}
                 </span>
               </div>
             </div>

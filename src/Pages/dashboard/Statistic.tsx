@@ -1,6 +1,18 @@
 import React, { useEffect, useState } from "react";
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend, PieChart, Pie, Cell
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  Legend,
+  PieChart,
+  Pie,
+  Cell,
 } from "recharts";
 
 // Màu cho từng bộ môn
@@ -13,7 +25,9 @@ type RevenueBySport = { name: string; value: number };
 
 const revenue = 42000000;
 const weeklyCustomers = [12, 18, 22, 30, 25, 28, 35]; // Số khách mỗi ngày trong tuần
-const monthlyCustomers = [120, 150, 180, 200, 170, 210, 250, 230, 220, 240, 260, 300]; // Số khách mỗi tháng
+const monthlyCustomers = [
+  120, 150, 180, 200, 170, 210, 250, 230, 220, 240, 260, 300,
+]; // Số khách mỗi tháng
 const topFields = [
   { name: "Sân bóng đá Mini 5v5", count: 32 },
   { name: "Sân tennis số 3", count: 27 },
@@ -29,21 +43,45 @@ const owners = [
 
 // Dữ liệu sân (mỗi sân gắn với 1 chủ)
 const fields = [
-  { id: "F001", name: "Sân bóng đá Mini 5v5", ownerId: "O001", bookingCount: 32, revenue: 12000000 },
-  { id: "F002", name: "Sân tennis số 3", ownerId: "O001", bookingCount: 27, revenue: 9000000 },
-  { id: "F003", name: "Sân bóng rổ ngoài trời", ownerId: "O002", bookingCount: 21, revenue: 8000000 },
-  { id: "F004", name: "Sân cầu lông số 2", ownerId: "O002", bookingCount: 18, revenue: 6000000 },
+  {
+    id: "F001",
+    name: "Sân bóng đá Mini 5v5",
+    ownerId: "O001",
+    bookingCount: 32,
+    revenue: 12000000,
+  },
+  {
+    id: "F002",
+    name: "Sân tennis số 3",
+    ownerId: "O001",
+    bookingCount: 27,
+    revenue: 9000000,
+  },
+  {
+    id: "F003",
+    name: "Sân bóng rổ ngoài trời",
+    ownerId: "O002",
+    bookingCount: 21,
+    revenue: 8000000,
+  },
+  {
+    id: "F004",
+    name: "Sân cầu lông số 2",
+    ownerId: "O002",
+    bookingCount: 18,
+    revenue: 6000000,
+  },
 ];
 
-const ownerStats = owners.map(owner => {
-  const ownerFields = fields.filter(f => f.ownerId === owner.id);
+const ownerStats = owners.map((owner) => {
+  const ownerFields = fields.filter((f) => f.ownerId === owner.id);
   const totalBooking = ownerFields.reduce((sum, f) => sum + f.bookingCount, 0);
   const totalRevenue = ownerFields.reduce((sum, f) => sum + f.revenue, 0);
   return {
     ...owner,
     totalBooking,
     totalRevenue,
-    fields: ownerFields
+    fields: ownerFields,
   };
 });
 
@@ -54,7 +92,9 @@ export default function Statistic() {
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
   const [topFields, setTopFields] = useState<TopField[]>([]);
   // Dữ liệu mẫu số lượng chủ sân đăng ký mới theo tháng
-  const [ownerRegisterData, setOwnerRegisterData] = useState<{ month: string; count: number }[]>([]);
+  const [ownerRegisterData, setOwnerRegisterData] = useState<
+    { month: string; count: number }[]
+  >([]);
 
   useEffect(() => {
     // Giả lập fetch API
@@ -113,7 +153,10 @@ export default function Statistic() {
   }, []);
 
   // Tổng doanh thu
-  const totalRevenue = revenueBySport.reduce((sum, item) => sum + item.value, 0);
+  const totalRevenue = revenueBySport.reduce(
+    (sum, item) => sum + item.value,
+    0
+  );
 
   return (
     <div className="p-6">
@@ -121,7 +164,9 @@ export default function Statistic() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         {/* Doanh thu theo bộ môn (Pie Chart) */}
         <div className="bg-white rounded-xl shadow p-6 flex flex-col items-center justify-center">
-          <div className="text-gray-500 text-sm mb-2">Tỷ lệ doanh thu theo bộ môn</div>
+          <div className="text-gray-500 text-sm mb-2">
+            Tỷ lệ doanh thu theo bộ môn
+          </div>
           <div className="flex justify-center w-full">
             <ResponsiveContainer width={220} height={180}>
               <PieChart>
@@ -137,7 +182,10 @@ export default function Statistic() {
                   }
                 >
                   {revenueBySport.map((entry, idx) => (
-                    <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
+                    <Cell
+                      key={`cell-${idx}`}
+                      fill={COLORS[idx % COLORS.length]}
+                    />
                   ))}
                 </Pie>
                 <Tooltip
@@ -153,7 +201,9 @@ export default function Statistic() {
         </div>
         {/* Lượng khách trong tuần */}
         <div className="bg-white rounded-xl shadow p-6 flex flex-col items-center justify-center">
-          <div className="text-gray-500 text-sm mb-2">Lượng khách đặt sân trong tuần</div>
+          <div className="text-gray-500 text-sm mb-2">
+            Lượng khách đặt sân trong tuần
+          </div>
           <div className="flex justify-center w-full">
             <ResponsiveContainer width={600} height={250}>
               <BarChart data={weeklyData}>
@@ -168,7 +218,9 @@ export default function Statistic() {
         </div>
         {/* Lượng khách trong tháng */}
         <div className="bg-white rounded-xl shadow p-6 flex flex-col items-center justify-center">
-          <div className="text-gray-500 text-sm mb-2 ">Lượng khách đặt sân trong 12 tháng</div>
+          <div className="text-gray-500 text-sm mb-2 ">
+            Lượng khách đặt sân trong 12 tháng
+          </div>
           <div className="flex justify-center w-full">
             <ResponsiveContainer width={500} height={250}>
               <LineChart data={monthlyData}>
@@ -177,31 +229,48 @@ export default function Statistic() {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Line type="monotone" dataKey="customers" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} />
+                <Line
+                  type="monotone"
+                  dataKey="customers"
+                  stroke="#3b82f6"
+                  strokeWidth={3}
+                  dot={{ r: 4 }}
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
-         {/* Biểu đồ số lượng chủ sân đăng ký mới theo tháng */}
-      <div className="bg-white rounded-xl shadow p-6 flex flex-col items-center justify-center">
-        <div className="text-gray-500 text-sm mb-2">Số lượng chủ sân đăng ký mới theo tháng</div>
-        <div className="flex justify-center w-full">
-          <ResponsiveContainer width={500} height={250}>
-            <LineChart data={ownerRegisterData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis allowDecimals={false} />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="count" stroke="#f59e42" strokeWidth={3} dot={{ r: 4 }} name="Chủ sân mới" />
-            </LineChart>
-          </ResponsiveContainer>
+        {/* Biểu đồ số lượng chủ sân đăng ký mới theo tháng */}
+        <div className="bg-white rounded-xl shadow p-6 flex flex-col items-center justify-center">
+          <div className="text-gray-500 text-sm mb-2">
+            Số lượng chủ sân đăng ký mới theo tháng
+          </div>
+          <div className="flex justify-center w-full">
+            <ResponsiveContainer width={500} height={250}>
+              <LineChart data={ownerRegisterData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis allowDecimals={false} />
+                <Tooltip />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="count"
+                  stroke="#f59e42"
+                  strokeWidth={3}
+                  dot={{ r: 4 }}
+                  name="Chủ sân mới"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         </div>
-      </div>
       </div>
       {/* Top sân được đặt nhiều nhất */}
       <div className="bg-white rounded-xl shadow p-6 mb-8">
-        <div className="text-gray-500 text-sm mb-4">Top sân được đặt nhiều nhất</div>
+        <div className="text-gray-500 text-sm mb-4">
+          Top sân được đặt nhiều nhất
+        </div>
         <table className="min-w-full text-sm">
           <thead>
             <tr className="bg-gray-100">
@@ -239,7 +308,9 @@ export default function Statistic() {
               <tr key={idx} className="border-b border-gray-200">
                 <td className="py-2 px-4">{f.id}</td>
                 <td className="py-2 px-4">{f.name}</td>
-                <td className="py-2 px-4">{owners.find(o => o.id === f.ownerId)?.name}</td>
+                <td className="py-2 px-4">
+                  {owners.find((o) => o.id === f.ownerId)?.name}
+                </td>
                 <td className="py-2 px-4">{f.bookingCount}</td>
                 <td className="py-2 px-4">{f.revenue.toLocaleString()}đ</td>
               </tr>
@@ -267,13 +338,14 @@ export default function Statistic() {
                 <td className="py-2 px-4">{o.name}</td>
                 <td className="py-2 px-4">{o.phone}</td>
                 <td className="py-2 px-4">{o.totalBooking}</td>
-                <td className="py-2 px-4">{o.totalRevenue.toLocaleString()}đ</td>
+                <td className="py-2 px-4">
+                  {o.totalRevenue.toLocaleString()}đ
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-     
     </div>
   );
-} 
+}

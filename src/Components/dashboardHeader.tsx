@@ -1,9 +1,12 @@
 import { Bell, Moon, SunMoon } from "lucide-react";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 export default function DashboardHeader() {
   const [dark, setDark] = useState(false);
   const [showNotif, setShowNotif] = useState(false);
+  
+  const userStr = localStorage.getItem("user");
+  const user = userStr ? JSON.parse(userStr) : null;
 
   useEffect(() => {
     const html = document.documentElement;
@@ -56,7 +59,7 @@ export default function DashboardHeader() {
         {/* Nút profile/avatar */}
         <button className="flex items-center gap-2 px-2 py-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
           <img
-            src="https://ui-avatars.com/api/?name=User&background=eee&color=888&size=32"
+            src={user.image ? user.image :"/avt_blank.png"}
             alt="avatar"
             className="w-8 h-8 rounded-full border border-gray-200 dark:border-gray-700"
           />
