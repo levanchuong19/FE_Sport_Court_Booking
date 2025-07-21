@@ -19,6 +19,8 @@ import BusinessLocationDetail from "./Pages/businessLocationDetail";
 import SearchPage from "./Pages/search";
 import DashboardGuard from "./Components/dashboardRouter";
 import Profile from "./Pages/profile";
+import ShowBusinessLocation from "./Pages/dashboard/LocationManagement";
+import DashboardOwner from "./Pages/dashboardOwner/dashboardOwner";
 
 function App() {
   const router = createBrowserRouter([
@@ -53,10 +55,15 @@ function App() {
       children: [
         { path: "", element: <Dashboard /> },
         { path: "/dashboard/booking", element: <BookingManagement /> },
+        { path: "/dashboard/businessLocation", element: <ShowBusinessLocation /> },
         { path: "/dashboard/court", element: <CourtManagement /> },
         { path: "/dashboard/user", element: <UserManagement /> },
         { path: "/dashboard/statistic", element: <Statistic /> },
       ],
+    },
+    {
+      path: "dashboardOwner",
+      element: <DashboardOwner />,
     },
   ]);
 

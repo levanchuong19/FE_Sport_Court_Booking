@@ -39,11 +39,12 @@ function Login() {
         localStorage.setItem("token", response.data.data.token);
         localStorage.setItem("user", JSON.stringify(response.data.data));
         dispatch(login(response.data.data.user));
-        if(response.data.data.role === "ADMIN" || response.data.data.role === "MANAGER"){
-          console.log(response.data.data.role)
+        if(response.data.data.role === "ADMIN"){
           navigate("/dashboard", { replace: true });
-        }else{
-        navigate("/", { replace: true });
+        } else if(response.data.data.role === "MANAGER"){
+          navigate("/dashboardOwner", { replace: true });
+        } else {
+          navigate("/", { replace: true });
         }
       } else {
         throw new Error(response.data.data);

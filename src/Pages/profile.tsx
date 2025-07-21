@@ -32,9 +32,6 @@ export default function Profile() {
     anonymous: false,
   });
   const [tab, setTab] = useState<'overview' | 'history' | 'favorite' | 'settings'>('overview');
-  const [notifBooking, setNotifBooking] = useState(true);
-  const [notifPromo, setNotifPromo] = useState(true);
-  const [reminder, setReminder] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 

@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { CalendarDays, ChartNoAxesCombined, LayoutDashboard, MapPinned, Settings, Users } from 'lucide-react';
+import { CalendarDays, ChartNoAxesCombined, LayoutDashboard, MapPinHouse, MapPinned, Settings, Users } from 'lucide-react';
 
 function DashboardSidebar() {
   const navigate = useNavigate();
@@ -32,6 +32,9 @@ function DashboardSidebar() {
                     </NavLink>
                     <NavLink to="/dashboard/booking" className={({ isActive }) => `${linkClass} ${isActive ? activeClass : inactiveClass}`}>
                         <span className="text-xl"><CalendarDays /></span> Quản lý đặt sân
+                    </NavLink>
+                    <NavLink to="/dashboard/businessLocation" className={({ isActive }) => `${linkClass} ${isActive ? activeClass : inactiveClass}`}>
+                        <span className="text-xl"><MapPinHouse/></span> Quản lý địa điểm
                     </NavLink>
                     <NavLink to="/dashboard/court" className={({ isActive }) => `${linkClass} ${isActive ? activeClass : inactiveClass}`}>
                         <span className="text-xl"><MapPinned /></span> Quản lý sân

@@ -4,66 +4,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import type { Court } from "../Model/court";
 import api from "../Config/api";
 import formatVND from "../Utils/currency";
-import { Radio } from "antd";
 import { customAlert } from "../Components/customAlert";
 import { jwtDecode } from "jwt-decode";
 import type { JwtPayload } from "../Model/user";
 
-const fieldTypes = [
-  {
-    key: "soccer",
-    label: "Sân bóng đá",
-    icon: (
-      <svg width="40" height="40" fill="none">
-        <circle cx="20" cy="20" r="16" stroke="#22c55e" strokeWidth="2" />
-        <circle cx="20" cy="20" r="8" stroke="#22c55e" strokeWidth="2" />
-      </svg>
-    ),
-  },
-  {
-    key: "tennis",
-    label: "Sân tennis",
-    icon: (
-      <svg width="40" height="40" fill="none">
-        <rect
-          x="8"
-          y="8"
-          width="24"
-          height="24"
-          rx="6"
-          stroke="#22c55e"
-          strokeWidth="2"
-        />
-        <rect
-          x="16"
-          y="16"
-          width="8"
-          height="8"
-          rx="2"
-          stroke="#22c55e"
-          strokeWidth="2"
-        />
-      </svg>
-    ),
-  },
-  {
-    key: "badminton",
-    label: "Sân cầu lông",
-    icon: (
-      <svg width="40" height="40" fill="none">
-        <circle cx="20" cy="20" r="16" stroke="#22c55e" strokeWidth="2" />
-        <line
-          x1="12"
-          y1="28"
-          x2="28"
-          y2="12"
-          stroke="#22c55e"
-          strokeWidth="2"
-        />
-      </svg>
-    ),
-  },
-];
 
 const getNext7Days = (offset = 0) => {
   const days = [];
