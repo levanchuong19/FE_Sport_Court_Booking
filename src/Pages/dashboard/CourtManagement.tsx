@@ -1,3 +1,4 @@
+import { Select } from "antd";
 import { Plus, Search } from "lucide-react";
 import api from "../../Config/api";
 import { useEffect, useState } from "react";
@@ -90,6 +91,10 @@ function CourtManagement() {
           onChange={(e) => setIsSearch(e.target.value)}
         />
         <button className="border border-gray-200 px-3 py-2 rounded-lg hover:bg-gray-100 flex items-center gap-1">
+          <span>
+            <Search />
+          </span>{" "}
+          Lọc
           <span>
             <Search />
           </span>{" "}

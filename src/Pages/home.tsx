@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import api from "../Config/api";
 import LocationCard from "../Components/locationCard";
 import type { BusinessLocation } from "../Model/businessLocation";
 import { useNavigate } from "react-router-dom";
 import { Modal } from "antd";
-import { CheckCircleOutlined } from "@ant-design/icons";
+import { CheckCircleOutlined, EnvironmentOutlined } from "@ant-design/icons";
 
 function Home() {
   const [location, setLocation] = useState<BusinessLocation[]>([]);
@@ -12,6 +12,30 @@ function Home() {
   const [paymentBookingCode, setPaymentBookingCode] = useState<string | null>(
     null
   );
+
+  // Search states
+  const [searchLocation, setSearchLocation] = useState("");
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedSport, setSelectedSport] = useState("Tất cả môn");
+  const [selectedDate, setSelectedDate] = useState("");
+  const [currentLocation, setCurrentLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Administrative divisions states
+  const [provinces, setProvinces] = useState<any[]>([]);
+  const [districts, setDistricts] = useState<any[]>([]);
+  const [wards, setWards] = useState<any[]>([]);
+  const [selectedProvince, setSelectedProvince] = useState<any>(null);
+  const [selectedDistrict, setSelectedDistrict] = useState<any>(null);
+  const [selectedWard, setSelectedWard] = useState<any>(null);
+  const [currentStep, setCurrentStep] = useState<
+    "province" | "district" | "ward"
+  >("province");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -41,6 +65,192 @@ function Home() {
     }
   };
   const navigate = useNavigate();
+
+  // Fetch provinces from Provinces Open API
+  const fetchProvinces = async () => {
+    try {
+      const response = await fetch("https://provinces.open-api.vn/api/p/");
+      const data = await response.json();
+      setProvinces(data);
+    } catch (error) {
+      console.error("Error fetching provinces:", error);
+    }
+  };
+
+  // Fetch districts by province code
+  const fetchDistricts = async (provinceCode: string) => {
+    try {
+      const response = await fetch(
+        `https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`
+      );
+      const data = await response.json();
+      setDistricts(data.districts || []);
+    } catch (error) {
+      console.error("Error fetching districts:", error);
+    }
+  };
+
+  const fetchWards = async (districtCode: string) => {
+    try {
+      const response = await fetch(
+        `https://provinces.open-api.vn/api/d/${districtCode}?depth=2`
+      );
+      const data = await response.json();
+      setWards(data.wards || []);
+    } catch (error) {
+      console.error("Error fetching wards:", error);
+    }
+  };
+
+  const handleProvinceSelect = (province: any) => {
+    setSelectedProvince(province);
+    setSelectedDistrict(null);
+    setSelectedWard(null);
+    setDistricts([]);
+    setWards([]);
+    setCurrentStep("district");
+    fetchDistricts(province.code);
+  };
+
+  // Handle district selection
+  const handleDistrictSelect = (district: any) => {
+    setSelectedDistrict(district);
+    setSelectedWard(null);
+    setWards([]);
+    setCurrentStep("ward");
+    fetchWards(district.code);
+  };
+
+  // Handle ward selection
+  const handleWardSelect = (ward: any) => {
+    setSelectedWard(ward);
+    const fullAddress = `${ward.name}, ${selectedDistrict?.name}, ${selectedProvince?.name}`;
+    setSearchLocation(fullAddress);
+    setShowSuggestions(false);
+  };
+
+  // Get current location
+  const getCurrentLocation = () => {
+    setIsLoadingLocation(true);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setCurrentLocation({ lat: latitude, lng: longitude });
+          setSearchLocation("Vị trí hiện tại của bạn");
+          setShowSuggestions(false);
+          setIsLoadingLocation(false);
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+          setIsLoadingLocation(false);
+          alert("Không thể lấy vị trí hiện tại. Vui lòng thử lại.");
+        }
+      );
+    } else {
+      setIsLoadingLocation(false);
+      alert("Trình duyệt của bạn không hỗ trợ định vị.");
+    }
+  };
+
+  // Search location with Nominatim
+  const searchLocationWithNominatim = async (query: string) => {
+    if (query.length < 3) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          query
+        )}&countrycodes=vn&limit=5`
+      );
+      const data = await response.json();
+      setSuggestions(data);
+      setShowSuggestions(true);
+    } catch (error) {
+      console.error("Error searching location:", error);
+    }
+  };
+
+  // Handle location input change
+  const handleLocationChange = (value: string) => {
+    setSearchLocation(value);
+    setCurrentLocation(null);
+
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    searchTimeoutRef.current = setTimeout(() => {
+      searchLocationWithNominatim(value);
+    }, 500);
+  };
+
+  // Handle location input focus - show suggestions immediately
+  const handleLocationFocus = () => {
+    // Clear current selection and show suggestions
+    setSearchLocation("");
+    setCurrentLocation(null);
+    setSelectedProvince(null);
+    setSelectedDistrict(null);
+    setSelectedWard(null);
+    setCurrentStep("province");
+    setShowSuggestions(true);
+    if (provinces.length === 0) {
+      fetchProvinces();
+    }
+  };
+
+  // Handle search
+  const handleSearch = async () => {
+    let center = undefined;
+    let latitude = 0;
+    let longitude = 0;
+
+    if (currentLocation) {
+      center = { lat: currentLocation.lat, lng: currentLocation.lng };
+      latitude = currentLocation.lat;
+      longitude = currentLocation.lng;
+    } else if (searchLocation) {
+      // Gọi Nominatim để lấy lat/lng từ searchLocation
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchLocation)}&countrycodes=vn&limit=1`
+        );
+        const data = await res.json();
+        if (data && data.length > 0) {
+          center = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+          latitude = parseFloat(data[0].lat);
+          longitude = parseFloat(data[0].lon);
+        }
+      } catch (e) {
+        // Nếu lỗi thì bỏ qua, center sẽ undefined
+      }
+    }
+
+    const searchData = {
+      location: currentLocation ? "" : searchLocation,
+      latitude,
+      longitude
+    };
+
+    try {
+      const response = await api.post("/search", searchData);
+      navigate("/search", { 
+        state: { 
+          searchResults: response.data.data.filter((location: BusinessLocation) => location.status === "ACTIVE"),
+          searchData: searchData,
+          center // luôn truyền center nếu có
+        } 
+      });
+    } catch (error) {
+      alert("Có lỗi xảy ra khi tìm kiếm. Vui lòng thử lại.");
+    }
+  };
+
   const fetchCourt = async () => {
     const response = await api.get("location/top3-BusinessLocations");
     setLocation(response.data.data);
@@ -48,6 +258,30 @@ function Home() {
   };
   useEffect(() => {
     fetchCourt();
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest(".location-search-container")) {
+        setShowSuggestions(false);
+        // Reset to province step when closing
+        setCurrentStep("province");
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
   return (
     <div className="flex flex-col min-h-screen">
@@ -94,10 +328,14 @@ function Home() {
         {/* Search Section */}
         <section className="container mx-auto -mt-12 z-10 relative px-4">
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 max-w-4xl mx-auto">
-            <div className="grid gap-4 md:grid-cols-4">
-              <div>
+            <div className="grid gap-2 md:grid-cols-3">
+              {/* <div>
                 <label className="text-sm font-medium">Môn thể thao</label>
-                <select className="w-full h-10 mt-1 border border-gray-200 rounded-md px-3 text-sm focus:ring-2 focus:ring-emerald-500">
+                <select 
+                  value={selectedSport}
+                  onChange={(e) => setSelectedSport(e.target.value)}
+                  className="w-full h-10 mt-1 border border-gray-200 rounded-md px-3 text-sm focus:ring-2 focus:ring-emerald-500"
+                >
                   <option>Tất cả môn</option>
                   <option>Bóng đá</option>
                   <option>Bóng rổ</option>
@@ -105,24 +343,175 @@ function Home() {
                   <option>Cầu lông</option>
                   <option>PickerBall</option>
                 </select>
+              </div> */}
+              <div className=" col-span-2 relative location-search-container">
+                <label className="text-sm font-medium">
+                  Tìm các sân có địa điểm gần bạn
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={searchLocation}
+                    onChange={(e) => handleLocationChange(e.target.value)}
+                    onFocus={handleLocationFocus}
+                    placeholder="Chọn địa điểm"
+                    className="w-full h-10 mt-1 border border-gray-200 rounded-md px-3 text-sm focus:ring-2 focus:ring-emerald-500 pr-10 cursor-pointer"
+                    readOnly={true}
+                  />
+                  <button
+                    onClick={getCurrentLocation}
+                    disabled={isLoadingLocation}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-emerald-600 hover:text-emerald-700 disabled:opacity-50"
+                    title="Lấy vị trí hiện tại"
+                  >
+                    <EnvironmentOutlined
+                      className={isLoadingLocation ? "animate-spin" : ""}
+                    />
+                  </button>
+                </div>
+                {/* Location suggestions */}
+                {showSuggestions && (
+                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                    {/* Header with breadcrumb */}
+                    <div className="p-3 border-b border-gray-100 bg-gray-50">
+                      <div className="flex items-center space-x-2 text-sm">
+                        <span className="text-gray-600">Chọn địa điểm:</span>
+                        <div className="flex items-center space-x-1">
+                          <button
+                            onClick={() => {
+                              setCurrentStep("province");
+                              setSelectedProvince(null);
+                              setSelectedDistrict(null);
+                              setSelectedWard(null);
+                            }}
+                            className={`px-2 py-1 rounded text-xs ${
+                              currentStep === "province"
+                                ? "bg-emerald-600 text-white"
+                                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                            }`}
+                          >
+                            Tỉnh/TP
+                          </button>
+                          {selectedProvince && (
+                            <>
+                              <span className="text-gray-400">→</span>
+                              <button
+                                onClick={() => {
+                                  setCurrentStep("district");
+                                  setSelectedDistrict(null);
+                                  setSelectedWard(null);
+                                }}
+                                className={`px-2 py-1 rounded text-xs ${
+                                  currentStep === "district"
+                                    ? "bg-emerald-600 text-white"
+                                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                }`}
+                              >
+                                {selectedProvince.name}
+                              </button>
+                            </>
+                          )}
+                          {selectedDistrict && (
+                            <>
+                              <span className="text-gray-400">→</span>
+                              <button
+                                onClick={() => {
+                                  setCurrentStep("ward");
+                                  setSelectedWard(null);
+                                }}
+                                className={`px-2 py-1 rounded text-xs ${
+                                  currentStep === "ward"
+                                    ? "bg-emerald-600 text-white"
+                                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                }`}
+                              >
+                                {selectedDistrict.name}
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Content based on current step */}
+                    <div className="max-h-48 overflow-y-auto">
+                      {currentStep === "province" && (
+                        <div>
+                          {provinces.length > 0 ? (
+                            provinces.map((province) => (
+                              <div
+                                key={province.code}
+                                onClick={() => handleProvinceSelect(province)}
+                                className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm border-b border-gray-100 last:border-b-0"
+                              >
+                                {province.name}
+                              </div>
+                            ))
+                          ) : (
+                            <div className="px-3 py-2 text-sm text-gray-500">
+                              Đang tải danh sách tỉnh/thành phố...
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {currentStep === "district" && (
+                        <div>
+                          {districts.length > 0 ? (
+                            districts.map((district) => (
+                              <div
+                                key={district.code}
+                                onClick={() => handleDistrictSelect(district)}
+                                className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm border-b border-gray-100 last:border-b-0"
+                              >
+                                {district.name}
+                              </div>
+                            ))
+                          ) : (
+                            <div className="px-3 py-2 text-sm text-gray-500">
+                              Đang tải danh sách quận/huyện...
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {currentStep === "ward" && (
+                        <div>
+                          {wards.length > 0 ? (
+                            wards.map((ward) => (
+                              <div
+                                key={ward.code}
+                                onClick={() => handleWardSelect(ward)}
+                                className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm border-b border-gray-100 last:border-b-0"
+                              >
+                                {ward.name}
+                              </div>
+                            ))
+                          ) : (
+                            <div className="px-3 py-2 text-sm text-gray-500">
+                              Đang tải danh sách phường/xã...
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
-              <div>
-                <label className="text-sm font-medium">Địa điểm</label>
-                <input
-                  type="text"
-                  placeholder="Nhập địa điểm"
-                  className="w-full h-10 mt-1 border border-gray-200 rounded-md px-3 text-sm focus:ring-2 focus:ring-emerald-500"
-                />
-              </div>
-              <div>
+              {/* <div>
                 <label className="text-sm font-medium">Ngày</label>
                 <input
                   type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
                   className="w-full h-10 mt-1 border border-gray-200 rounded-md px-3 text-sm focus:ring-2 focus:ring-emerald-500"
                 />
-              </div>
+              </div> */}
               <div className="flex items-end">
-                <button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-10 rounded-md font-semibold">
+                <button
+                  onClick={handleSearch}
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-10 rounded-md font-semibold"
+                >
                   Tìm kiếm
                 </button>
               </div>
@@ -168,7 +557,7 @@ function Home() {
             <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
               <h2 className="text-3xl font-bold">Sân nổi bật</h2>
               <a
-                href="#"
+                href="/search"
                 className="text-emerald-600 hover:text-emerald-700 font-medium flex items-center"
               >
                 Xem tất cả <span className="ml-2">→</span>

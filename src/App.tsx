@@ -2,7 +2,6 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Home from "./Pages/home";
 import Layout from "./Components/layout";
 import BookingManagement from "./Pages/dashboard/BookingManagement";
-import DashboardLayout from "./Components/dashboardLayout";
 import Dashboard from "./Pages/dashboard/dashboard";
 import CourtManagement from "./Pages/dashboard/CourtManagement";
 import UserManagement from "./Pages/dashboard/UserManagement";
@@ -14,13 +13,24 @@ import ConfirmBooking from "./Pages/confirmBooking";
 import GuidePage from "./Pages/guidePage";
 import CourtBooking from "./Pages/courtBooking";
 import RegisterPartner from "./Pages/registerPartner";
-import BookingHistory from "./Pages/bookingHistory";
+import DetailCourt from "./Pages/detailCourt";
+import BusinessLocationPage from "./Pages/businessLocation";
+import BusinessLocationDetail from "./Pages/businessLocationDetail";
+import SearchPage from "./Pages/search";
+import DashboardGuard from "./Components/dashboardRouter";
+import Profile from "./Pages/profile";
+import ForgotPassword from "./Pages/forgotPassword";
+import ChangePassword from "./Pages/changePassword";
 
 function App() {
   const router = createBrowserRouter([
     {
       path: "login",
       element: <Login />,
+    },
+    {
+      path: "forgot-password",
+      element: <ForgotPassword />,
     },
     {
       path: "",
@@ -31,8 +41,13 @@ function App() {
         { path: "confirm-booking/:id", element: <ConfirmBooking /> },
         { path: "guide", element: <GuidePage /> },
         { path: "court", element: <CourtBooking /> },
+        { path: "detail-court/:id", element: <DetailCourt /> },
         { path: "registerPartner", element: <RegisterPartner /> },
-        { path: "bookingHistory", element: <BookingHistory /> },
+        { path: "profile", element: <Profile /> },
+        { path: "change-password", element: <ChangePassword /> },
+        { path: "businessLocation", element: <BusinessLocationPage /> },
+        { path: "businessLocation/:id", element: <BusinessLocationDetail /> },
+        { path: "search", element: <SearchPage /> },
       ],
     },
     {
@@ -41,7 +56,7 @@ function App() {
     },
     {
       path: "dashboard",
-      element: <DashboardLayout />,
+      element: <DashboardGuard />,
       children: [
         { path: "", element: <Dashboard /> },
         { path: "/dashboard/booking", element: <BookingManagement /> },

@@ -1,19 +1,11 @@
 import { useEffect, useState } from "react";
-import { Button, Card, Row, Col, Tag, Typography, Divider, Empty, Input, Select } from "antd";
-import {
-  DollarOutlined,
-  UserOutlined,
-  HomeOutlined,
-  ExpandOutlined,
-  InfoCircleOutlined,
-} from "@ant-design/icons";
+import { Button, Card, Row, Col, Typography, Empty, Select } from "antd";
 import type { Court } from "../Model/court";
 import api from "../Config/api";
-import { useNavigate } from "react-router-dom";
-import { MapPin, Search, Filter, ListFilter } from "lucide-react";
+import { Filter, ListFilter } from "lucide-react";
 import CourtCard from "../Components/courtCard";
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 const { Option } = Select;
 
 const sportMap: Record<string, string> = {
@@ -21,16 +13,6 @@ const sportMap: Record<string, string> = {
   TENNIS: "Tennis",
   BADMINTON: "Cầu lông",
   BASKETBALL: "Bóng rổ",
-};
-
-const getSportColor = (sport: string) => {
-  const colors: Record<string, string> = {
-    "Cầu lông": "blue",
-    "Bóng rổ": "orange",
-    Tennis: "green",
-    "Bóng đá": "red",
-  };
-  return colors[sport] || "default";
 };
 
 const sortOptions = [
@@ -44,9 +26,10 @@ const sortOptions = [
 const CourtBooking: React.FC = () => {
   const [courts, setCourts] = useState<Court[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
-  const [selectedType, setSelectedType] = useState<string | undefined>(undefined);
+  const [selectedType, setSelectedType] = useState<string | undefined>(
+    undefined
+  );
   const [sortType, setSortType] = useState<string>("featured");
-  const navigate = useNavigate();
 
   const handleSearch = async () => {
     try {
@@ -71,7 +54,8 @@ const CourtBooking: React.FC = () => {
 
   // Sắp xếp
   const sortedCourts = [...filteredCourts].sort((a, b) => {
-    const getPrice = (court: Court) => court.prices?.find(p => p.priceType === "HOURLY")?.price || 0;
+    const getPrice = (court: Court) =>
+      court.prices?.find((p) => p.priceType === "HOURLY")?.price || 0;
     const getRating = (court: Court) => court.businessLocation?.rating || 0;
     if (sortType === "price_asc") return getPrice(a) - getPrice(b);
     if (sortType === "price_desc") return getPrice(b) - getPrice(a);
@@ -103,79 +87,93 @@ const CourtBooking: React.FC = () => {
       <section className="py-12 bg-gradient-to-r from-green-600 to-blue-600 text-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Tất cả loại sân thể thao</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              Tất cả loại sân thể thao
+            </h1>
             <p className="text-xl opacity-90 max-w-2xl mx-auto">
               Khám phá và đặt sân thể thao yêu thích của bạn với giá tốt nhất
             </p>
           </div>
 
           {/* Search Bar */}
-          <div className="max-w-4xl mx-auto">
+          {/* <div className="max-w-4xl mx-auto">
             <div className="bg-white rounded-lg p-4 shadow-lg">
               <div className="grid md:grid-cols-4 gap-4 items-center">
                 <div className="md:col-span-2">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <Input placeholder="Tìm kiếm sân theo tên, địa điểm..." className="pl-10 h-10 border-gray-300" />
+                    <Input
+                      placeholder="Tìm kiếm sân theo tên, địa điểm..."
+                      className="pl-10 h-10 border-gray-300"
+                    />
                   </div>
                 </div>
                 <div>
                   <div className="relative">
                     <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <Input placeholder="Khu vực" className="pl-10 h-10 border-gray-300" />
+                    <Input
+                      placeholder="Khu vực"
+                      className="pl-10 h-10 border-gray-300"
+                    />
                   </div>
                 </div>
                 <button className="bg-green-600 h-10 pl-10 pr-10 py-4 flex items-center justify-center border border-gray-300 rounded-lg hover:bg-green-700">
-                  <Search className="w-4 h-4 mr-2 text-white"/>
+                  <Search className="w-4 h-4 mr-2 text-white" />
                   <span className="text-white text-xs">Tìm kiếm</span>
                 </button>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </section>
 
       {/* Filter & Sort row - BELOW section */}
       <div className="flex justify-between items-center max-w-6xl mx-auto px-4 border-b border-gray-300 pb-2 mb-8">
-      <div className="flex flex-wrap gap-4 mt-8 mb-6 items-center justify-center">
-        {/* Filter button */}
-        <Button className="flex items-center gap-2 border rounded-lg px-4 py-2 bg-white hover:bg-gray-50 shadow-none">
-          <Filter className="w-5 h-5" />
-          <span className="font-medium">Bộ lọc</span>
-        </Button>
-        {/* Sort dropdown */}
-        <div className="flex items-center gap-2">
-          <ListFilter className="w-5 h-5 text-gray-700" />
-          <span className="font-medium text-gray-700">Xếp theo:</span>
-          <Select
-            value={sortType}
-            style={{ minWidth: 140 }}
-            onChange={v => setSortType(v)}
-            dropdownMatchSelectWidth={false}
-          >
-            {sortOptions.map(opt => (
-              <Option value={opt.value} key={opt.value}>{opt.label}</Option>
-            ))}
-          </Select>
+        <div className="flex flex-wrap gap-4 mt-8 mb-6 items-center justify-center">
+          {/* Filter button */}
+          <Button className="flex items-center gap-2 border rounded-lg px-4 py-2 bg-white hover:bg-gray-50 shadow-none">
+            <Filter className="w-5 h-5" />
+            <span className="font-medium">Bộ lọc</span>
+          </Button>
+          {/* Sort dropdown */}
+          <div className="flex items-center gap-2">
+            <ListFilter className="w-5 h-5 text-gray-700" />
+            <span className="font-medium text-gray-700">Xếp theo:</span>
+            <Select
+              value={sortType}
+              style={{ minWidth: 140 }}
+              onChange={(v) => setSortType(v)}
+              dropdownMatchSelectWidth={false}
+            >
+              {sortOptions.map((opt) => (
+                <Option value={opt.value} key={opt.value}>
+                  {opt.label}
+                </Option>
+              ))}
+            </Select>
+          </div>
+          {/* Court type filter (optional, can be moved into filter modal if needed) */}
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-gray-700">Loại sân:</span>
+            <Select
+              allowClear
+              placeholder="Tất cả"
+              style={{ minWidth: 120 }}
+              value={selectedType}
+              onChange={(v) => setSelectedType(v)}
+            >
+              {Object.entries(sportMap).map(([key, label]) => (
+                <Option value={key} key={key}>
+                  {label}
+                </Option>
+              ))}
+            </Select>
+          </div>
         </div>
-        {/* Court type filter (optional, can be moved into filter modal if needed) */}
-        <div className="flex items-center gap-2">
-          <span className="font-medium text-gray-700">Loại sân:</span>
-          <Select
-            allowClear
-            placeholder="Tất cả"
-            style={{ minWidth: 120 }}
-            value={selectedType}
-            onChange={v => setSelectedType(v)}
-          >
-            {Object.entries(sportMap).map(([key, label]) => (
-              <Option value={key} key={key}>{label}</Option>
-            ))}
-          </Select>
-        </div>
-      </div>
-      <div className="flex items-center gap-2 mr-8 align-middle">
-          <span className="font-medium text-gray-700">Tìm thấy {courts.length} sân thể thao</span>
+        <div className="flex items-center gap-2 mr-8 align-middle">
+          <span className="font-medium text-gray-700">
+            Tìm thấy {courts.length} sân thể thao
+          </span>
         </div>
       </div>
 
@@ -205,7 +203,9 @@ const CourtBooking: React.FC = () => {
                     key={index}
                     style={{ display: "flex" }}
                   >
-                    <CourtCard court={court} />
+                    <div className="w-full  ">
+                      <CourtCard court={court} />
+                    </div>
                   </Col>
                 ))}
               </Row>

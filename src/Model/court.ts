@@ -5,7 +5,7 @@ import type { Slot } from "./slot";
 import type { User } from "./user";
 
 export interface Court {
-  id: number;
+  id: string;
   courtName: string;
   address: string;
   images: Images[];
