@@ -168,12 +168,7 @@ const DetailCourt = () => {
                 Liên hệ nhanh
               </h3>
               <button className="w-full bg-emerald-600 text-white py-2 rounded-lg font-medium hover:bg-emerald-700 flex items-center justify-center gap-2">
-                <Phone size={18} />
-                Gọi ngay
-              </button>
-              <button className="w-full border border-gray-300 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-50 flex items-center justify-center gap-2">
-                <MessageCircle size={18} />
-                Gửi tin nhắn
+                Đặt ngay
               </button>
               <button className="w-full border border-gray-300 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-50 flex items-center justify-center gap-2">
                 <Navigation size={18} />

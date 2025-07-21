@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import api from "../Config/api";
 import { useDispatch } from "react-redux";
 import { login } from "../redux/features/userSlice";
-import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
+import { FaPhoneAlt, FaLock, FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 
 interface LoginProps {
   phone: string;
@@ -18,6 +19,8 @@ function Login() {
   });
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [rememberMe, setRememberMe] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
 
   const dispatch = useDispatch();
 
@@ -35,15 +38,18 @@ function Login() {
     setIsLoading(true);
     try {
       const response = await api.post("auth/login", formData);
-      if (response.status === 200) {
+      if (response.data.status === true) {
         localStorage.setItem("token", response.data.data.token);
         localStorage.setItem("user", JSON.stringify(response.data.data));
         dispatch(login(response.data.data.user));
-        if(response.data.data.role === "ADMIN" || response.data.data.role === "MANAGER"){
-          console.log(response.data.data.role)
+        if (
+          response.data.data.role === "ADMIN" ||
+          response.data.data.role === "MANAGER"
+        ) {
+          console.log(response.data.data.role);
           navigate("/dashboard", { replace: true });
-        }else{
-        navigate("/", { replace: true });
+        } else {
+          navigate("/", { replace: true });
         }
       } else {
         throw new Error(response.data.data);
@@ -59,17 +65,21 @@ function Login() {
   const handleSignIn = () => {
     navigate("/register");
   };
+
+  const handleForgotPassword = () => {
+    navigate("/forgot-password");
+  };
+
   return (
     <div className="min-h-screen flex flex-col md:flex-row overflow-hidden">
       {/* Left side */}
       <div className="hidden md:flex md:w-2/5 bg-gradient-to-br from-emerald-900 via-emerald-700 to-emerald-500 p-10 relative overflow-hidden">
-        {/*Color */}
+        {/* Color Circles */}
         <div className="absolute top-0 left-0 w-full h-full z-0">
           <div className="absolute top-[10%] left-[20%] w-72 h-72 rounded-full bg-emerald-300/10 blur-3xl animate-pulse" />
           <div className="absolute bottom-[20%] right-[10%] w-64 h-64 rounded-full bg-emerald-200/10 blur-3xl animate-pulse delay-700" />
           <div className="absolute top-[40%] right-[30%] w-60 h-60 rounded-full bg-emerald-400/10 blur-3xl animate-pulse delay-500" />
         </div>
-
         <div className="relative z-10 text-white flex flex-col justify-center">
           <h2 className="text-3xl font-bold mb-4 leading-snug">
             Chào mừng bạn đến với Sport-Zone
@@ -89,8 +99,8 @@ function Login() {
       </div>
 
       {/* Right side */}
-      <div className="flex flex-1 items-center justify-center px-6 sm:px-10 py-10 bg-white">
-        <div className="w-full max-w-md">
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="w-full max-w-md border border-gray-200 rounded-xl p-8 shadow-sm bg-white">
           <h2 className="text-3xl font-bold text-center text-emerald-600 mb-2">
             Đăng nhập Sport-Zone
           </h2>
@@ -107,35 +117,73 @@ function Login() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Số điện thoại
               </label>
-              <input
-                type="phone"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-400"
-                placeholder="0123456789"
-              />
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300">
+                  <FaPhoneAlt />
+                </span>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  required
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                  placeholder="0123456789"
+                />
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Mật khẩu
               </label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-400"
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300">
+                  <FaLock />
+                </span>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                  placeholder="••••••••"
+                />
+                <span
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                >
+                  {showPassword ? <FaRegEyeSlash /> : <FaRegEye />}
+                </span>
+              </div>
             </div>
+
+            {/* Remember me & Forgot password */}
+            <div className="flex items-center justify-between text-sm">
+              <label className="flex items-center gap-2 text-gray-600">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="accent-emerald-600"
+                />
+                Ghi nhớ đăng nhập
+              </label>
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                className="text-emerald-600 hover:text-emerald-700 hover:underline"
+              >
+                Quên mật khẩu?
+              </button>
+            </div>
+
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full bg-emerald-600 text-white py-2 rounded-lg hover:bg-emerald-700 transition ${isLoading ? "opacity-70 cursor-not-allowed" : ""
-                }`}
+              className={`w-full bg-emerald-600 text-white py-2 rounded-lg hover:bg-emerald-700 transition ${
+                isLoading ? "opacity-70 cursor-not-allowed" : ""
+              }`}
             >
               {isLoading ? "Đang xử lý..." : "Đăng nhập"}
             </button>
@@ -145,7 +193,10 @@ function Login() {
             <GoogleOAuthProvider clientId="136882428338-vclkmobr196nsjj3g9eldo1nt6vm4fq2.apps.googleusercontent.com">
               <GoogleLogin
                 onSuccess={async (credentialResponse) => {
-                  console.log("Google credential:", credentialResponse.credential);
+                  console.log(
+                    "Google credential:",
+                    credentialResponse.credential
+                  );
                   try {
                     const res = await api.post("auth/google/login", {
                       token: credentialResponse.credential,
@@ -156,7 +207,10 @@ function Login() {
                     if (token) {
                       localStorage.setItem("accessToken", token);
                       localStorage.setItem("token", res.data.data.token);
-                      localStorage.setItem("user", JSON.stringify(res.data.data));
+                      localStorage.setItem(
+                        "user",
+                        JSON.stringify(res.data.data)
+                      );
                       alert("Đăng Nhập thành công!");
                       navigate("/", { replace: true });
                     } else {
@@ -173,19 +227,16 @@ function Login() {
             </GoogleOAuthProvider>
           </div>
 
-
           <p className="mt-5 text-center text-sm text-gray-600">
             Bạn chưa có tài khoản?{" "}
-            <a
+            <span
               onClick={handleSignIn}
-              className="text-emerald-600 font-medium cursor-pointer transition-all duration-300 hover:text-emerald-700 hover:underline-offset-4 hover:underline relative group"
+              className="text-emerald-600 font-medium cursor-pointer transition-all duration-300 hover:text-emerald-700 hover:underline relative group"
             >
               Đăng ký ngay
-            </a>
+            </span>
           </p>
         </div>
-
-
       </div>
     </div>
   );

@@ -19,12 +19,18 @@ import BusinessLocationDetail from "./Pages/businessLocationDetail";
 import SearchPage from "./Pages/search";
 import DashboardGuard from "./Components/dashboardRouter";
 import Profile from "./Pages/profile";
+import ForgotPassword from "./Pages/forgotPassword";
+import ChangePassword from "./Pages/changePassword";
 
 function App() {
   const router = createBrowserRouter([
     {
       path: "login",
       element: <Login />,
+    },
+    {
+      path: "forgot-password",
+      element: <ForgotPassword />,
     },
     {
       path: "",
@@ -38,9 +44,10 @@ function App() {
         { path: "detail-court/:id", element: <DetailCourt /> },
         { path: "registerPartner", element: <RegisterPartner /> },
         { path: "profile", element: <Profile /> },
+        { path: "change-password", element: <ChangePassword /> },
         { path: "businessLocation", element: <BusinessLocationPage /> },
         { path: "businessLocation/:id", element: <BusinessLocationDetail /> },
-        { path: "search", element: <SearchPage /> }
+        { path: "search", element: <SearchPage /> },
       ],
     },
     {

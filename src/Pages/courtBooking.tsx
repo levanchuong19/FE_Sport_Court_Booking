@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import { Button, Card, Row, Col, Typography, Empty, Input, Select } from "antd";
+import { Button, Card, Row, Col, Typography, Empty, Select } from "antd";
 import type { Court } from "../Model/court";
 import api from "../Config/api";
-import { useNavigate } from "react-router-dom";
-import { MapPin, Search, Filter, ListFilter } from "lucide-react";
+import { Filter, ListFilter } from "lucide-react";
 import CourtCard from "../Components/courtCard";
 
 const { Title } = Typography;
@@ -31,11 +30,6 @@ const CourtBooking: React.FC = () => {
     undefined
   );
   const [sortType, setSortType] = useState<string>("featured");
-  const navigate = useNavigate();
-
-  const handleDetailCourt = (id: string) => {
-    navigate(`/detail-court/${id}`);
-  };
 
   const handleSearch = async () => {
     try {
@@ -209,10 +203,7 @@ const CourtBooking: React.FC = () => {
                     key={index}
                     style={{ display: "flex" }}
                   >
-                    <div
-                      className="w-full cursor-pointer hover:scale-[1.02] transition"
-                      onClick={() => handleDetailCourt(court.id)}
-                    >
+                    <div className="w-full  ">
                       <CourtCard court={court} />
                     </div>
                   </Col>
