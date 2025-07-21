@@ -1,18 +1,9 @@
-import { Divide, Plus, Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { User } from "../../Model/user";
 import api from "../../Config/api";
 import formatDate from "../../Utils/date";
-import {
-  Button,
-  DatePicker,
-  Form,
-  Input,
-  message,
-  Modal,
-  Popover,
-  Select,
-} from "antd";
+import { Button, DatePicker, Form, Input, Modal, Popover, Select } from "antd";
 import { useForm } from "antd/es/form/Form";
 import { EllipsisOutlined } from "@ant-design/icons";
 
@@ -23,12 +14,8 @@ function UserManagement() {
   const [isDelete, setIsDelete] = useState("ALL");
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [form] = useForm();
-  const [open, setOpen] = useState(false);
+  // const [open, setOpen] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
-
-  const hide = () => {
-    setOpen(false);
-  };
 
   const handleOpenModal = () => {
     setIsOpenModal(true);
@@ -69,17 +56,6 @@ function UserManagement() {
   useEffect(() => {
     fetchUsers();
   }, []);
-
-  const handleChange = async (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleOpenChange = (newOpen: boolean) => {
-    setOpen(newOpen);
-  };
 
   return (
     <div className="p-6">

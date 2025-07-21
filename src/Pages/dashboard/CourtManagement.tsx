@@ -185,7 +185,7 @@ function CourtManagement() {
               <Form.List name="prices">
                 {(fields, { add, remove }) => (
                   <>
-                    {fields.map((field, idx) => (
+                    {fields.map((field) => (
                       <div key={field.key}>
                         <Form.Item
                           {...field}
@@ -323,7 +323,7 @@ function CourtManagement() {
             </Form.Item>
             <Form.List
               name="images"
-              rules={[{ required: true, message: "Thêm ít nhất một ảnh!" }]}
+              // rules={[{ required: true, message: "Thêm ít nhất một ảnh!" }]}
             >
               {(fields, { add, remove }) => (
                 <>
