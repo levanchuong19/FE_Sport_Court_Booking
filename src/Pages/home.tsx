@@ -5,6 +5,7 @@ import type { BusinessLocation } from "../Model/businessLocation";
 import { useNavigate } from "react-router-dom";
 import { Modal } from "antd";
 import { CheckCircleOutlined, EnvironmentOutlined } from "@ant-design/icons";
+import type { Feedback } from "../Model/Feedback";
 
 function Home() {
   const [location, setLocation] = useState<BusinessLocation[]>([]);
@@ -31,6 +32,7 @@ function Home() {
   const [selectedProvince, setSelectedProvince] = useState<any>(null);
   const [selectedDistrict, setSelectedDistrict] = useState<any>(null);
   const [selectedWard, setSelectedWard] = useState<any>(null);
+  const [rating, setRating] = useState<Feedback[]>([]);
   const [currentStep, setCurrentStep] = useState<
     "province" | "district" | "ward"
   >("province");
@@ -237,12 +239,12 @@ function Home() {
 
     try {
       const response = await api.post("/search", searchData);
-      navigate("/search", { 
-        state: { 
+      navigate("/search", {
+        state: {
           searchResults: response.data.data.filter((location: BusinessLocation) => location.status === "ACTIVE"),
           searchData: searchData,
           center // luôn truyền center nếu có
-        } 
+        }
       });
     } catch (error) {
       alert("Có lỗi xảy ra khi tìm kiếm. Vui lòng thử lại.");
@@ -280,6 +282,16 @@ function Home() {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
+  }, []);
+
+  const fetchRating = async () => {
+    const response = await api.get("feedback/random");
+    console.log("response", response.data.data)
+    setRating(response.data.data)
+  }
+
+  useEffect(() => {
+    fetchRating();
   }, []);
   return (
     <div className="flex flex-col min-h-screen">
@@ -382,11 +394,10 @@ function Home() {
                               setSelectedDistrict(null);
                               setSelectedWard(null);
                             }}
-                            className={`px-2 py-1 rounded text-xs ${
-                              currentStep === "province"
+                            className={`px-2 py-1 rounded text-xs ${currentStep === "province"
                                 ? "bg-emerald-600 text-white"
                                 : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                            }`}
+                              }`}
                           >
                             Tỉnh/TP
                           </button>
@@ -399,11 +410,10 @@ function Home() {
                                   setSelectedDistrict(null);
                                   setSelectedWard(null);
                                 }}
-                                className={`px-2 py-1 rounded text-xs ${
-                                  currentStep === "district"
+                                className={`px-2 py-1 rounded text-xs ${currentStep === "district"
                                     ? "bg-emerald-600 text-white"
                                     : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                                }`}
+                                  }`}
                               >
                                 {selectedProvince.name}
                               </button>
@@ -417,11 +427,10 @@ function Home() {
                                   setCurrentStep("ward");
                                   setSelectedWard(null);
                                 }}
-                                className={`px-2 py-1 rounded text-xs ${
-                                  currentStep === "ward"
+                                className={`px-2 py-1 rounded text-xs ${currentStep === "ward"
                                     ? "bg-emerald-600 text-white"
                                     : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                                }`}
+                                  }`}
                               >
                                 {selectedDistrict.name}
                               </button>
@@ -622,35 +631,13 @@ function Home() {
               </p>
             </div>
             <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-              {[
-                {
-                  name: "Nguyễn Văn A",
-                  role: "Cầu thủ bóng đá nghiệp dư",
-                  comment:
-                    "Tôi rất hài lòng với dịch vụ đặt sân. Giao diện dễ sử dụng và có nhiều sân chất lượng để lựa chọn.",
-                  rating: 5,
-                },
-                {
-                  name: "Trần Thị B",
-                  role: "HLV Tennis",
-                  comment:
-                    "Đặt sân tennis chưa bao giờ dễ dàng đến thế. Tôi có thể dễ dàng tìm và đặt sân cho các buổi huấn luyện.",
-                  rating: 4,
-                },
-                {
-                  name: "Lê Văn C",
-                  role: "Người chơi cầu lông",
-                  comment:
-                    "Ứng dụng rất tiện lợi, giúp tôi tiết kiệm thời gian tìm kiếm sân. Đặc biệt là tính năng đánh giá sân rất hữu ích.",
-                  rating: 5,
-                },
-              ].map((t, idx) => (
+              {rating.map((t, idx) => (
                 <div
-                  key={idx}
+                  key={t.id}
                   className="bg-white p-6 rounded-xl shadow flex flex-col items-center"
                 >
                   <div className="flex mb-2">
-                    {Array(t.rating)
+                    {Array(Math.round(t.overallRating))
                       .fill(0)
                       .map((_, i) => (
                         <span key={i} className="text-yellow-500 text-xl">
@@ -661,16 +648,19 @@ function Home() {
                   <p className="italic mb-4 text-center">"{t.comment}"</p>
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-emerald-200 flex items-center justify-center text-emerald-700 font-bold">
-                      {t.name.charAt(0)}
+                      {t.account?.fullName.charAt(0) ?? "?"}
                     </div>
                     <div>
-                      <div className="font-medium">{t.name}</div>
-                      <div className="text-sm text-gray-500">{t.role}</div>
+                      <div className="font-medium">{t.account?.fullName ?? "Ẩn danh"}</div>
+                      <div className="text-sm text-gray-500">
+                        Đã chơi ngày {new Date(t.playedDate).toLocaleDateString("vi-VN")}
+                      </div>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
+
           </div>
         </section>
       </main>
