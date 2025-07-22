@@ -73,7 +73,7 @@ export default function ShowBusinessLocation() {
         status === "ACTIVE" ? (
           <Tag color="green">Đang hoạt động</Tag>
         ) : (
-          <Tag color="red">Chuư</Tag>
+          <Tag color="red">Chưa xác thực</Tag>
         ),
     },
     {

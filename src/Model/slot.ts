@@ -4,6 +4,8 @@ import type { User } from "./user";
 export interface Slot {
     id: string;
     account: User;
+    accountUsername: string;
+    courtName: string;
     court: Court;
     createAt: Date;
     startDate: string;
