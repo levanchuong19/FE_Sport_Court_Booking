@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import api from "../Config/api";
 import LocationCard from "../Components/locationCard";
 import type { BusinessLocation } from "../Model/businessLocation";
@@ -11,7 +11,6 @@ function BusinessLocationPage() {
   const [searchParams, setSearchParams] = useState<any>(null);
   const [isSearchResult, setIsSearchResult] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
 
   const fetchLocation = async () => {
     setIsLoading(true);

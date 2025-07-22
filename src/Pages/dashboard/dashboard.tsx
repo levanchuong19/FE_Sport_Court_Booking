@@ -1,4 +1,3 @@
-import { Search } from "lucide-react";
 import { useState } from "react";
 
 export default function Dashboard() {
@@ -32,27 +31,7 @@ export default function Dashboard() {
             change: "+3 so với hôm qua",
             changeColor: "text-green-600",
         },
-    ]);
-
-    // Dữ liệu động cho bảng đặt sân gần đây
-    const [bookings] = useState([
-        {
-            customer: "Nguyễn Văn A",
-            field: "Sân bóng đá 1",
-            time: "14:00 - 16:00",
-            status: "Đã xác nhận",
-            statusColor: "bg-black text-white",
-            price: "300,000 VNĐ",
-        },
-        {
-            customer: "Trần Thị B",
-            field: "Sân tennis 2",
-            time: "16:00 - 17:00",
-            status: "Chờ xác nhận",
-            statusColor: "bg-yellow-200 text-yellow-800",
-            price: "120,000 VNĐ",
-        },
-    ]);
+    ])
 
     // Dữ liệu động cho trạng thái sân
     const [fields] = useState([

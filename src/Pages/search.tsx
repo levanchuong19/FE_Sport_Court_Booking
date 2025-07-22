@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import api from "../Config/api";
-import LocationCard from "../Components/locationCard";
 import MiniLocationCard from "../Components/MiniLocationCard";
 import type { BusinessLocation } from "../Model/businessLocation";
 import { Search, MapPin, Filter } from "lucide-react";
@@ -19,8 +18,7 @@ function SearchPage() {
   const [mapBounds, setMapBounds] = useState<google.maps.LatLngBounds | null>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
   const location = useLocation();
-  const navigate = useNavigate();
-  // Lấy center động từ state nếu có, nếu không thì dùng mặc định
+
   const initialCenter = location.state?.center || { lat: 10.816632639921957, lng: 106.73380658226068 };
   const [center, setCenter] = useState(initialCenter);
 

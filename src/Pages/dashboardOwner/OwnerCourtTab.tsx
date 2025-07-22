@@ -1,15 +1,37 @@
-
-import { Plus, Search } from "lucide-react";
-import api from "../../Config/api";
 import { useEffect, useState } from "react";
-import formatVND from "../../Utils/currency";
+import { Button, Form, Input, InputNumber, Modal, Select, Table } from "antd";
+import api from "../../Config/api";
 import type { Court } from "../../Model/court";
-import { Button, Form, Input, InputNumber, Modal, Select } from "antd";
-import { useForm } from "antd/es/form/Form";
+import type { JwtPayload } from "../../Model/user";
+import { jwtDecode } from "jwt-decode";
+import formatVND from "../../Utils/currency";
 import { Option } from "antd/es/mentions";
 import type { BusinessLocation } from "../../Model/businessLocation";
+import { useForm } from "antd/es/form/Form";
 
-function CourtManagement() {
+interface OwnerCourtTabProps {
+  onDetail: (record: Court) => void;
+}
+
+export default function OwnerCourtTab({ onDetail }: OwnerCourtTabProps) {
+  const [courts, setCourts] = useState<Court[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    const token = localStorage.getItem("token");
+    if (token) {
+      const decodedToken: JwtPayload = jwtDecode(token);
+      api.get(`location/getCourtsByOwnerId/${decodedToken.sub}`)
+      .then(res => setCourts(Array.isArray(res.data.data.content) ? res.data.data.content : []))
+      .catch(() => setCourts([]))
+      .finally(() => setLoading(false));
+    } else {
+      setCourts([]);
+      setLoading(false);
+    }
+  }, []);
+
   const [isFields, setIsFields] = useState<Court[]>([]);
   const [isSearch, setIsSearch] = useState("");
   const [isOpenModal, setIsOpenModal] = useState(false);
@@ -35,7 +57,7 @@ function CourtManagement() {
       console.log(response.data.data);
       setIsOpenModal(false);
       form.resetFields();
-      fetchCourts();
+      // fetchCourts();
     } catch (error) {
       console.error("Error submitting form:", error);
     }
@@ -55,71 +77,40 @@ function CourtManagement() {
     setIsLocation(response.data.data.content);
   };
 
-  const fetchCourts = async () => {
-    const response = await api.get("court/getAll");
-    console.log(response.data.data.content);
-    setIsFields(response.data.data.content);
-  };
+  // const fetchCourts = async () => {
+  //   const response = await api.get("court/getAll");
+  //   console.log(response.data.data.content);
+  //   setIsFields(response.data.data.content);
+  // };
 
-  useEffect(() => {
-    fetchCourts();
-  }, []);
+  // useEffect(() => {
+  //   fetchCourts();
+  // }, []);
 
   useEffect(() => {
     fetchLocations();
   }, []);
 
+
+  const columns = [
+    { title: "Tên sân", dataIndex: "name", key: "name" },
+    { title: "Loại sân", dataIndex: "type", key: "type" },
+    { title: "Giá", dataIndex: "price", key: "price" },
+    { title: "Trạng thái", dataIndex: "status", key: "status" },
+    { title: "", key: "detail", render: (_: any, record: Court) => <a onClick={() => onDetail(record)}>Chi tiết</a> },
+  ];
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">Quản lý sân thể thao</h1>
-        <button
-          onClick={handleOpenModal}
-          className="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 hover:bg-green-700"
-        >
-          <span>
-            <Plus />
-          </span>{" "}
-          Thêm sân mới
-        </button>
-      </div>
-      <div className="flex flex-wrap gap-2 mb-4">
-        <input
-          className="border border-gray-200 rounded-lg px-3 py-2 w-64"
-          placeholder="Tìm kiếm sân..."
-          value={isSearch}
-          onChange={(e) => setIsSearch(e.target.value)}
-        />
-        <button className="border border-gray-200 px-3 py-2 rounded-lg hover:bg-gray-100 flex items-center gap-1">
-          <span>
-            <Search />
-          </span>{" "}
-          Lọc
-          <span>
-            <Search />
-          </span>{" "}
-          Lọc
-        </button>
-        <select
-          className="border border-gray-200 rounded-lg px-3 py-2"
-          value={type}
-          onChange={(e) => setType(e.target.value)}
-        >
-          <option value="ALL">Tất cả loại sân</option>
-          <option value="FOOTBALL">Bóng đá</option>
-          <option value="TENNIS">Tennis</option>
-          <option value="BASKETBALL">Bóng rổ</option>
-          <option value="BADMINTON">Cầu lông</option>
-          <option value="VOLLEYBALL">Bóng chuyền</option>
-        </select>
-        {/* <button className="bg-green-500 text-white px-4 py-2 rounded-lg font-semibold">
-          Danh sách
-        </button>
-        <button className="bg-white border border-green-500 text-green-500 px-4 py-2 rounded-lg font-semibold">
-          Lưới
-        </button> */}
-      </div>
-      <div className="overflow-x-auto bg-white rounded-xl shadow">
+    <div>
+      <h2 className="text-xl font-semibold mb-2">Quản lý sân</h2>
+      {/* <Table
+        columns={columns}
+        dataSource={courts}
+        loading={loading}
+        rowKey="id"
+        pagination={{ pageSize: 5 }}
+      /> */}
+
+<div className="overflow-x-auto bg-white rounded-xl shadow">
         <table className="min-w-full text-sm">
           <thead>
             <tr className="bg-gray-100">
@@ -365,6 +356,4 @@ function CourtManagement() {
       </div>
     </div>
   );
-}
-
-export default CourtManagement;
+} 

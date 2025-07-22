@@ -5,8 +5,7 @@ import api from "../Config/api";
 import type { JwtPayload } from "../Model/user";
 import type { ChangePassword } from "../Model/changePassword";
 import { Eye, EyeOff } from "lucide-react";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { customAlert } from "../Components/customAlert";
 
 export default function ChangePasswordPage() {
   const navigate = useNavigate();
@@ -48,12 +47,20 @@ export default function ChangePasswordPage() {
     e.preventDefault();
 
     if (form.newPassword !== form.confirmNewPassword) {
-      toast.error("Mật khẩu xác nhận không khớp.");
+      customAlert(
+        "Lỗi",
+        "Mật khẩu xác nhận không khớp.",
+        "destructive"
+      );
       return;
     }
 
     if (form.newPassword.length < 6) {
-      toast.error("Mật khẩu mới phải có ít nhất 6 ký tự.");
+      customAlert(
+        "Lỗi",
+        "Mật khẩu mới phải có ít nhất 6 ký tự.",
+        "destructive"
+      );
       return;
     }
 
@@ -64,14 +71,18 @@ export default function ChangePasswordPage() {
           accountId: accountId,
         },
       });
-      toast.success("Đổi mật khẩu thành công!");
+      customAlert("Thành công", "Đổi mật khẩu thành công!", "default");
       localStorage.removeItem("token");
       setTimeout(() => {
         navigate("/login");
       }, 1500);
     } catch (error: any) {
       const errMsg = error?.response?.data?.message || "Lỗi không xác định.";
-      toast.error(`❌ ${errMsg}`);
+      customAlert(
+        "Lỗi",
+       'Lỗi không xác định',
+        "destructive"
+      );
     } finally {
       setLoading(false);
     }

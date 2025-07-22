@@ -7,6 +7,7 @@ export interface BusinessLocation {
     address: string;
     openTime: string;
     closeTime: string;
+    courtNum: number;
     owner: User;
     courts: Court[];
     isDeleted: boolean;

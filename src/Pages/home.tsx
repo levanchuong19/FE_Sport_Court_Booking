@@ -17,8 +17,6 @@ function Home() {
   const [searchLocation, setSearchLocation] = useState("");
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [selectedSport, setSelectedSport] = useState("Tất cả môn");
-  const [selectedDate, setSelectedDate] = useState("");
   const [currentLocation, setCurrentLocation] = useState<{
     lat: number;
     lng: number;
