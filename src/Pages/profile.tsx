@@ -39,7 +39,6 @@ export default function Profile() {
     cleanlinessRating: 5,
     bookingExperienceRating: 5,
     comment: "",
-    anonymous: false,
   });
   const [tab, setTab] = useState<
     "overview" | "history" | "favorite" | "settings"
@@ -75,8 +74,8 @@ export default function Profile() {
       const location = b.court?.businessLocation?.name?.toLowerCase() || "";
       const bookingCode =
         typeof b === "object" &&
-        "bookingCode" in b &&
-        typeof (b as any).bookingCode === "string"
+          "bookingCode" in b &&
+          typeof (b as any).bookingCode === "string"
           ? (b as any).bookingCode.toLowerCase()
           : "";
       return (
@@ -115,41 +114,63 @@ export default function Profile() {
   const handleChangePassword = () => {
     navigate("/change-password");
   };
+
   const handleLogout = () => {
     navigate("/");
   };
 
-  // Hàm submit feedback
+  const handleEditProfile = () => {
+    navigate("/edit-profile");
+  }
+
   const handleSubmitFeedback = async () => {
-    if (!feedbackBooking) return;
-    const payload = {
-      overallRating: feedbackForm.overallRating,
-      comment: feedbackForm.comment,
-      courtQualityRating: feedbackForm.courtQualityRating,
-      cleanlinessRating: feedbackForm.cleanlinessRating,
-      bookingExperienceRating: feedbackForm.bookingExperienceRating,
-      playedDate: feedbackBooking.startDate,
-      anonymous: feedbackForm.anonymous,
-      courtId: feedbackBooking.court?.id,
-    };
-    try {
-      await api.post("/feedback", payload);
-      alert("Gửi đánh giá thành công!");
-      setShowFeedback(false);
-      setFeedbackBooking(null);
-      setFeedbackForm({
-        overallRating: 5,
-        courtQualityRating: 5,
-        cleanlinessRating: 5,
-        bookingExperienceRating: 5,
-        comment: "",
-        anonymous: false,
-      });
-    } catch (e) {
-      alert("Gửi đánh giá thất bại!");
-    }
+  if (!feedbackBooking) return;
+
+  // Lấy token và decode để lấy accountId
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Bạn chưa đăng nhập!");
+    return;
+  }
+
+  let accountId = "";
+  try {
+    const decodedToken: JwtPayload = jwtDecode(token);
+    accountId = decodedToken.sub;
+  } catch (err) {
+    console.error("Lỗi giải mã token", err);
+    alert("Token không hợp lệ!");
+    return;
+  }
+
+  const payload = {
+    overallRating: feedbackForm.overallRating,
+    comment: feedbackForm.comment,
+    courtQualityRating: feedbackForm.courtQualityRating,
+    cleanlinessRating: feedbackForm.cleanlinessRating,
+    bookingExperienceRating: feedbackForm.bookingExperienceRating,
+    playedDate: feedbackBooking.startDate,
+    courtId: feedbackBooking.court?.id,
+    accountId: accountId, // ✅ dùng trực tiếp từ token
   };
 
+  try {
+    await api.post("/feedback", payload);
+    alert("Gửi đánh giá thành công!");
+    setShowFeedback(false);
+    setFeedbackBooking(null);
+    setFeedbackForm({
+      overallRating: 5,
+      courtQualityRating: 5,
+      cleanlinessRating: 5,
+      bookingExperienceRating: 5,
+      comment: "",
+    });
+  } catch (e) {
+    alert("Gửi đánh giá thất bại!");
+    console.error(e);
+  }
+};
   return (
     <div className="max-w-7xl mx-auto py-8 px-4">
       {/* Header profile card */}
@@ -216,31 +237,28 @@ export default function Profile() {
       <div className="flex mb-6 bg-gray-100 rounded-xl overflow-hidden">
         <button
           onClick={() => setTab("overview")}
-          className={`flex-1 px-6 py-3 font-semibold text-base ${
-            tab === "overview"
+          className={`flex-1 px-6 py-3 font-semibold text-base ${tab === "overview"
               ? " border-b-2 border-emerald-600 text-emerald-600"
               : "text-gray-600"
-          }`}
+            }`}
         >
           Tổng quan
         </button>
         <button
           onClick={() => setTab("history")}
-          className={`flex-1 px-6 py-3 font-semibold text-base ${
-            tab === "history"
+          className={`flex-1 px-6 py-3 font-semibold text-base ${tab === "history"
               ? " border-b-2 border-emerald-600 text-emerald-600"
               : "text-gray-600"
-          }`}
+            }`}
         >
           Lịch sử đặt sân
         </button>
         <button
           onClick={() => setTab("settings")}
-          className={`flex-1 px-6 py-3 font-semibold text-base ${
-            tab === "settings"
+          className={`flex-1 px-6 py-3 font-semibold text-base ${tab === "settings"
               ? "border-b-2 border-emerald-600 text-emerald-600"
               : "text-gray-600"
-          }`}
+            }`}
         >
           Cài đặt
         </button>
@@ -421,10 +439,9 @@ export default function Profile() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span
-                        className={`px-2 py-1 rounded text-xs font-semibold ${
-                          statusColor[b.status as keyof typeof statusColor] ||
+                        className={`px-2 py-1 rounded text-xs font-semibold ${statusColor[b.status as keyof typeof statusColor] ||
                           "bg-gray-100 text-gray-700"
-                        }`}
+                          }`}
                       >
                         {b.status === "BOOKED" && "Đã đặt"}
                         {b.status === "CHECKED_IN" && "Đã check in"}
@@ -578,7 +595,8 @@ export default function Profile() {
               >
                 <KeyRound className="w-5 h-5" /> Đổi mật khẩu
               </button>
-              <button className="flex items-center gap-3 px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 text-base">
+              <button className="flex items-center gap-3 px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 text-base"
+                onClick={handleEditProfile}>
                 <Pencil className="w-5 h-5" /> Chỉnh sửa trang cá nhân
               </button>
               <button
@@ -680,20 +698,6 @@ export default function Profile() {
                 className="w-full border rounded px-2 py-1"
                 rows={3}
               />
-            </div>
-            <div className="mb-3 flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={feedbackForm.anonymous}
-                onChange={(e) =>
-                  setFeedbackForm((f) => ({
-                    ...f,
-                    anonymous: e.target.checked,
-                  }))
-                }
-                id="anonymous"
-              />
-              <label htmlFor="anonymous">Ẩn danh</label>
             </div>
             <button
               className="w-full bg-green-600 text-white py-2 rounded font-semibold mt-2"
