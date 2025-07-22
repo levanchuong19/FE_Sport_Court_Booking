@@ -25,7 +25,6 @@ function CourtCard({ court }: { court: Court }) {
     { icon: <Wifi className="w-4 h-4" />, label: "Wifi" },
     { icon: <Car className="w-4 h-4" />, label: "Bãi đậu xe" },
     { icon: <ShowerHead className="w-4 h-4" />, label: "Phòng tắm" },
-    { icon: <Star className="w-4 h-4" />, label: "Cho thuê vợt" },
   ];
 
   const rating = court.businessLocation?.rating || 4.8;

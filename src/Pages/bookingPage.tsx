@@ -362,7 +362,7 @@ export default function BookingPage() {
     };
     try {
       const response = await api.post("slot/create", payload);
-      customAlert("Thành công", "Đặt sân thành công", "default");
+      // customAlert("Thành công", "Đặt sân thành công", "default");
       navigate(`/confirm-booking/${response.data.data.id}`);
     } catch (error: any) {
       customAlert(
