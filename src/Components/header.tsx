@@ -92,7 +92,7 @@ function Header() {
             <>
               <img
                 onClick={() => setShowDropdown(!showDropdown)}
-                src={user.image ? user.image :"/avt_blank_black.png"}
+                src={user?.image || "/avt_blank_black.png"}
                 alt="avatar"
                 className="w-9 h-9 rounded-full cursor-pointer object-cover"
               />
