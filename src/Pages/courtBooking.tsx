@@ -13,6 +13,7 @@ const sportMap: Record<string, string> = {
   TENNIS: "Tennis",
   BADMINTON: "Cầu lông",
   BASKETBALL: "Bóng rổ",
+  VOLLEYBALL: "Bóng chuyền",
 };
 
 const sortOptions = [

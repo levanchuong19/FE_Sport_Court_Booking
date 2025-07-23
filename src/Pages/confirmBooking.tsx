@@ -4,6 +4,7 @@ import formatVND from "../Utils/currency";
 import api from "../Config/api";
 import type { Slot } from "../Model/slot";
 import { useEffect, useState } from "react";
+import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
 
 // Giả lập lấy user từ account đăng nhập
 const user = {
@@ -13,6 +14,10 @@ const user = {
 };
 
 export default function ConfirmBooking() {
+  // Đặt tất cả hook ở đầu function
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: "AIzaSyBRt3wAQATMzjz8MiJQQfCfAOOkFrtg6AY"
+  });
   // const location = useLocation();
   const navigate = useNavigate();
   const { id } = useParams();
@@ -97,6 +102,17 @@ export default function ConfirmBooking() {
     window.location.href = response.data.data;
   };
 
+  // THÊM phần hiển thị Google Map
+  const containerStyle = {
+    width: "100%",
+    height: "370px",
+    marginTop: "30px"
+  };
+  const center = {
+    lat: bookingInfo?.court?.businessLocation?.latitude || 10.816632639921957,
+    lng: bookingInfo?.court?.businessLocation?.longitude || 106.73380658226068
+  };
+
   return (
     <div className="max-w-5xl border border-gray-200 rounded-xl shadow-lg p-8 mt-10 mx-auto py-8 mb-10">
       <button
@@ -108,45 +124,19 @@ export default function ConfirmBooking() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Thông tin đặt sân */}
         <div>
-          <h2 className="text-2xl font-bold mb-6">Thông tin đặt sân</h2>
-          <div className="mb-4">
-            <label className="block font-medium mb-1">Họ và tên</label>
-            <input
-              className="w-full border border-gray-200 rounded-lg px-4 py-2 bg-gray-100"
-              value={user.name}
-              disabled
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block font-medium mb-1">Số điện thoại</label>
-            <input
-              className="w-full border border-gray-200 rounded-lg px-4 py-2 bg-gray-100"
-              value={user.phone}
-              disabled
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block font-medium mb-1">Email</label>
-            <input
-              className="w-full border border-gray-200 rounded-lg px-4 py-2 bg-gray-100"
-              value={user.email}
-              disabled
-            />
-          </div>
-          <div className="mb-6">
-            <label className="block font-medium mb-1">Ghi chú</label>
-            <textarea
-              className="w-full border border-gray-200 rounded-lg px-4 py-2"
-              placeholder="Nhập ghi chú nếu có"
-              rows={3}
-            />
-          </div>
-          <button
-            onClick={handleBooking}
-            className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-900 transition"
-          >
-            Xác nhận đặt sân
-          </button>
+          <h2 className="text-2xl font-bold mb-6">Vị trí sân đã đặt</h2>
+        {isLoaded ? (
+            <GoogleMap
+              mapContainerStyle={containerStyle}
+              center={center}
+              zoom={16}
+            >
+              <Marker position={center} />
+            </GoogleMap>
+          ) : (
+            <div className="h-[350px] flex items-center justify-center text-gray-400">Đang tải bản đồ...</div>
+          )}
+          
         </div>
         {/* Chi tiết đặt sân */}
         <div>
@@ -265,6 +255,12 @@ export default function ConfirmBooking() {
           </div>
         </div>
       </div>
+      <button
+            onClick={handleBooking}
+            className="w-full bg-black mt-4 text-white py-3 rounded-lg font-semibold hover:bg-gray-900 transition"
+          >
+            Thanh toán
+          </button>
     </div>
   );
 }

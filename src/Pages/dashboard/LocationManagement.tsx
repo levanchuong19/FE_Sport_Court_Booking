@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../Config/api";
-import { Button, Input, Table, Tag, Dropdown, Menu } from "antd";
+import { Button, Input, Table, Tag, Dropdown, Menu, message } from "antd";
 import { EllipsisOutlined } from '@ant-design/icons';
 import { useNavigate } from "react-router-dom";
 import type { BusinessLocation } from "../../Model/businessLocation";
@@ -21,7 +21,6 @@ export default function ShowBusinessLocation() {
     try {
       const res = await api.get("location/getAll");
       let data = res.data.data.content || [];
-      console.log("data", data)
       if (status !== "ALL") {
         data = data.filter((item: any) => item.status === status);
       }
@@ -30,6 +29,7 @@ export default function ShowBusinessLocation() {
           item.name.toLowerCase().includes(search.toLowerCase())
         );
       }
+      
       setLocations(data);
     } catch (err) {
       setLocations([]);
@@ -38,14 +38,22 @@ export default function ShowBusinessLocation() {
     }
   };
 
+  const handleActivateLocation = async (id: string) => {
+    try {
+      await api.patch(`/location/activeLocation/${id}`);
+      message.success("Kích hoạt địa điểm thành công");
+      fetchLocations();
+    } catch (error: any) {
+      message.error("Kích hoạt thất bại: " + (error.response?.data?.message || ""));
+    }
+  };
+
   const columns = [
     {
       title: "Tên địa điểm",
       dataIndex: "name",
       key: "name",
-      render: (text: string, record: any) => (
-        <span className="font-semibold">{text}</span>
-      ),
+      render: (text: string) => <span className="font-semibold">{text}</span>,
     },
     {
       title: "Địa chỉ",
@@ -57,7 +65,6 @@ export default function ShowBusinessLocation() {
       title: "Chủ sở hữu",
       dataIndex: ["owner", "fullName"],
       key: "owner",
-      render: (text: string) => <span>{text}</span>,
     },
     {
       title: "Số sân",
@@ -79,7 +86,7 @@ export default function ShowBusinessLocation() {
     {
       title: "Hành động",
       key: "action",
-      render: (_: any, record: any) => {
+      render: (_: any, record: BusinessLocation) => {
         const menu = (
           <Menu>
             <Menu.Item key="edit" onClick={() => {/* TODO: Thêm logic sửa */}}>
@@ -96,6 +103,33 @@ export default function ShowBusinessLocation() {
           </Dropdown>
         );
       },
+    },
+  ];
+
+  const inactiveColumns = [
+    {
+      title: "Tên địa điểm",
+      dataIndex: "name",
+      key: "name",
+    },
+    {
+      title: "Địa chỉ",
+      dataIndex: "address",
+      key: "address",
+    },
+    {
+      title: "Chủ sở hữu",
+      dataIndex: ["owner", "fullName"],
+      key: "owner",
+    },
+    {
+      title: "Hành động",
+      key: "action",
+      render: (_: any, record: BusinessLocation) => (
+        <Button type="primary" onClick={() => handleActivateLocation(record.id)}>
+          Kích hoạt
+        </Button>
+      ),
     },
   ];
 
@@ -124,6 +158,8 @@ export default function ShowBusinessLocation() {
           </Button>
         </div>
       </div>
+
+      {/* Bảng chính */}
       <Table
         columns={columns}
         dataSource={locations}
@@ -131,6 +167,22 @@ export default function ShowBusinessLocation() {
         rowKey="id"
         pagination={{ pageSize: 8 }}
       />
+
+      {/* Bảng phụ - chỉ hiện địa điểm INACTIVE */}
+      {status === "ALL" && locations.some(loc => loc.status === "INACTIVE") && (
+        <div className="mt-10">
+          <h3 className="font-semibold mb-2 text-lg text-red-600">
+            Địa điểm chưa xác thực
+          </h3>
+          <Table
+            columns={inactiveColumns}
+            dataSource={locations.filter(loc => loc.status === "INACTIVE")}
+            rowKey="id"
+            pagination={false}
+            bordered
+          />
+        </div>
+      )}
     </div>
   );
 }
