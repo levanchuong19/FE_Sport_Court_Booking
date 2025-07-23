@@ -30,7 +30,6 @@ export default function Profile() {
   const [user, setUser] = useState<User>();
   const [bookings, setBookings] = useState<BookingHistory>();
   const navigate = useNavigate();
-  // State cho modal đánh giá
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackBooking, setFeedbackBooking] = useState<any>(null);
   const [feedbackForm, setFeedbackForm] = useState({

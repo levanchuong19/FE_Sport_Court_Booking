@@ -8,7 +8,6 @@ import {
   Ruler,
   Users2,
   Calendar,
-  Navigation,
   MapPinned,
 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -65,6 +64,10 @@ const DetailCourt = () => {
       </div>
     );
   }
+
+  const handleBooking = () => {
+    navigate(`/booking/${court.id}`);
+  };
 
   return (
     <motion.div
