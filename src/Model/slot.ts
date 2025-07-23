@@ -5,6 +5,8 @@ export interface Slot {
     id: string;
     account: User;
     accountUsername: string;
+    accountId: string;
+    ownerId: string;
     courtName: string;
     court: Court;
     createAt: Date;

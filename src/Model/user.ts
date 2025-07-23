@@ -4,6 +4,7 @@ import type { Slot } from "./slot";
 export interface User {
   id: string;
   fullName: string;
+  managerId: string;
   dateOfBirth: Date;
   phone: string;
   gender: "MALE" | "FEMALE" | "OTHER";

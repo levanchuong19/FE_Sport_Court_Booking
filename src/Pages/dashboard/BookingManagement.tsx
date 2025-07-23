@@ -7,71 +7,35 @@ import formatVND from "../../Utils/currency";
 import { Button, Dropdown, Menu } from "antd";
 import { EllipsisOutlined } from "@ant-design/icons";
 
-const bookingData = [
-  {
-    id: "B001",
-    customer: "Nguyễn Văn A",
-    phone: "0901234567",
-    field: "Sân bóng đá Mini 5v5",
-    date: "15/05/2025",
-    time: "15:00 - 17:00",
-    price: "500,000đ",
-    status: "Đã xác nhận",
-    statusColor: "bg-green-500 text-white",
-  },
-  {
-    id: "B002",
-    customer: "Trần Thị B",
-    phone: "0901234568",
-    field: "Sân tennis số 3",
-    date: "15/05/2025",
-    time: "08:00 - 10:00",
-    price: "350,000đ",
-    status: "Chờ xác nhận",
-    statusColor: "bg-yellow-400 text-white",
-  },
-  {
-    id: "B003",
-    customer: "Lê Văn C",
-    phone: "0901234569",
-    field: "Sân bóng rổ ngoài trời",
-    date: "15/05/2025",
-    time: "19:00 - 21:00",
-    price: "400,000đ",
-    status: "Đã xác nhận",
-    statusColor: "bg-green-500 text-white",
-  },
-  {
-    id: "B004",
-    customer: "Phạm Thị D",
-    phone: "0901234570",
-    field: "Sân cầu lông số 2",
-    date: "15/05/2025",
-    time: "17:00 - 19:00",
-    price: "250,000đ",
-    status: "Đã huỷ",
-    statusColor: "bg-red-500 text-white",
-  },
-];
-
 export default function BookingManagement() {
   const [bookings, setIsBooking] = useState<Slot[]>([]);
 
   const fetchBooking = async () => {
-      const response = await api.get("slot/getAll")
-      setIsBooking(response.data.data.content);
-  }
+    const response = await api.get("slot/getAll");
+    setIsBooking(response.data.data.content);
+  };
 
-  useEffect(()=> {
+  useEffect(() => {
     fetchBooking();
-  },[])
+  }, []);
 
   const menu = (
     <Menu>
-      <Menu.Item key="edit" onClick={() => {/* TODO: Thêm logic sửa */}}>
+      <Menu.Item
+        key="edit"
+        onClick={() => {
+          /* TODO: Thêm logic sửa */
+        }}
+      >
         Sửa
       </Menu.Item>
-      <Menu.Item key="delete" onClick={() => {/* TODO: Thêm logic xóa */}} danger>
+      <Menu.Item
+        key="delete"
+        onClick={() => {
+          /* TODO: Thêm logic xóa */
+        }}
+        danger
+      >
         Xóa
       </Menu.Item>
     </Menu>
@@ -124,36 +88,41 @@ export default function BookingManagement() {
             </tr>
           </thead>
           <tbody>
-            {Array.isArray(bookings) && bookings.map((b, idx) => (
-              <tr key={idx} className="border-b border-gray-200">
-                <td className="py-2 px-4">
-                  {b.accountUsername}
-                  <div className="text-xs text-gray-500">{b.account?.phone}</div>
-                </td>
-                <td className="py-2 px-4">{b.courtName}</td>
-                <td className="py-2 px-4">{formatDate(b?.createAt)}</td>
-                <td className="py-2 px-4">{b.startTime + "- " + b.endTime}</td>
-                <td className="py-2 px-4">{formatVND(b.price)}</td>
-                <td className="py-2 px-4">
-                <span className={`px-3 py-1 rounded-full text-xs ${b.status === "COMPLETED"
-                  ? "bg-green-500 text-white"
-                  : b.status === "CANCELED"
-                  ? "bg-red-500 text-white"
-                  : "bg-gray-200 text-black"
-                  }`}
-                  >
-                  {b.status}
-                  </span>
-                </td>
-                <td className="py-2 px-4">
-                
-          <Dropdown overlay={menu} trigger={["click"]}>
-            <Button icon={<EllipsisOutlined />} />
-          </Dropdown>
-      
-                </td>
-              </tr>
-            ))}
+            {Array.isArray(bookings) &&
+              bookings.map((b, idx) => (
+                <tr key={idx} className="border-b border-gray-200">
+                  <td className="py-2 px-4">
+                    {b.accountUsername}
+                    <div className="text-xs text-gray-500">
+                      {b.account?.phone}
+                    </div>
+                  </td>
+                  <td className="py-2 px-4">{b.courtName}</td>
+                  <td className="py-2 px-4">{formatDate(b?.createAt)}</td>
+                  <td className="py-2 px-4">
+                    {b.startTime + "- " + b.endTime}
+                  </td>
+                  <td className="py-2 px-4">{formatVND(b.price)}</td>
+                  <td className="py-2 px-4">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs ${
+                        b.status === "COMPLETED"
+                          ? "bg-green-500 text-white"
+                          : b.status === "CANCELED"
+                          ? "bg-red-500 text-white"
+                          : "bg-gray-200 text-black"
+                      }`}
+                    >
+                      {b.status}
+                    </span>
+                  </td>
+                  <td className="py-2 px-4">
+                    <Dropdown overlay={menu} trigger={["click"]}>
+                      <Button icon={<EllipsisOutlined />} />
+                    </Dropdown>
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>
