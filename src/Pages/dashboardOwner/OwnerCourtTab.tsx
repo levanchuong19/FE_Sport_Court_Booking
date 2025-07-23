@@ -97,7 +97,10 @@ export default function OwnerCourtTab({ onDetail }: OwnerCourtTabProps) {
   ];
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-2">Quản lý sân</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">Quản lý sân</h2>
+        <Button type="primary" onClick={handleOpenModal}>+ Tạo sân mới</Button>
+      </div>
       {/* <Table
         columns={columns}
         dataSource={courts}
@@ -106,7 +109,7 @@ export default function OwnerCourtTab({ onDetail }: OwnerCourtTabProps) {
         pagination={{ pageSize: 5 }}
       /> */}
 
-<div className="overflow-x-auto bg-white rounded-xl shadow">
+      <div className="overflow-x-auto bg-white rounded-xl shadow">
         <table className="min-w-full text-sm">
           <thead>
             <tr className="bg-gray-100">
@@ -134,9 +137,8 @@ export default function OwnerCourtTab({ onDetail }: OwnerCourtTabProps) {
                   </td>
                   <td className="py-2 px-4">
                     <span
-                      className={`px-3 py-1 rounded-full text-xs ${
-                        f.status === "AVAILABLE" ? "bg-green-500" : ""
-                      }`}
+                      className={`px-3 py-1 rounded-full text-xs ${f.status === "AVAILABLE" ? "bg-green-500" : ""
+                        }`}
                     >
                       {f.status}
                     </span>
@@ -315,7 +317,7 @@ export default function OwnerCourtTab({ onDetail }: OwnerCourtTabProps) {
             </Form.Item>
             <Form.List
               name="images"
-              // rules={[{ required: true, message: "Thêm ít nhất một ảnh!" }]}
+            // rules={[{ required: true, message: "Thêm ít nhất một ảnh!" }]}
             >
               {(fields, { add, remove }) => (
                 <>
