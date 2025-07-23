@@ -8,7 +8,7 @@ import {
   Ruler,
   Users2,
   Calendar,
-  Navigation,
+  MapPinned,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -17,6 +17,7 @@ const sportMap: Record<string, string> = {
   TENNIS: "Tennis",
   BADMINTON: "Cầu lông",
   BASKETBALL: "Bóng rổ",
+  VOLLEYBALL: "Bóng chuyền",
 };
 
 const fallbackImage =
@@ -170,14 +171,28 @@ const DetailCourt = () => {
                 Liên hệ nhanh
               </h3>
               <button
-                onClick={handleBooking}
                 className="w-full bg-emerald-600 text-white py-2 rounded-lg font-medium hover:bg-emerald-700 flex items-center justify-center gap-2"
+                onClick={() => {
+                  navigate(`/booking/${id}`);
+                }}
               >
                 Đặt ngay
               </button>
-              <button className="w-full border border-gray-300 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-50 flex items-center justify-center gap-2">
-                <Navigation size={18} />
-                Chỉ đường
+              <button
+                className="w-full mt-4 border border-gray-300 text-gray-700 py-2 rounded font-semibold flex items-center justify-center gap-2 cursor-pointer"
+                onClick={() => {
+                  const address = court.businessLocation?.address || "";
+                  if (address) {
+                    window.open(
+                      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                        address
+                      )}`,
+                      "_blank"
+                    );
+                  }
+                }}
+              >
+                <MapPinned className="w-4 h-4 text-gray-500" /> Chỉ đường
               </button>
             </div>
           </div>

@@ -4,6 +4,7 @@ import api from "../Config/api";
 import { MapPin, Phone, MessageCircle, Info, MapPinned } from "lucide-react";
 import type { BusinessLocation } from "../Model/businessLocation";
 import type { Court } from "../Model/court";
+import formatVND from "../Utils/currency";
 
 // Helper function để xác định trạng thái hoạt động
 function isOpenNow(openTime: string, closeTime: string): boolean {
@@ -74,6 +75,9 @@ export default function BusinessLocationDetail() {
   }
 
   const open = isOpenNow(businessLocation.openTime, businessLocation.closeTime);
+
+  const getPrice = (court: Court) =>
+    court.prices?.find((p) => p.priceType === "HOURLY")?.price || 0;
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
@@ -218,9 +222,7 @@ export default function BusinessLocationDetail() {
                               </div>
                             </div>
                             <div className="text-emerald-600 text-xl font-bold">
-                              {court.prices && court.prices.length > 0
-                                ? `${court.prices[0].price.toLocaleString()} VNĐ/giờ`
-                                : "Liên hệ"}
+                              {formatVND(getPrice(court))}
                             </div>
                           </div>
                           <div className="flex flex-wrap gap-2 mb-2">
@@ -335,9 +337,7 @@ export default function BusinessLocationDetail() {
                       {court.courtName}
                     </div>
                     <div className="text-emerald-600 text-xs font-bold">
-                      {court.prices && court.prices.length > 0
-                        ? `${court.prices[0].price.toLocaleString()} VNĐ/giờ`
-                        : "Liên hệ"}
+                      {formatVND(getPrice(court))}/giờ
                     </div>
                   </div>
                   <button
