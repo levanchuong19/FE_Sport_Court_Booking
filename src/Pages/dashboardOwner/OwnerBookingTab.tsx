@@ -48,7 +48,7 @@ export default function OwnerBookingTab({ onDetail }: OwnerBookingTabProps) {
       key: "status",
       render: (status: string) => {
         if (status === "PENDING") return <Tag color="orange">Chờ xác nhận</Tag>;
-        if (status === "BOOKED") return <Tag color="gray">Đã đặt</Tag>;
+        if (status === "BOOKED") return <Tag color="gray">Chờ Check-in</Tag>;
         if (status === "CANCELED") return <Tag color="red">Đã hủy</Tag>;
         if (status === "COMPLETED")
           return <Tag color="green">Đã hoàn thành</Tag>;
