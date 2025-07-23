@@ -15,29 +15,27 @@ interface OwnerCourtTabProps {
 
 export default function OwnerCourtTab({ onDetail }: OwnerCourtTabProps) {
   const [courts, setCourts] = useState<Court[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    setLoading(true);
-    const token = localStorage.getItem("token");
-    if (token) {
-      const decodedToken: JwtPayload = jwtDecode(token);
-      api.get(`location/getCourtsByOwnerId/${decodedToken.sub}`)
-      .then(res => setCourts(Array.isArray(res.data.data.content) ? res.data.data.content : []))
-      .catch(() => setCourts([]))
-      .finally(() => setLoading(false));
-    } else {
-      setCourts([]);
-      setLoading(false);
-    }
-  }, []);
-
-  const [isFields, setIsFields] = useState<Court[]>([]);
   const [isSearch, setIsSearch] = useState("");
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [form] = useForm();
   const [isLocation, setIsLocation] = useState<BusinessLocation[]>([]);
   const [type, setType] = useState("ALL");
+
+  const fetchCourts = async () => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      const decodedToken: JwtPayload = jwtDecode(token);
+      const response = await api.get(`court/getCourtByOwner/${decodedToken.sub}`)
+      setCourts(Array.isArray(response.data.data) ? response.data.data : [])
+      console.log("response.data.data.content", response.data.data);
+    } else {
+      setCourts([]);
+    }
+  }
+
+  useEffect(() => {
+    fetchCourts();
+  }, []);
 
   const handleOpenModal = () => {
     setIsOpenModal(true);
@@ -63,10 +61,8 @@ export default function OwnerCourtTab({ onDetail }: OwnerCourtTabProps) {
     }
   };
 
-  const filterFields = isFields.filter((f) => {
-    const matchName = f.courtName
-      .toLowerCase()
-      .includes(isSearch.toLowerCase());
+  const filterFields = courts.filter((f) => {
+    const matchName = (f.courtName || "").toLowerCase().includes(isSearch.toLowerCase());
     const matchType = type === "ALL" || f.courtType === type;
     return matchName && matchType;
   });
@@ -130,11 +126,11 @@ export default function OwnerCourtTab({ onDetail }: OwnerCourtTabProps) {
                   <td className="py-2 px-4">{f.courtName}</td>
                   <td className="py-2 px-4">{f.courtType}</td>
                   <td className="py-2 px-4">
-                    {f.businessLocation.owner.fullName}
+                    {f.businessLocation?.owner?.fullName}
                   </td>
-                  <td className="py-2 px-4">{f.businessLocation.address}</td>
+                  <td className="py-2 px-4">{f.businessLocation?.address}</td>
                   <td className="py-2 px-4">
-                    {formatVND(f.prices?.[0].price)}
+                    {formatVND(f.prices?.[0]?.price)}
                   </td>
                   <td className="py-2 px-4">
                     <span

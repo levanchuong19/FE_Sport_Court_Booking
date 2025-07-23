@@ -119,11 +119,7 @@ export default function Profile() {
   };
 
   const handleEditProfile = () => {
-    if (user?.id) {
-      navigate(`/edit-profile/${user.id}`);
-    } else {
-      alert("Không tìm thấy ID người dùng.");
-    }
+    navigate("/edit-profile");
   };
 
   const handleSubmitFeedback = async () => {
@@ -154,7 +150,7 @@ export default function Profile() {
       bookingExperienceRating: feedbackForm.bookingExperienceRating,
       playedDate: feedbackBooking.startDate,
       courtId: feedbackBooking.court?.id,
-      accountId: accountId,
+      accountId: accountId, // ✅ dùng trực tiếp từ token
     };
 
     try {
@@ -513,12 +509,23 @@ export default function Profile() {
                       ) : null) as React.ReactNode
                     }
                     {/* Nút liên hệ, chỉ đường, chia sẻ */}
-                    <div className="flex gap-3 mt-2 text-sm">
-                      <button className="flex items-center gap-1 hover:underline">
-                        <MapPinned className="w-4 h-4 text-gray-500" /> Chỉ
-                        đường
-                      </button>
-                    </div>
+                    <button
+                      className="flex items-center gap-1 hover:underline"
+                      onClick={() => {
+                        const address =
+                          b.court?.businessLocation?.address || "";
+                        if (address) {
+                          window.open(
+                            `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                              address
+                            )}`,
+                            "_blank"
+                          );
+                        }
+                      }}
+                    >
+                      <MapPinned className="w-4 h-4 text-gray-500" /> Chỉ đường
+                    </button>
                   </div>
                   {/* Giá và thao tác */}
                   <div className="flex flex-col items-end gap-2 min-w-[120px]">

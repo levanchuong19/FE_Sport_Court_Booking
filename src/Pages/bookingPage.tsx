@@ -362,7 +362,7 @@ export default function BookingPage() {
     };
     try {
       const response = await api.post("slot/create", payload);
-      customAlert("Thành công", "Đặt sân thành công", "default");
+      // customAlert("Thành công", "Đặt sân thành công", "default");
       navigate(`/confirm-booking/${response.data.data.id}`);
     } catch (error: any) {
       customAlert(
@@ -378,12 +378,12 @@ export default function BookingPage() {
     t && t.length >= 5 ? t.slice(0, 5) : t;
   const isSlotBooked = (slot: string, dateStr: string) => {
     return (court?.slots || []).some((s) => {
+      // Bỏ qua slot đã huỷ và overdue
+      if (s.status === "CANCELED" && s.bookingStatus === "OVERDUE") return false;
       const slotStartDate = typeof s.startDate === "string" ? s.startDate : "";
       const slotEndDate = typeof s.endDate === "string" ? s.endDate : "";
-      const slotStartTime =
-        typeof s.startTime === "string" ? toHHmm(s.startTime) : "";
-      const slotEndTime =
-        typeof s.endTime === "string" ? toHHmm(s.endTime) : "";
+      const slotStartTime = typeof s.startTime === "string" ? toHHmm(s.startTime) : "";
+      const slotEndTime = typeof s.endTime === "string" ? toHHmm(s.endTime) : "";
       if (slotStartDate <= dateStr && dateStr <= slotEndDate) {
         return slot >= slotStartTime && slot < slotEndTime;
       }

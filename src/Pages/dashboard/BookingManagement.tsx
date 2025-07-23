@@ -1,5 +1,11 @@
 import { Plus, Search } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { Slot } from "../../Model/slot";
+import api from "../../Config/api";
+import formatDate from "../../Utils/date";
+import formatVND from "../../Utils/currency";
+import { Button, Dropdown, Menu } from "antd";
+import { EllipsisOutlined } from "@ant-design/icons";
 
 const bookingData = [
   {
@@ -49,8 +55,27 @@ const bookingData = [
 ];
 
 export default function BookingManagement() {
-  const [bookings] = useState(bookingData);
+  const [bookings, setIsBooking] = useState<Slot[]>([]);
 
+  const fetchBooking = async () => {
+      const response = await api.get("slot/getAll")
+      setIsBooking(response.data.data.content);
+  }
+
+  useEffect(()=> {
+    fetchBooking();
+  },[])
+
+  const menu = (
+    <Menu>
+      <Menu.Item key="edit" onClick={() => {/* TODO: Thêm logic sửa */}}>
+        Sửa
+      </Menu.Item>
+      <Menu.Item key="delete" onClick={() => {/* TODO: Thêm logic xóa */}} danger>
+        Xóa
+      </Menu.Item>
+    </Menu>
+  );
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
@@ -89,39 +114,43 @@ export default function BookingManagement() {
         <table className="min-w-full text-sm">
           <thead>
             <tr className="bg-gray-100 ">
-              <th className="py-2 px-4 text-left">Mã đặt sân</th>
               <th className="py-2 px-4 text-left">Khách hàng</th>
               <th className="py-2 px-4 text-left">Sân</th>
               <th className="py-2 px-4 text-left">Ngày</th>
               <th className="py-2 px-4 text-left">Giờ</th>
               <th className="py-2 px-4 text-left">Giá</th>
               <th className="py-2 px-4 text-left">Trạng thái</th>
-              <th className="py-2 px-4 text-left">Thao tác</th>
+              <th className="py-2 px-4 text-left">Hành động</th>
             </tr>
           </thead>
           <tbody>
-            {bookings.map((b, idx) => (
+            {Array.isArray(bookings) && bookings.map((b, idx) => (
               <tr key={idx} className="border-b border-gray-200">
-                <td className="py-2 px-4 font-semibold">{b.id}</td>
                 <td className="py-2 px-4">
-                  {b.customer}
-                  <div className="text-xs text-gray-500">{b.phone}</div>
+                  {b.accountUsername}
+                  <div className="text-xs text-gray-500">{b.account?.phone}</div>
                 </td>
-                <td className="py-2 px-4">{b.field}</td>
-                <td className="py-2 px-4">{b.date}</td>
-                <td className="py-2 px-4">{b.time}</td>
-                <td className="py-2 px-4">{b.price}</td>
+                <td className="py-2 px-4">{b.courtName}</td>
+                <td className="py-2 px-4">{formatDate(b?.createAt)}</td>
+                <td className="py-2 px-4">{b.startTime + "- " + b.endTime}</td>
+                <td className="py-2 px-4">{formatVND(b.price)}</td>
                 <td className="py-2 px-4">
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs ${b.statusColor}`}
+                <span className={`px-3 py-1 rounded-full text-xs ${b.status === "COMPLETED"
+                  ? "bg-green-500 text-white"
+                  : b.status === "CANCELED"
+                  ? "bg-red-500 text-white"
+                  : "bg-gray-200 text-black"
+                  }`}
                   >
-                    {b.status}
+                  {b.status}
                   </span>
                 </td>
                 <td className="py-2 px-4">
-                  <button className="px-2 py-1 rounded hover:bg-gray-100">
-                    ...
-                  </button>
+                
+          <Dropdown overlay={menu} trigger={["click"]}>
+            <Button icon={<EllipsisOutlined />} />
+          </Dropdown>
+      
                 </td>
               </tr>
             ))}

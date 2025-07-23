@@ -11,21 +11,22 @@ interface OwnerBookingTabProps {
 
 export default function OwnerBookingTab({ onDetail }: OwnerBookingTabProps) {
   const [bookings, setBookings] = useState<Slot[]>([]);
-  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    setLoading(true);
+  const fetchBookings = async () => {
     const token = localStorage.getItem("token");
     if (token) {
       const decodedToken: JwtPayload = jwtDecode(token);
-      api.get(`slot/getBookingByAccount/${decodedToken.sub}`)
-      .then(res => setBookings(Array.isArray(res.data.data) ? res.data.data : []))
-      .catch(() => setBookings([]))
-      .finally(() => setLoading(false));
+      const response = await api.get(`slot/getBookingByAccount/${decodedToken.sub}`)
+      setBookings(Array.isArray(response.data.data.bookings) ? response.data.data.bookings : [])
+      console.log("response.data.data", response.data.data.bookings);
+
     } else {
       setBookings([]);
-      setLoading(false);
     }
+  }
+
+  useEffect(() => {
+    fetchBookings();
   }, []);
 
   const columns = [
@@ -41,7 +42,6 @@ export default function OwnerBookingTab({ onDetail }: OwnerBookingTabProps) {
       <Table
         columns={columns}
         dataSource={bookings}
-        loading={loading}
         rowKey="id"
         pagination={{ pageSize: 5 }}
       />
