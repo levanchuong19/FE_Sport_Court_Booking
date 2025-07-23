@@ -1,198 +1,218 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../Config/api";
+import { useParams } from "react-router-dom";
 
 interface Profile {
-    fullName: string;
-    dateOfBirth: string;
-    phone: string;
-    gender: string;
-    address: string;
-    image: string;
+  fullName: string;
+  dateOfBirth: string;
+  phone: string;
+  gender: string;
+  address: string;
+  image: string;
 }
 
 export default function EditProfile() {
-    const [profile, setProfile] = useState<Profile>({
-        fullName: "",
-        dateOfBirth: "",
-        phone: "",
-        gender: "",
-        address: "",
-        image: "",
-    });
+  const [profile, setProfile] = useState<Profile>({
+    fullName: "",
+    dateOfBirth: "",
+    phone: "",
+    gender: "",
+    address: "",
+    image: "",
+  });
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
 
-    useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                const res = await api.get("/user/profile");
-                setProfile(res.data);
-            } catch (err) {
-                console.error("Failed to load profile", err);
-            }
-        };
-
-        fetchProfile();
-    }, []);
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setProfile({ ...profile, [name]: value });
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        if (!id) return;
+        const res = await api.get(`/auth/account/${id}`);
+        setProfile(res.data);
+      } catch (err) {
+        console.error("Failed to load profile", err);
+      }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    fetchProfile();
+  }, [id]);
 
-        const payload = {
-            ...profile,
-            dateOfBirth: new Date(profile.dateOfBirth).toISOString(),
-        };
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setProfile({ ...profile, [name]: value });
+  };
 
-        console.log("Payload gửi đi:", payload);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-        try {
-            const userStr = localStorage.getItem("user");
-            const token = localStorage.getItem("token");
+    if (!id) {
+      alert("Không tìm thấy user ID trong URL.");
+      return;
+    }
 
-            if (!userStr || !token) {
-                alert("Không tìm thấy user hoặc token.");
-                return;
-            }
-
-            const userObj = JSON.parse(userStr);
-            const userId = userObj?.account?.id;
-
-            if (!userId) {
-                alert("Không tìm thấy user ID.");
-                return;
-            }
-            console.log("Payload gửi đi:", payload);
-            await api.put(`/account/${userId}`, payload);
-
-            alert("Cập nhật thành công!");
-            navigate("/profile");
-        } catch (err) {
-            console.error("Update failed", err);
-            alert("Lỗi khi cập nhật hồ sơ.");
-        }
+    const payload = {
+      ...profile,
+      dateOfBirth: new Date(profile.dateOfBirth).toISOString(),
     };
 
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      await api.put(`/account/${id}`, payload);
+      alert("Cập nhật thành công!");
+      navigate("/profile");
+    } catch (err) {
+      console.error("Update failed", err);
+      alert("Lỗi khi cập nhật hồ sơ.");
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("upload_preset", "CourtSportZone"); // 👈 cái bạn tạo ở Cloudinary
+    formData.append("upload_preset", "CourtSportZone");
 
     try {
-        const res = await fetch("https://api.cloudinary.com/v1_1/dansvb29z/image/upload", {
-            method: "POST",
-            body: formData,
-        });
-
-        const data = await res.json();
-        if (data.secure_url) {
-            setProfile({ ...profile, image: data.secure_url });
-        } else {
-            alert("Lỗi khi upload ảnh.");
+      const res = await fetch(
+        "https://api.cloudinary.com/v1_1/dansvb29z/image/upload",
+        {
+          method: "POST",
+          body: formData,
         }
-    } catch (err) {
-        console.error("Upload ảnh thất bại", err);
+      );
+
+      const data = await res.json();
+      if (data.secure_url) {
+        setProfile({ ...profile, image: data.secure_url });
+      } else {
         alert("Lỗi khi upload ảnh.");
+      }
+    } catch (err) {
+      console.error("Upload ảnh thất bại", err);
+      alert("Lỗi khi upload ảnh.");
     }
-};
+  };
 
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-emerald-100 py-12 px-4">
+      <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-8 border border-emerald-200">
+        <h2 className="text-3xl font-bold text-emerald-600 mb-8 text-center">
+          Chỉnh sửa hồ sơ cá nhân
+        </h2>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Ảnh đại diện */}
+          <div className="relative w-32 h-32 mx-auto">
+            <img
+              src={profile.image}
+              alt="Avatar"
+              className="w-32 h-32 object-cover rounded-full border-4 border-emerald-500 shadow-lg"
+            />
+            <label className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 transition-opacity rounded-full cursor-pointer">
+              <span className="text-white font-semibold text-sm">Đổi ảnh</span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="absolute inset-0 opacity-0 cursor-pointer"
+              />
+            </label>
+          </div>
 
-    return (
-        <div className="max-w-xl mx-auto p-6 bg-white shadow rounded-xl mt-10">
-            <h2 className="text-2xl font-bold mb-6">Chỉnh sửa hồ sơ</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                    <label className="block font-medium mb-1">Họ và tên</label>
-                    <input
-                        type="text"
-                        name="fullName"
-                        value={profile.fullName}
-                        onChange={handleChange}
-                        className="w-full p-2 border rounded"
-                        required
-                    />
-                </div>
-                <div>
-                    <label className="block font-medium mb-1">Ngày sinh</label>
-                    <input
-                        type="date"
-                        name="dateOfBirth"
-                        value={profile.dateOfBirth?.split("T")[0] || ""}
-                        onChange={handleChange}
-                        className="w-full p-2 border rounded"
-                        required
-                    />
-                </div>
-                <div>
-                    <label className="block font-medium mb-1">Số điện thoại</label>
-                    <input
-                        type="text"
-                        name="phone"
-                        value={profile.phone}
-                        onChange={handleChange}
-                        className="w-full p-2 border rounded"
-                        required
-                    />
-                </div>
-                <div>
-                    <label className="block font-medium mb-1">Giới tính</label>
-                    <select
-                        name="gender"
-                        value={profile.gender}
-                        onChange={handleChange}
-                        className="w-full p-2 border rounded"
-                        required
-                    >
-                        <option value="">-- Chọn giới tính --</option>
-                        <option value="MALE">Nam</option>
-                        <option value="FEMALE">Nữ</option>
-                        <option value="OTHER">Khác</option>
-                    </select>
-                </div>
-                <div>
-                    <label className="block font-medium mb-1">Địa chỉ</label>
-                    <input
-                        type="text"
-                        name="address"
-                        value={profile.address}
-                        onChange={handleChange}
-                        className="w-full p-2 border rounded"
-                        required
-                    />
-                </div>
-                <div>
-                    <label className="block font-medium mb-1">Ảnh đại diện</label>
-                    <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        className="w-full p-2 border rounded"
-                    />
-                    {profile.image && (
-                        <img
-                            src={profile.image}
-                            alt="Ảnh đại diện"
-                            className="mt-2 w-32 h-32 object-cover rounded-full"
-                        />
-                    )}
-                </div>
-                <div className="flex justify-end">
-                    <button
-                        type="submit"
-                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                    >
-                        Lưu thay đổi
-                    </button>
-                </div>
-            </form>
-        </div>
-    );
+          {/* Họ và tên */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Họ và tên
+            </label>
+            <input
+              type="text"
+              name="fullName"
+              value={profile.fullName}
+              onChange={handleChange}
+              className="w-full p-3 border rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
+              required
+            />
+          </div>
+
+          {/* Ngày sinh */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Ngày sinh
+            </label>
+            <input
+              type="date"
+              name="dateOfBirth"
+              value={profile.dateOfBirth?.split("T")[0] || ""}
+              onChange={handleChange}
+              className="w-full p-3 border rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
+              required
+            />
+          </div>
+
+          {/* Số điện thoại */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Số điện thoại
+            </label>
+            <input
+              type="text"
+              name="phone"
+              value={profile.phone}
+              onChange={handleChange}
+              className="w-full p-3 border rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
+              required
+            />
+          </div>
+
+          {/* Giới tính */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Giới tính
+            </label>
+            <select
+              name="gender"
+              value={profile.gender}
+              onChange={handleChange}
+              className="w-full p-3 border rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
+              required
+            >
+              <option value="">-- Chọn giới tính --</option>
+              <option value="MALE">Nam</option>
+              <option value="FEMALE">Nữ</option>
+              <option value="OTHER">Khác</option>
+            </select>
+          </div>
+
+          {/* Địa chỉ */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Địa chỉ
+            </label>
+            <input
+              type="text"
+              name="address"
+              value={profile.address}
+              onChange={handleChange}
+              className="w-full p-3 border rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
+              required
+            />
+          </div>
+
+          {/* Nút lưu */}
+          <div className="flex justify-end pt-4">
+            <button
+              type="submit"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-200"
+            >
+              Lưu thay đổi
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 }

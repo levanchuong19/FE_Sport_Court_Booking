@@ -8,8 +8,6 @@ import {
   Ruler,
   Users2,
   Calendar,
-  Phone,
-  MessageCircle,
   Navigation,
 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -65,6 +63,10 @@ const DetailCourt = () => {
       </div>
     );
   }
+
+  const handleBooking = () => {
+    navigate(`/booking/${court.id}`);
+  };
 
   return (
     <motion.div
@@ -167,7 +169,10 @@ const DetailCourt = () => {
               <h3 className="text-lg font-semibold text-gray-900">
                 Liên hệ nhanh
               </h3>
-              <button className="w-full bg-emerald-600 text-white py-2 rounded-lg font-medium hover:bg-emerald-700 flex items-center justify-center gap-2">
+              <button
+                onClick={handleBooking}
+                className="w-full bg-emerald-600 text-white py-2 rounded-lg font-medium hover:bg-emerald-700 flex items-center justify-center gap-2"
+              >
                 Đặt ngay
               </button>
               <button className="w-full border border-gray-300 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-50 flex items-center justify-center gap-2">

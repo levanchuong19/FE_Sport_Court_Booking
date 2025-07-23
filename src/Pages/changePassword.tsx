@@ -47,11 +47,7 @@ export default function ChangePasswordPage() {
     e.preventDefault();
 
     if (form.newPassword !== form.confirmNewPassword) {
-      customAlert(
-        "Lỗi",
-        "Mật khẩu xác nhận không khớp.",
-        "destructive"
-      );
+      customAlert("Lỗi", "Mật khẩu xác nhận không khớp.", "destructive");
       return;
     }
 
@@ -78,11 +74,7 @@ export default function ChangePasswordPage() {
       }, 1500);
     } catch (error: any) {
       const errMsg = error?.response?.data?.message || "Lỗi không xác định.";
-      customAlert(
-        "Lỗi",
-       'Lỗi không xác định',
-        "destructive"
-      );
+      customAlert("Lỗi", "Lỗi không xác định", "destructive");
     } finally {
       setLoading(false);
     }
