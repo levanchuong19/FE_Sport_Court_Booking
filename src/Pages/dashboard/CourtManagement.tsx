@@ -1,13 +1,22 @@
-
 import { Plus, Search } from "lucide-react";
 import api from "../../Config/api";
 import { useEffect, useState } from "react";
 import formatVND from "../../Utils/currency";
 import type { Court } from "../../Model/court";
-import { Button, Form, Input, InputNumber, Modal, Select } from "antd";
+import {
+  Button,
+  Form,
+  Input,
+  InputNumber,
+  Modal,
+  Popconfirm,
+  Popover,
+  Select,
+} from "antd";
 import { useForm } from "antd/es/form/Form";
 import { Option } from "antd/es/mentions";
 import type { BusinessLocation } from "../../Model/businessLocation";
+import { EllipsisOutlined } from "@ant-design/icons";
 
 function CourtManagement() {
   const [isFields, setIsFields] = useState<Court[]>([]);
@@ -16,6 +25,8 @@ function CourtManagement() {
   const [form] = useForm();
   const [isLocation, setIsLocation] = useState<BusinessLocation[]>([]);
   const [type, setType] = useState("ALL");
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [edittingCourt, setEditingCourt] = useState<Court | null>(null);
 
   const handleOpenModal = () => {
     setIsOpenModal(true);
@@ -31,13 +42,36 @@ function CourtManagement() {
 
   const handleSubmit = async (values: Court) => {
     try {
-      const response = await api.post("court/create", values);
-      console.log(response.data.data);
+      if (edittingCourt) {
+        await api.put(`court/update/${edittingCourt.id}`, values);
+      } else {
+        await api.post("court/create", values);
+      }
       setIsOpenModal(false);
       form.resetFields();
       fetchCourts();
     } catch (error) {
       console.error("Error submitting form:", error);
+    }
+  };
+
+  const handleEdit = (court: Court) => {
+    setEditingCourt(court);
+    form.setFieldsValue({
+      ...court,
+      businessLocationId: court.businessLocation.id,
+      manager_id: court.businessLocation.owner.id,
+    });
+    setIsOpenModal(true);
+  };
+
+  const handleDelete = async (courtId: string) => {
+    try {
+      await api.delete(`court/delete/${courtId}`);
+      fetchCourts();
+      console.log("Court deleted successfully");
+    } catch (error) {
+      console.error("Error deleting court:", error);
     }
   };
 
@@ -155,9 +189,30 @@ function CourtManagement() {
                     </span>
                   </td>
                   <td className="py-2 px-4">
-                    <button className="px-2 py-1 rounded hover:bg-gray-100">
-                      ...
-                    </button>
+                    <Popover
+                      content={
+                        <div className="flex  gap-2">
+                          <Button onClick={() => handleEdit(f)}> Sửa </Button>
+                          <Popconfirm
+                            title="Bạn có chắc chắn muốn xóa sân này?"
+                            onConfirm={() => handleDelete(f.id)}
+                            okText="Có"
+                            cancelText="Không"
+                          >
+                            <Button danger> Xóa </Button>
+                          </Popconfirm>
+                        </div>
+                      }
+                      trigger="click"
+                      open={openId === f.id}
+                      onOpenChange={(newOpen) => {
+                        setOpenId(newOpen ? f.id : null);
+                      }}
+                    >
+                      <button className="px-2 py-1 rounded hover:bg-gray-100">
+                        <EllipsisOutlined className="text-xl" />
+                      </button>
+                    </Popover>
                   </td>
                 </tr>
               ))}
