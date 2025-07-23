@@ -119,7 +119,11 @@ export default function Profile() {
   };
 
   const handleEditProfile = () => {
-    navigate("/edit-profile");
+    if (user?.id) {
+      navigate(`/edit-profile/${user.id}`);
+    } else {
+      alert("Không tìm thấy ID người dùng.");
+    }
   };
 
   const handleSubmitFeedback = async () => {
