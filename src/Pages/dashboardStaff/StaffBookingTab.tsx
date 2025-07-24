@@ -42,8 +42,7 @@ export default function StaffBookingTab({ onDetail }: StaffBookingTabProps) {
   }, []);
 
   const handleCheckIn = async (values: Slot) => {
-    const response = await api.patch(`slot/${values.id}/checkIn`);
-    console.log("response", response.data.data);
+    await api.patch(`slot/${values.id}/checkIn`);
     customAlert("Thành Công", "Check-In thành công", "default");
     fetchBookings();
   };
@@ -54,8 +53,10 @@ export default function StaffBookingTab({ onDetail }: StaffBookingTabProps) {
       dataIndex: "accountUsername",
       key: "accountUsername",
     },
+    { title: "Số điện thoại", dataIndex: "phone", key: "phone" },
     { title: "Sân", dataIndex: "courtName", key: "courtName" },
-    { title: "Ngày", dataIndex: "startDate", key: "startDate" },
+    { title: "Ngày bắt đầu", dataIndex: "startDate", key: "startDate" },
+    { title: "Ngày kết thúc", dataIndex: "endDate", key: "endDate" },
     { title: "Giờ bắt đầu", dataIndex: "startTime", key: "startTime" },
     { title: "Giờ kết thúc", dataIndex: "endTime", key: "endTime" },
     {
@@ -95,6 +96,7 @@ export default function StaffBookingTab({ onDetail }: StaffBookingTabProps) {
       dataIndex: "accountUsername",
       key: "accountUsername",
     },
+    { title: "Số điện thoại", dataIndex: "phone", key: "phone" },
     { title: "Sân", dataIndex: "courtName", key: "courtName" },
     { title: "Ngày bắt đầu", dataIndex: "startDate", key: "startDate" },
     { title: "Ngày kết thúc", dataIndex: "endDate", key: "endDate" },
@@ -119,13 +121,6 @@ export default function StaffBookingTab({ onDetail }: StaffBookingTabProps) {
       dataIndex: "price",
       key: "price",
       render: (price: number) => formatVND(price),
-    },
-    {
-      title: "",
-      key: "detail",
-      render: (_: any, record: Slot) => (
-        <a onClick={() => onDetail(record)}>Chi tiết</a>
-      ),
     },
   ];
   return (
