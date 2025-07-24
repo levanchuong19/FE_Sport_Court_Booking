@@ -181,9 +181,8 @@ function Login() {
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full bg-emerald-600 text-white py-2 rounded-lg hover:bg-emerald-700 transition ${
-                isLoading ? "opacity-70 cursor-not-allowed" : ""
-              }`}
+              className={`w-full bg-emerald-600 text-white py-2 rounded-lg hover:bg-emerald-700 transition ${isLoading ? "opacity-70 cursor-not-allowed" : ""
+                }`}
             >
               {isLoading ? "Đang xử lý..." : "Đăng nhập"}
             </button>
@@ -193,28 +192,31 @@ function Login() {
             <GoogleOAuthProvider clientId="136882428338-vclkmobr196nsjj3g9eldo1nt6vm4fq2.apps.googleusercontent.com">
               <GoogleLogin
                 onSuccess={async (credentialResponse) => {
-                  console.log(
-                    "Google credential:",
-                    credentialResponse.credential
-                  );
+                  console.log("Google credential:", credentialResponse.credential);
                   try {
                     const res = await api.post("auth/google/login", {
                       token: credentialResponse.credential,
                     });
 
                     const token = res.data?.data?.token;
+                    const account = res.data?.data?.account;
 
-                    if (token) {
+                    if (token && account) {
                       localStorage.setItem("accessToken", token);
-                      localStorage.setItem("token", res.data.data.token);
-                      localStorage.setItem(
-                        "user",
-                        JSON.stringify(res.data.data)
-                      );
+                      localStorage.setItem("token", token);
+                      localStorage.setItem("user", JSON.stringify(account));
+
+                      dispatch(login(account)); // nếu có dùng Redux
+
                       alert("Đăng Nhập thành công!");
-                      navigate("/", { replace: true });
-                    } else {
-                      alert("Không tìm thấy token trong phản hồi từ server.");
+
+                      if (account.role === "ADMIN") {
+                        navigate("/dashboard", { replace: true });
+                      } else if (account.role === "MANAGER") {
+                        navigate("/dashboardOwner", { replace: true });
+                      } else {
+                        navigate("/", { replace: true });
+                      }
                     }
                   } catch (err) {
                     console.error(err);

@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import api from "../Config/api";
-import { useParams } from "react-router-dom";
 
 interface Profile {
   fullName: string;
   dateOfBirth: string;
-  phone: string;
+  phoneNumber: string;
   gender: string;
   address: string;
   image: string;
@@ -16,7 +15,7 @@ export default function EditProfile() {
   const [profile, setProfile] = useState<Profile>({
     fullName: "",
     dateOfBirth: "",
-    phone: "",
+    phoneNumber: "",
     gender: "",
     address: "",
     image: "",
@@ -30,9 +29,21 @@ export default function EditProfile() {
       try {
         if (!id) return;
         const res = await api.get(`/auth/account/${id}`);
-        setProfile(res.data);
+        const account = res.data?.data;
+
+        if (account) {
+          setProfile({
+            fullName: account.fullName || "",
+            dateOfBirth: account.dateOfBirth?.split("T")[0] || "",
+            phoneNumber: account.phone || "",
+            gender: account.gender || "",
+            address: account.address || "",
+            image: account.image || "",
+          });
+        }
       } catch (err) {
-        console.error("Failed to load profile", err);
+        console.error("❌ Lỗi khi tải thông tin:", err);
+        alert("Không thể tải thông tin hồ sơ");
       }
     };
 
@@ -43,30 +54,10 @@ export default function EditProfile() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setProfile({ ...profile, [name]: value });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!id) {
-      alert("Không tìm thấy user ID trong URL.");
-      return;
-    }
-
-    const payload = {
-      ...profile,
-      dateOfBirth: new Date(profile.dateOfBirth).toISOString(),
-    };
-
-    try {
-      await api.put(`/account/${id}`, payload);
-      alert("Cập nhật thành công!");
-      navigate("/profile");
-    } catch (err) {
-      console.error("Update failed", err);
-      alert("Lỗi khi cập nhật hồ sơ.");
-    }
+    setProfile((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,23 +69,48 @@ export default function EditProfile() {
     formData.append("upload_preset", "CourtSportZone");
 
     try {
-      const res = await fetch(
-        "https://api.cloudinary.com/v1_1/dansvb29z/image/upload",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const res = await fetch("https://api.cloudinary.com/v1_1/dansvb29z/image/upload", {
+        method: "POST",
+        body: formData,
+      });
 
       const data = await res.json();
+
       if (data.secure_url) {
-        setProfile({ ...profile, image: data.secure_url });
+        setProfile((prev) => ({ ...prev, image: data.secure_url }));
       } else {
         alert("Lỗi khi upload ảnh.");
       }
     } catch (err) {
-      console.error("Upload ảnh thất bại", err);
-      alert("Lỗi khi upload ảnh.");
+      console.error("Upload ảnh thất bại:", err);
+      alert("Upload ảnh thất bại.");
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!id) return;
+
+    const payload = {
+      fullName: profile.fullName,
+      dateOfBirth: profile.dateOfBirth,
+      gender: profile.gender,
+      address: profile.address,
+      phoneNumber: profile.phoneNumber,
+      image: profile.image,
+    };
+
+    console.log("📤 Payload gửi lên:", payload);
+
+    try {
+      const res = await api.put(`/account/${id}`, payload);
+      console.log("Cập nhật thành công:", res.data);
+      alert("Cập nhật thành công");
+      navigate("/profile");
+    } catch (err: any) {
+      console.error("Cập nhật thất bại:", err?.response?.data || err.message);
+      alert("Cập nhật thất bại");
     }
   };
 
@@ -105,7 +121,6 @@ export default function EditProfile() {
           Chỉnh sửa hồ sơ cá nhân
         </h2>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Ảnh đại diện */}
           <div className="relative w-32 h-32 mx-auto">
             <img
               src={profile.image}
@@ -123,7 +138,6 @@ export default function EditProfile() {
             </label>
           </div>
 
-          {/* Họ và tên */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Họ và tên
@@ -138,7 +152,6 @@ export default function EditProfile() {
             />
           </div>
 
-          {/* Ngày sinh */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Ngày sinh
@@ -146,29 +159,27 @@ export default function EditProfile() {
             <input
               type="date"
               name="dateOfBirth"
-              value={profile.dateOfBirth?.split("T")[0] || ""}
+              value={profile.dateOfBirth}
               onChange={handleChange}
               className="w-full p-3 border rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
               required
             />
           </div>
 
-          {/* Số điện thoại */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Số điện thoại
             </label>
             <input
               type="text"
-              name="phone"
-              value={profile.phone}
+              name="phoneNumber"
+              value={profile.phoneNumber}
               onChange={handleChange}
               className="w-full p-3 border rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
               required
             />
           </div>
 
-          {/* Giới tính */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Giới tính
@@ -187,7 +198,6 @@ export default function EditProfile() {
             </select>
           </div>
 
-          {/* Địa chỉ */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Địa chỉ
@@ -202,7 +212,6 @@ export default function EditProfile() {
             />
           </div>
 
-          {/* Nút lưu */}
           <div className="flex justify-end pt-4">
             <button
               type="submit"

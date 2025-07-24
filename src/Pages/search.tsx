@@ -4,10 +4,13 @@ import api from "../Config/api";
 import MiniLocationCard from "../Components/MiniLocationCard";
 import type { BusinessLocation } from "../Model/businessLocation";
 import { Search, MapPin, Filter } from "lucide-react";
-import { GoogleMap, Marker, InfoWindow, useJsApiLoader } from "@react-google-maps/api";
+import {
+  GoogleMap,
+  Marker,
+  InfoWindow,
+  useJsApiLoader,
+} from "@react-google-maps/api";
 import PopupLocationCard from "../Components/popupLocationCard";
-
-
 
 function SearchPage() {
   const [isLocation, setIsLocation] = useState<BusinessLocation[]>([]);
@@ -15,30 +18,41 @@ function SearchPage() {
   const [searchParams, setSearchParams] = useState<any>(null);
   const [isSearchResult, setIsSearchResult] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [mapBounds, setMapBounds] = useState<google.maps.LatLngBounds | null>(null);
+  const [mapBounds, setMapBounds] = useState<google.maps.LatLngBounds | null>(
+    null
+  );
   const mapRef = useRef<google.maps.Map | null>(null);
   const location = useLocation();
 
-  const initialCenter = location.state?.center || { lat: 10.816632639921957, lng: 106.73380658226068 };
+  const initialCenter = location.state?.center || {
+    lat: 10.816632639921957,
+    lng: 106.73380658226068,
+  };
   const [center, setCenter] = useState(initialCenter);
 
   const containerStyle = {
     width: "100%",
-    height: "550px"
+    height: "550px",
   };
-  const onLoad = useCallback((map: google.maps.Map) => { mapRef.current = map; }, []);
-  const onUnmount = useCallback((map: google.maps.Map) => { mapRef.current = null; }, []);
+  const onLoad = useCallback((map: google.maps.Map) => {
+    mapRef.current = map;
+  }, []);
+  const onUnmount = useCallback((map: google.maps.Map) => {
+    mapRef.current = null;
+  }, []);
 
   const { isLoaded } = useJsApiLoader({
     // googleMapsApiKey: "AIzaSyD_iw1deyH_-hWDmE7PJK1RWKPle6uT97Q"
-    googleMapsApiKey: "AIzaSyBRt3wAQATMzjz8MiJQQfCfAOOkFrtg6AY"
+    googleMapsApiKey: "AIzaSyBRt3wAQATMzjz8MiJQQfCfAOOkFrtg6AY",
   });
 
   const fetchLocation = async () => {
     setIsLoading(true);
     try {
       const response = await api.get("location/getAll");
-      const locations = response.data.data.content.filter((location: BusinessLocation) => location.status === "ACTIVE");
+      const locations = response.data.data.content.filter(
+        (location: BusinessLocation) => location.status === "ACTIVE"
+      );
       setIsLocation(locations);
     } catch (error) {
       console.log(error);
@@ -51,13 +65,19 @@ function SearchPage() {
     setIsLoading(true);
     setIsSearchResult(true);
     setSearchParams(searchData);
-    
+
     try {
       const response = await api.post("/search", searchData);
       console.log("Search response:", response.data.data);
-      
-      if (response.data && Array.isArray(response.data.data) && response.data.data.length > 0) {
-        const locations = response.data.data.filter((location: BusinessLocation) => location.status === "ACTIVE");
+
+      if (
+        response.data &&
+        Array.isArray(response.data.data) &&
+        response.data.data.length > 0
+      ) {
+        const locations = response.data.data.filter(
+          (location: BusinessLocation) => location.status === "ACTIVE"
+        );
         setIsLocation(locations);
       } else {
         // Nếu không có kết quả, hiển thị tất cả sân
@@ -92,7 +112,9 @@ function SearchPage() {
       location.latitude &&
       location.longitude &&
       mapBounds &&
-      mapBounds.contains(new window.google.maps.LatLng(location.latitude, location.longitude))
+      mapBounds.contains(
+        new window.google.maps.LatLng(location.latitude, location.longitude)
+      )
   );
 
   return (
@@ -162,7 +184,7 @@ function SearchPage() {
                     position={center}
                     icon={{
                       url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
-                      scaledSize: new window.google.maps.Size(40, 40)
+                      scaledSize: new window.google.maps.Size(40, 40),
                     }}
                     title="Vị trí của bạn"
                   />
@@ -171,13 +193,19 @@ function SearchPage() {
                   location.latitude && location.longitude ? (
                     <Marker
                       key={location.id}
-                      position={{ lat: location.latitude, lng: location.longitude }}
+                      position={{
+                        lat: location.latitude,
+                        lng: location.longitude,
+                      }}
                       title={location.name}
                       onClick={() => setSelectedId(location.id)}
                     >
                       {selectedId === location.id && (
-                        <InfoWindow 
-                          position={{ lat: location.latitude, lng: location.longitude }}
+                        <InfoWindow
+                          position={{
+                            lat: location.latitude,
+                            lng: location.longitude,
+                          }}
                           onCloseClick={() => setSelectedId(null)}
                         >
                           <div style={{ minWidth: 180, maxWidth: 220 }}>
@@ -196,7 +224,9 @@ function SearchPage() {
                 )}
               </GoogleMap>
             ) : (
-              <div className="h-[500px] flex items-center justify-center text-gray-400">Đang tải bản đồ...</div>
+              <div className="h-[500px] flex items-center justify-center text-gray-400">
+                Đang tải bản đồ...
+              </div>
             )}
           </div>
           {/* Card bên phải */}
@@ -216,13 +246,14 @@ function SearchPage() {
                     <Search className="w-16 h-16 mx-auto" />
                   </div>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    {isSearchResult ? "Không tìm thấy kết quả" : "Không có địa điểm nào"}
+                    {isSearchResult
+                      ? "Không tìm thấy kết quả"
+                      : "Không có địa điểm nào"}
                   </h3>
                   <p className="text-gray-500 mb-6">
-                    {isSearchResult 
+                    {isSearchResult
                       ? "Không có sân thể thao nào phù hợp với tiêu chí tìm kiếm của bạn."
-                      : "Hiện tại chưa có địa điểm nào được đăng ký."
-                    }
+                      : "Hiện tại chưa có địa điểm nào được đăng ký."}
                   </p>
                   {isSearchResult && (
                     <button
