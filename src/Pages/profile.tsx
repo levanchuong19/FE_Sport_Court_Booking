@@ -349,7 +349,7 @@ export default function Profile() {
                   <b>Điện thoại:</b> {user?.phone}
                 </div>
                 <div>
-                  <b>Địa chỉ:</b> 123 Đường Nguyễn Huệ, Quận 1, TP.HCM
+                  <b>Địa chỉ:</b> {user?.address}
                 </div>
                 <div>
                   <b>Tổng đặt sân:</b> {bookings?.totalBookings}
@@ -588,7 +588,7 @@ export default function Profile() {
                 <b>Điện thoại:</b> {user?.phone}
               </div>
               <div>
-                <b>Địa chỉ:</b> 123 Đường Nguyễn Huệ, Quận 1, TP.HCM
+                <b>Địa chỉ:</b> {user?.address}
               </div>
               <div>
                 <b>Tổng đặt sân:</b> {bookings?.totalBookings}

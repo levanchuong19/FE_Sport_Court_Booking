@@ -1,13 +1,21 @@
-
 import { Plus, Search } from "lucide-react";
 import api from "../../Config/api";
 import { useEffect, useState } from "react";
 import formatVND from "../../Utils/currency";
 import type { Court } from "../../Model/court";
-import { Button, Form, Input, InputNumber, Modal, Select } from "antd";
+import {
+  Button,
+  Form,
+  Input,
+  InputNumber,
+  Modal,
+  Popconfirm,
+  Popover,
+  Select,
+} from "antd";
 import { useForm } from "antd/es/form/Form";
-import { Option } from "antd/es/mentions";
 import type { BusinessLocation } from "../../Model/businessLocation";
+import { EllipsisOutlined } from "@ant-design/icons";
 
 function CourtManagement() {
   const [isFields, setIsFields] = useState<Court[]>([]);
@@ -16,9 +24,14 @@ function CourtManagement() {
   const [form] = useForm();
   const [isLocation, setIsLocation] = useState<BusinessLocation[]>([]);
   const [type, setType] = useState("ALL");
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [edittingCourt, setEditingCourt] = useState<Court | null>(null);
 
   const handleOpenModal = () => {
     setIsOpenModal(true);
+    form.setFieldsValue({
+      prices: [{ priceType: undefined, price: undefined }],
+    });
   };
 
   const handleCloseModal = () => {
@@ -31,13 +44,38 @@ function CourtManagement() {
 
   const handleSubmit = async (values: Court) => {
     try {
-      const response = await api.post("court/create", values);
-      console.log(response.data.data);
+      if (edittingCourt) {
+        await api.put(`court/update/${edittingCourt.id}`, values);
+      } else {
+        await api.post("court/create", values);
+      }
       setIsOpenModal(false);
       form.resetFields();
       fetchCourts();
     } catch (error) {
       console.error("Error submitting form:", error);
+    }
+  };
+
+  const handleEdit = (court: Court) => {
+    setEditingCourt(court);
+    form.setFieldsValue({
+      ...court,
+      businessLocationId: court.businessLocation.id,
+      manager_id: court.businessLocation.owner.id,
+    });
+    setIsOpenModal(true);
+  };
+
+  const handleDelete = async (courtId: string) => {
+    try {
+      await api.put(`court/update/${courtId}`, {
+        status: "INACTIVE",
+      });
+      fetchCourts();
+      console.log("Court set to INACTIVE");
+    } catch (error) {
+      console.error("Error updating court status:", error);
     }
   };
 
@@ -95,10 +133,6 @@ function CourtManagement() {
             <Search />
           </span>{" "}
           Lọc
-          <span>
-            <Search />
-          </span>{" "}
-          Lọc
         </button>
         <select
           className="border border-gray-200 rounded-lg px-3 py-2"
@@ -148,16 +182,37 @@ function CourtManagement() {
                   <td className="py-2 px-4">
                     <span
                       className={`px-3 py-1 rounded-full text-xs ${
-                        f.status === "AVAILABLE" ? "bg-green-500" : ""
+                        f.status === "AVAILABLE" ? "bg-green-500" : "bg-red-500"
                       }`}
                     >
                       {f.status}
                     </span>
                   </td>
                   <td className="py-2 px-4">
-                    <button className="px-2 py-1 rounded hover:bg-gray-100">
-                      ...
-                    </button>
+                    <Popover
+                      content={
+                        <div className="flex  gap-2">
+                          <Button onClick={() => handleEdit(f)}> Sửa </Button>
+                          <Popconfirm
+                            title="Bạn có chắc chắn muốn xóa sân này?"
+                            onConfirm={() => handleDelete(f.id)}
+                            okText="Có"
+                            cancelText="Không"
+                          >
+                            <Button danger> Xóa </Button>
+                          </Popconfirm>
+                        </div>
+                      }
+                      trigger="click"
+                      open={openId === f.id}
+                      onOpenChange={(newOpen) => {
+                        setOpenId(newOpen ? f.id : null);
+                      }}
+                    >
+                      <button className="px-2 py-1 rounded hover:bg-gray-100">
+                        <EllipsisOutlined className="text-xl" />
+                      </button>
+                    </Popover>
                   </td>
                 </tr>
               ))}
@@ -193,7 +248,7 @@ function CourtManagement() {
                     {fields.map((field) => (
                       <div key={field.key}>
                         <Form.Item
-                          {...field}
+                          fieldKey={[field.key, "priceType"]}
                           name={[field.name, "priceType"]}
                           label="Giá"
                           rules={[
@@ -201,14 +256,14 @@ function CourtManagement() {
                           ]}
                         >
                           <Select placeholder="Chọn loại giá">
-                            <Option value="HOURLY">Giờ</Option>
-                            <Option value="DAILY">Ngày</Option>
-                            <Option value="WEEKLY">Tuần</Option>
-                            <Option value="MONTHLY">Tháng</Option>
+                            <Select.Option value="HOURLY">Giờ</Select.Option>
+                            <Select.Option value="DAILY">Ngày</Select.Option>
+                            <Select.Option value="WEEKLY">Tuần</Select.Option>
+                            <Select.Option value="MONTHLY">Tháng</Select.Option>
                           </Select>
                         </Form.Item>
                         <Form.Item
-                          {...field}
+                          fieldKey={[field.key, "price"]}
                           name={[field.name, "price"]}
                           rules={[
                             {
@@ -254,18 +309,24 @@ function CourtManagement() {
             <Form.Item name="businessLocationId" label="Địa điểm kinh doanh">
               <Select placeholder="Chọn địa điểm kinh doanh">
                 {isLocation.map((location: BusinessLocation) => (
-                  <Option key={location.id} value={location.id}>
+                  <Select.Option key={location.id} value={location.id}>
                     {location.address}
-                  </Option>
+                  </Select.Option>
                 ))}
               </Select>
             </Form.Item>
             <Form.Item name="manager_id" label="Quản lý sân">
               <Select placeholder="Chọn quản lý sân">
-                {isLocation.map((location: BusinessLocation) => (
-                  <Option key={location.owner.id} value={location.owner.id}>
-                    {location.owner.fullName}
-                  </Option>
+                {[
+                  ...new Map(
+                    isLocation
+                      .filter((location) => location.owner) // Lọc location có owner
+                      .map((location) => [location.owner.id, location.owner])
+                  ).values(),
+                ].map((owner) => (
+                  <Select.Option key={owner.id} value={owner.id}>
+                    {owner.fullName}
+                  </Select.Option>
                 ))}
               </Select>
             </Form.Item>
@@ -338,9 +399,9 @@ function CourtManagement() {
                       key={key}
                       label={`Ảnh ${key + 1}`}
                       name={name}
-                      rules={[
-                        { required: true, message: "Vui lòng nhập URL ảnh!" },
-                      ]}
+                      // rules={[
+                      //   { required: true, message: "Vui lòng nhập URL ảnh!" },
+                      // ]}
                     >
                       <Input
                         placeholder="Nhập URL ảnh"

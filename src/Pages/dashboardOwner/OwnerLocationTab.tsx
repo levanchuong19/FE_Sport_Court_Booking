@@ -4,10 +4,13 @@ import api from "../../Config/api";
 import type { BusinessLocation } from "../../Model/businessLocation";
 import type { JwtPayload } from "../../Model/user";
 import { jwtDecode } from "jwt-decode";
-
 interface OwnerLocationTabProps {
   onDetail: (record: BusinessLocation) => void;
 }
+
+const handleDeleteRequest = (location: BusinessLocation) => {
+  alert(`Vui lòng liên hệ support@sportcourt.com để được hỗ trợ xóa địa điểm: ${location.name} - ${location.address}`);
+};
 
 export default function OwnerLocationTab({ onDetail }: OwnerLocationTabProps) {
   const [locations, setLocations] = useState<BusinessLocation[]>([]);
@@ -19,9 +22,9 @@ export default function OwnerLocationTab({ onDetail }: OwnerLocationTabProps) {
     if (token) {
       const decodedToken: JwtPayload = jwtDecode(token);
       api.get(`location/getByOwner/${decodedToken.sub}`)
-      .then(res => setLocations(Array.isArray(res.data.data) ? res.data.data : []))
-      .catch(() => setLocations([]))
-      .finally(() => setLoading(false));
+        .then(res => setLocations(Array.isArray(res.data.data) ? res.data.data : []))
+        .catch(() => setLocations([]))
+        .finally(() => setLoading(false));
     } else {
       setLocations([]);
       setLoading(false);
@@ -32,7 +35,19 @@ export default function OwnerLocationTab({ onDetail }: OwnerLocationTabProps) {
     { title: "Tên địa điểm", dataIndex: "name", key: "name" },
     { title: "Địa chỉ", dataIndex: "address", key: "address" },
     { title: "Trạng thái", dataIndex: "status", key: "status" },
-    { title: "", key: "detail", render: (_: any, record: BusinessLocation) => <a onClick={() => onDetail(record)}>Chi tiết</a> },
+    {
+      title: "Thao tác",
+      key: "detail",
+      render: (_: any, record: BusinessLocation) => (
+        <>
+          <a onClick={() => onDetail(record)}>Chi tiết</a>
+          <span style={{ margin: "0 8px" }}>|</span>
+          <a onClick={() => handleDeleteRequest(record)} style={{ color: "red" }}>
+            Yêu cầu xóa
+          </a>
+        </>
+      ),
+    },
   ];
   return (
     <div>

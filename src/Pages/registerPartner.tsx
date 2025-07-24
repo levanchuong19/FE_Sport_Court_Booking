@@ -113,7 +113,7 @@ const RegisterPartner: React.FC = () => {
       });
       customAlert(
         "Success",
-        "Bạn đã đăng ký thành công ! Vui Lòng đợi đội ngũ chúng tôi liên hệ để xác minh thông tin",
+        "Bạn đã đăng ký thành công ! Vui Lòng đợi đội ngũ chúng tôi liên hệ để xác minh thông tin (hãy thêm sđt của bạn ở phần hồ sơ)",
         "default"
       );
     } catch (error) {

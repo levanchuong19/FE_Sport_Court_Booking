@@ -24,6 +24,7 @@ export default function ChangePasswordPage() {
   });
 
   useEffect(() => {
+    customAlert("Warning", "Nếu đăng nhập bằng Google sẽ không thể đổi mật khẩu", "default");
     const token = localStorage.getItem("token");
     if (!token) {
       navigate("/login");

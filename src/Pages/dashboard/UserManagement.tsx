@@ -3,9 +3,19 @@ import { useEffect, useState } from "react";
 import type { User } from "../../Model/user";
 import api from "../../Config/api";
 import formatDate from "../../Utils/date";
-import { Button, DatePicker, Form, Input, Modal, Popover, Select } from "antd";
+import {
+  Button,
+  DatePicker,
+  Form,
+  Input,
+  Modal,
+  Popconfirm,
+  Popover,
+  Select,
+} from "antd";
 import { useForm } from "antd/es/form/Form";
 import { EllipsisOutlined } from "@ant-design/icons";
+import dayjs from "dayjs";
 
 function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);
@@ -16,6 +26,7 @@ function UserManagement() {
   const [form] = useForm();
   // const [open, setOpen] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
 
   const handleOpenModal = () => {
     setIsOpenModal(true);
@@ -23,6 +34,8 @@ function UserManagement() {
 
   const handleCloseModal = () => {
     setIsOpenModal(false);
+    setEditingUser(null);
+    form.resetFields();
   };
 
   const handleOk = () => {
@@ -30,11 +43,32 @@ function UserManagement() {
   };
 
   const handleSubmit = async (values: User) => {
-    const response = await api.post("account", values);
-    console.log(response.data.data);
+    if (editingUser) {
+      // Update existing user
+      await api.put(`account/${editingUser.id}`, values);
+    } else {
+      // Create new user
+      await api.post("account", values);
+    }
+
     setIsOpenModal(false);
+    setEditingUser(null);
     form.resetFields();
     fetchUsers();
+  };
+
+  const handleDelete = async (id: string) => {
+    await api.delete(`account/${id}`);
+    fetchUsers();
+  };
+
+  const handleEdit = (user: User) => {
+    setEditingUser(user);
+    setIsOpenModal(true);
+    form.setFieldsValue({
+      ...user,
+      dateOfBirth: user.dateOfBirth ? dayjs(user.dateOfBirth) : null,
+    });
   };
 
   const filterUsers = users.filter((u) => {
@@ -163,8 +197,15 @@ function UserManagement() {
                   <Popover
                     content={
                       <div className="flex  gap-2">
-                        <Button> Sửa </Button>
-                        <Button danger> Xóa </Button>
+                        <Button onClick={() => handleEdit(u)}> Sửa </Button>
+                        <Popconfirm
+                          title="Bạn có chắc chắn muốn xóa người dùng này?"
+                          onConfirm={() => handleDelete(u.id)}
+                          okText="Có"
+                          cancelText="Không"
+                        >
+                          <Button danger> Xóa </Button>
+                        </Popconfirm>
                       </div>
                     }
                     trigger="click"
@@ -217,13 +258,15 @@ function UserManagement() {
             >
               <Input placeholder="Nhập số điện thoại" />
             </Form.Item>
-            <Form.Item
-              name="password"
-              label="Mật khẩu"
-              rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}
-            >
-              <Input.Password placeholder="Nhập mật khẩu" />
-            </Form.Item>
+            {!editingUser && (
+              <Form.Item
+                name="password"
+                label="Mật khẩu"
+                rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}
+              >
+                <Input.Password placeholder="Nhập mật khẩu" />
+              </Form.Item>
+            )}
             <Form.Item
               name="gender"
               label="Giới tính"

@@ -13,14 +13,17 @@ function Footer() {
             Nền tảng đặt sân thể thao trực tuyến hàng đầu Việt Nam
           </p>
           <div className="flex gap-4 mt-4 text-xl">
-            <a href="#" className="text-slate-400 hover:text-white transition">
+            <a
+              href="https://www.facebook.com/?locale=vi_VN"
+              className="text-slate-400 hover:text-white transition"
+            >
               <FaFacebookF />
             </a>
-            <a href="#" className="text-slate-400 hover:text-white transition">
+            <a
+              href="https://www.instagram.com/accounts/login/"
+              className="text-slate-400 hover:text-white transition"
+            >
               <FaInstagram />
-            </a>
-            <a href="#" className="text-slate-400 hover:text-white transition">
-              <FaTwitter />
             </a>
           </div>
         </div>

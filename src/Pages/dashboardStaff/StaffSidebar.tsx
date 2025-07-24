@@ -1,29 +1,21 @@
 import { useNavigate } from "react-router-dom";
-import {
-  LayoutDashboard,
-  MapPinHouse,
-  MapPinned,
-  CalendarDays,
-  Users,
-} from "lucide-react";
+import { LayoutDashboard, MapPinned, CalendarDays } from "lucide-react";
 
 // Define TabKey locally
-type TabKey = "overview" | "location" | "court" | "booking" | "staff";
+type TabKey = "overview" | "court" | "booking";
 
 const TABS = [
   { key: "overview", label: "Tổng quan", icon: <LayoutDashboard /> },
-  { key: "location", label: "Quản lý địa điểm", icon: <MapPinHouse /> },
   { key: "court", label: "Quản lý sân", icon: <MapPinned /> },
   { key: "booking", label: "Quản lý đặt sân", icon: <CalendarDays /> },
-  { key: "staff", label: "Quản lý nhân viên", icon: <Users /> },
 ];
 
-interface OwnerSidebarProps {
+interface StaffSidebarProps {
   tab: TabKey;
   setTab: (t: TabKey) => void;
 }
 
-export default function OwnerSidebar({ tab, setTab }: OwnerSidebarProps) {
+export default function StaffSidebar({ tab, setTab }: StaffSidebarProps) {
   const navigate = useNavigate();
   const linkClass =
     "flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer";
