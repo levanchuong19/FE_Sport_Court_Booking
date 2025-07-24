@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../Config/api";
-import { MapPin, Phone, MessageCircle, Info, MapPinned } from "lucide-react";
+import { MapPin, Info, MapPinned } from "lucide-react";
 import type { BusinessLocation } from "../Model/businessLocation";
 import type { Court } from "../Model/court";
 import formatVND from "../Utils/currency";
