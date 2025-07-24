@@ -8,8 +8,10 @@ import {
   Star,
   Wifi,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Court } from "../Model/court";
+import api from "../Config/api";
 import formatVND from "../Utils/currency";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
@@ -20,6 +22,8 @@ import { customAlert } from "./customAlert";
 
 function CourtCard({ court }: { court: Court }) {
   const navigate = useNavigate();
+  const [averageRating, setAverageRating] = useState<number>(0);
+  const [reviewCount, setReviewCount] = useState<number>(0);
 
   const amenities = [
     { icon: <Wifi className="w-4 h-4" />, label: "Wifi" },
@@ -27,9 +31,33 @@ function CourtCard({ court }: { court: Court }) {
     { icon: <ShowerHead className="w-4 h-4" />, label: "Phòng tắm" },
   ];
 
-  const rating = court.businessLocation?.rating || 4.8;
-  const reviews = court.businessLocation?.reviews || 124;
   const price = court.prices?.find((p) => p.priceType === "HOURLY")?.price;
+
+  useEffect(() => {
+    const fetchFeedback = async () => {
+      try {
+        const res = await api.get(`/feedback/court/${court.id}`);
+        const feedbacks = res.data?.data || [];
+
+        if (feedbacks.length > 0) {
+          const total = feedbacks.reduce(
+            (sum: number, fb: any) => sum + fb.overallRating,
+            0
+          );
+          const avg = total / feedbacks.length;
+          setAverageRating(Number(avg.toFixed(1)));
+          setReviewCount(feedbacks.length);
+        } else {
+          setAverageRating(0);
+          setReviewCount(0);
+        }
+      } catch (err) {
+        console.error("Lỗi khi lấy feedback:", err);
+      }
+    };
+
+    fetchFeedback();
+  }, [court.id]);
 
   const handleBooking = () => {
     const token = localStorage.getItem("token");
@@ -99,8 +127,8 @@ function CourtCard({ court }: { court: Court }) {
         <div className="flex items-center justify-between mt-1">
           <div className="flex items-center gap-1 text-yellow-500 text-sm font-medium">
             <Star className="w-4 h-4 fill-yellow-400" />
-            <span>{rating}</span>
-            <span className="text-gray-400 text-xs">({reviews})</span>
+            <span>{averageRating > 0 ? averageRating : "0"}</span>
+            <span className="text-gray-400 text-xs">({reviewCount})</span>
           </div>
           <div className="text-emerald-600 font-bold text-lg">
             {formatVND(price || 0)}/giờ
