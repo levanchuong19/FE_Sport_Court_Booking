@@ -18,7 +18,7 @@ export default function DashboardOwner() {
   const navigate = useNavigate();
 
   const handleContact = () => {
-    window.location.href = "mailto:support@sportzone.com?subject=Hỗ trợ chủ sân";
+    window.location.href = "http://localhost:5173/guide";
   };
 
   const handleHotline = () => {

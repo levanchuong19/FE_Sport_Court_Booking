@@ -139,7 +139,7 @@ export default function StaffCourtTab({ onDetail }: StaffCourtTabProps) {
     { title: "Tên sân", dataIndex: "courtName", key: "courtName" },
     { title: "Loại sân", dataIndex: "courtType", key: "courtType" },
     {
-      title: "Quản lí sân",
+      title: "Chủ sân",
       dataIndex: "businessLocation",
       key: "businessLocation",
       render: (businessLocation: BusinessLocation) =>
@@ -166,7 +166,7 @@ export default function StaffCourtTab({ onDetail }: StaffCourtTabProps) {
       ),
     },
     {
-      title: "Gửi report",
+      title: "Báo cáo",
       key: "report",
       render: (_: any, record: Court) => (
         <Button
@@ -178,27 +178,27 @@ export default function StaffCourtTab({ onDetail }: StaffCourtTabProps) {
         </Button>
       ),
     },
-    {
-      title: "",
-      key: "detail",
-      render: (_: any, record: Court) => (
-        <Popover
-          content={
-            <div className="flex  gap-2">
-              <Button> Sửa </Button>
-              <Button danger> Xóa </Button>
-            </div>
-          }
-          trigger="click"
-          open={openId === record.id}
-          onOpenChange={(newOpen) => setOpenId(newOpen ? record.id : null)}
-        >
-          <button className="px-2 py-1 rounded hover:bg-gray-100">
-            <Ellipsis className="text-xl" />
-          </button>
-        </Popover>
-      ),
-    },
+    // {
+    //   title: "",
+    //   key: "detail",
+    //   render: (_: any, record: Court) => (
+    //     <Popover
+    //       content={
+    //         <div className="flex  gap-2">
+    //           <Button> Sửa </Button>
+    //           <Button danger> Xóa </Button>
+    //         </div>
+    //       }
+    //       trigger="click"
+    //       open={openId === record.id}
+    //       onOpenChange={(newOpen) => setOpenId(newOpen ? record.id : null)}
+    //     >
+    //       <button className="px-2 py-1 rounded hover:bg-gray-100">
+    //         <Ellipsis className="text-xl" />
+    //       </button>
+    //     </Popover>
+    //   ),
+    // },
   ];
   return (
     <div>

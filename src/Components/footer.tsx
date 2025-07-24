@@ -1,6 +1,8 @@
-import { FaFacebookF, FaInstagram, FaTwitter } from "react-icons/fa";
+import { FaFacebookF, FaInstagram } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 function Footer() {
+  const navigate = useNavigate();
   return (
     <footer className="bg-slate-900 text-slate-200 py-10">
       <div className="container mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 px-4 max-w-6xl">
@@ -34,11 +36,11 @@ function Footer() {
             Liên kết nhanh
           </h3>
           <ul className="space-y-2">
-            {["Trang chủ", "Tìm sân", "Thể loại", "Đăng ký", "Đăng nhập"].map(
+            {["Trang chủ", " Tìm sân", "Thể loại", "Đăng ký", "Đăng nhập"].map(
               (item, idx) => (
                 <li key={idx}>
                   <a
-                    href="#"
+                    href="/"
                     className="text-slate-400 hover:text-white text-sm transition"
                   >
                     {item}
@@ -52,7 +54,7 @@ function Footer() {
         {/* Cột 3 */}
         <div>
           <h3 className="font-semibold text-white text-base mb-4">Thông tin</h3>
-          <ul className="space-y-2">
+          <ul onClick={() => navigate("/guide")} className="space-y-2">
             {[
               "Về chúng tôi",
               "Điều khoản sử dụng",
@@ -76,9 +78,9 @@ function Footer() {
         <div>
           <h3 className="font-semibold text-white text-base mb-4">Liên hệ</h3>
           <ul className="space-y-2 text-sm text-slate-400 leading-relaxed">
-            <li>123 Đường ABC, Quận 1, TP.HCM</li>
-            <li>0123 456 789</li>
-            <li>info@sportzone.vn</li>
+            <li>123 Nguyễn Văn Linh, Q.7, TP.HCM</li>
+            <li>1900 1234</li>
+            <li>support@sportbooking.vn</li>
             <li>8:00 - 22:00, Thứ 2 - Chủ nhật</li>
           </ul>
         </div>

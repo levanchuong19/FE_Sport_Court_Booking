@@ -15,7 +15,7 @@ export interface Court {
   updatedAt: Date;
   createdBy: string;
   updatedBy: string;
-  isDeleted: boolean;
+  isDelete: boolean;
   courtType: string;
   yearBuild: number;
   length: number;

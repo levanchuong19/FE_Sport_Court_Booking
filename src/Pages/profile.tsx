@@ -17,6 +17,8 @@ import {
   KeyRound,
   Pencil,
   Settings,
+  Mail,
+  Phone,
 } from "lucide-react";
 
 const statusColor = {
@@ -154,7 +156,7 @@ export default function Profile() {
       bookingExperienceRating: feedbackForm.bookingExperienceRating,
       playedDate: feedbackBooking.startDate,
       courtId: feedbackBooking.court?.id,
-      accountId: accountId, // ✅ dùng trực tiếp từ token
+      accountId: accountId,
     };
 
     try {
@@ -202,16 +204,18 @@ export default function Profile() {
               <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-semibold">
                 Đã xác thực
               </span>
-              <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-semibold">
-                Premium
-              </span>
             </div>
             <div className="flex flex-wrap items-center gap-3 text-gray-600 text-sm mb-2">
-              <span>{user?.email}</span>
-              <span>•</span>
-              <span>{user?.phone}</span>
-              <span>•</span>
-              <span>
+              <span className="flex items-center gap-1">
+                <Mail className="w-4 h-4 mt-1" />
+                {user?.email}
+              </span>
+              <span className="flex items-center gap-1">
+                <Phone className="w-4 h-4" />
+                {user?.phone}
+              </span>
+              <span className="flex items-center gap-1">
+                <Calendar className="w-4 h-4" />
                 Tham gia từ{" "}
                 {user?.createAt ? formatDate(new Date(user.createAt)) : ""}
               </span>
@@ -538,9 +542,6 @@ export default function Profile() {
                     </div>
                     <div className="flex flex-col gap-2">
                       <div className="flex gap-2">
-                        <button className="px-4 py-2 border border-gray-200 rounded hover:bg-gray-50 flex items-center gap-1">
-                          Chi tiết
-                        </button>
                         <button
                           className="px-4 w-[100px] py-2 flex items-center justify-center border border-gray-200 rounded hover:bg-gray-50 flex items-center gap-1"
                           onClick={() => navigate(`/booking/${b.court?.id}`)}
@@ -562,7 +563,14 @@ export default function Profile() {
                       )}
                       {b.status === "BOOKED" && (
                         <>
-                          <button className="px-4 py-2 gap-3 border justify-center border-gray-200 rounded hover:bg-gray-50 flex items-center gap-1">
+                          <button
+                            onClick={() =>
+                              navigate(`/booking/${b.court?.id}`, {
+                                state: { rebookId: b.id },
+                              })
+                            }
+                            className="px-4 py-2 gap-3 border justify-center border-gray-200 rounded hover:bg-gray-50 flex items-center gap-1"
+                          >
                             <RefreshCcw className="w-4 h-4 text-gray-500" />
                             Đổi lịch
                           </button>
