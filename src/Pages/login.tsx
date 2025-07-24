@@ -42,10 +42,12 @@ function Login() {
         localStorage.setItem("token", response.data.data.token);
         localStorage.setItem("user", JSON.stringify(response.data.data));
         dispatch(login(response.data.data.user));
-        if(response.data.data.role === "ADMIN"){
+        if (response.data.data.role === "ADMIN") {
           navigate("/dashboard", { replace: true });
-        } else if(response.data.data.role === "MANAGER"){
+        } else if (response.data.data.role === "MANAGER") {
           navigate("/dashboardOwner", { replace: true });
+        } else if (response.data.data.role === "STAFF") {
+          navigate("/dashboardStaff", { replace: true });
         } else {
           navigate("/", { replace: true });
         }

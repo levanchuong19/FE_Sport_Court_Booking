@@ -223,21 +223,27 @@ export default function GuidePage() {
             <div className=" max-w-2xl mx-auto mb-12 pt-6">
               <div className="font-bold text-xl mb-4">Theo dõi chúng tôi</div>
               <div className="flex gap-4">
-                <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Facebook_Logo_%282019%29.png/1200px-Facebook_Logo_%282019%29.png"
-                  alt="Facebook"
-                  className="w-10 h-10"
-                />
-                <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Icon_of_Zalo.svg/2048px-Icon_of_Zalo.svg.png"
-                  alt="Zalo"
-                  className="w-10 h-10"
-                />
-                <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Instagram_icon.png/2048px-Instagram_icon.png"
-                  alt="Instagram"
-                  className="w-10 h-10"
-                />
+                <a href="https://www.facebook.com/?locale=vi_VN">
+                  <img
+                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Facebook_Logo_%282019%29.png/1200px-Facebook_Logo_%282019%29.png"
+                    alt="Facebook"
+                    className="w-10 h-10"
+                  />
+                </a>
+                <a href="https://id.zalo.me/account?continue=https%3A%2F%2Fchat.zalo.me%2Findex.html">
+                  <img
+                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Icon_of_Zalo.svg/2048px-Icon_of_Zalo.svg.png"
+                    alt="Zalo"
+                    className="w-10 h-10"
+                  />
+                </a>
+                <a href="https://www.instagram.com/accounts/login/">
+                  <img
+                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Instagram_icon.png/2048px-Instagram_icon.png"
+                    alt="Instagram"
+                    className="w-10 h-10"
+                  />
+                </a>
               </div>
             </div>
           </div>

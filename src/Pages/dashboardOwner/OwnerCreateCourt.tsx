@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../Config/api";
 import { Input, Select, Button, Form, InputNumber, message } from "antd";
-import jwt_decode from "jwt-decode";
+import type { JwtPayload } from "../../Model/user";
+import { jwtDecode } from "jwt-decode";
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -52,8 +53,8 @@ export default function OwnerCreateCourt() {
     const token = localStorage.getItem("accessToken");
     if (!token) return "";
     try {
-      const decoded: any = jwt_decode(token);
-      return decoded?.sub || "";
+      const decodedToken: JwtPayload = jwtDecode(token);
+      return decodedToken?.sub || "";
     } catch (e) {
       return "";
     }
@@ -94,15 +95,27 @@ export default function OwnerCreateCourt() {
     <div className="max-w-4xl mx-auto p-6">
       <h2 className="text-2xl font-bold text-emerald-600 mb-4">Tạo sân mới</h2>
       <Form layout="vertical" onFinish={onFinish}>
-        <Form.Item name="courtName" label="Tên sân" rules={[{ required: true }]}>
+        <Form.Item
+          name="courtName"
+          label="Tên sân"
+          rules={[{ required: true }]}
+        >
           <Input />
         </Form.Item>
 
-        <Form.Item name="description" label="Mô tả" rules={[{ required: true }]}>
+        <Form.Item
+          name="description"
+          label="Mô tả"
+          rules={[{ required: true }]}
+        >
           <TextArea rows={3} />
         </Form.Item>
 
-        <Form.Item name="courtType" label="Loại sân" rules={[{ required: true }]}>
+        <Form.Item
+          name="courtType"
+          label="Loại sân"
+          rules={[{ required: true }]}
+        >
           <Select placeholder="Chọn loại sân">
             {courtTypes.map((ct) => (
               <Option key={ct.value} value={ct.value}>
@@ -112,23 +125,47 @@ export default function OwnerCreateCourt() {
           </Select>
         </Form.Item>
 
-        <Form.Item name="length" label="Chiều dài (m)" rules={[{ required: true }]}>
+        <Form.Item
+          name="length"
+          label="Chiều dài (m)"
+          rules={[{ required: true }]}
+        >
           <InputNumber min={1} className="w-full" />
         </Form.Item>
 
-        <Form.Item name="width" label="Chiều rộng (m)" rules={[{ required: true }]}>
+        <Form.Item
+          name="width"
+          label="Chiều rộng (m)"
+          rules={[{ required: true }]}
+        >
           <InputNumber min={1} className="w-full" />
         </Form.Item>
 
-        <Form.Item name="yearBuild" label="Năm xây dựng" rules={[{ required: true }]}>
-          <InputNumber min={1900} max={new Date().getFullYear()} className="w-full" />
+        <Form.Item
+          name="yearBuild"
+          label="Năm xây dựng"
+          rules={[{ required: true }]}
+        >
+          <InputNumber
+            min={1900}
+            max={new Date().getFullYear()}
+            className="w-full"
+          />
         </Form.Item>
 
-        <Form.Item name="maxPlayers" label="Sức chứa tối đa" rules={[{ required: true }]}>
+        <Form.Item
+          name="maxPlayers"
+          label="Sức chứa tối đa"
+          rules={[{ required: true }]}
+        >
           <InputNumber min={1} className="w-full" />
         </Form.Item>
 
-        <Form.Item name="businessLocationId" label="Địa điểm" rules={[{ required: true }]}>
+        <Form.Item
+          name="businessLocationId"
+          label="Địa điểm"
+          rules={[{ required: true }]}
+        >
           <Select placeholder="Chọn địa điểm">
             {locations.map((loc) => (
               <Option key={loc.id} value={loc.id}>

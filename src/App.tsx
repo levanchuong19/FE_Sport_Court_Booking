@@ -24,6 +24,7 @@ import ChangePassword from "./Pages/changePassword";
 import ShowBusinessLocation from "./Pages/dashboard/LocationManagement";
 import DashboardOwner from "./Pages/dashboardOwner/dashboardOwner";
 import EditProfile from "./Pages/editProfile";
+import DashboardStaff from "./Pages/dashboardStaff/dashboardStaff";
 function App() {
   const router = createBrowserRouter([
     {
@@ -75,6 +76,10 @@ function App() {
     {
       path: "dashboardOwner",
       element: <DashboardOwner />,
+    },
+    {
+      path: "dashboardStaff",
+      element: <DashboardStaff />,
     },
   ]);
 
