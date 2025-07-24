@@ -11,7 +11,12 @@ import {
   Row,
   Col,
 } from "antd";
-import { PlusOutlined, DeleteOutlined, EyeOutlined } from "@ant-design/icons";
+import {
+  PlusOutlined,
+  DeleteOutlined,
+  EyeOutlined,
+  EditOutlined,
+} from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import api from "../../Config/api";
 import { jwtDecode } from "jwt-decode";
@@ -20,7 +25,7 @@ import type { Court } from "../../Model/court";
 import type { JwtPayload } from "../../Model/user";
 import type { BusinessLocation } from "../../Model/businessLocation";
 import { useForm } from "antd/es/form/Form";
-import { useNavigate } from "react-router-dom";
+
 const { Option } = Select;
 
 interface OwnerCourtTabProps {
@@ -30,10 +35,10 @@ interface OwnerCourtTabProps {
 export default function OwnerCourtTab({ onDetail }: OwnerCourtTabProps) {
   const [courts, setCourts] = useState<Court[]>([]);
   const [isOpenModal, setIsOpenModal] = useState(false);
+  const [editingCourt, setEditingCourt] = useState<Court | null>(null);
   const [form] = useForm();
   const [locations, setLocations] = useState<BusinessLocation[]>([]);
   const [managerId, setManagerId] = useState<string>("");
-  const navigate = useNavigate();
 
   const fetchCourts = async (ownerId: string) => {
     try {
@@ -51,10 +56,10 @@ export default function OwnerCourtTab({ onDetail }: OwnerCourtTabProps) {
     if (!token) return;
     const decoded: JwtPayload = jwtDecode(token);
     setManagerId(decoded.sub);
-
     fetchCourts(decoded.sub);
 
-    api.get("location/getAll")
+    api
+      .get("location/getAll")
       .then((res) => {
         const locs: BusinessLocation[] = res.data.data.content;
         setLocations(locs.filter((loc) => loc.owner?.id === decoded.sub));
@@ -63,29 +68,35 @@ export default function OwnerCourtTab({ onDetail }: OwnerCourtTabProps) {
   }, []);
 
   const handleSubmit = async (values: any) => {
-    try {
-      const payload = {
-        courtType: values.courtType,
-        courtName: values.courtName,
-        description: values.description,
-        manager_id: managerId,
-        businessLocationId: values.businessLocationId,
-        yearBuild: values.yearBuild,
-        length: values.length,
-        width: values.width,
-        maxPlayers: values.maxPlayers,
-        prices: values.prices || [],
-        images: values.images || [],
-      };
+    const payload = {
+      courtType: values.courtType,
+      courtName: values.courtName,
+      description: values.description,
+      manager_id: managerId,
+      businessLocationId: values.businessLocationId,
+      yearBuild: values.yearBuild,
+      length: values.length,
+      width: values.width,
+      maxPlayers: values.maxPlayers,
+      prices: values.prices || [],
+      images: values.images || [],
+    };
 
-      const res = await api.post("court/create", payload);
-      message.success("Tạo sân thành công");
+    try {
+      if (editingCourt) {
+        await api.put(`court/update/${editingCourt.id}`, payload);
+        message.success("Cập nhật sân thành công");
+      } else {
+        await api.post("court/create", payload);
+        message.success("Tạo sân thành công");
+      }
       setIsOpenModal(false);
+      setEditingCourt(null);
       form.resetFields();
       fetchCourts(managerId);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      message.error("Tạo sân thất bại");
+      message.error(editingCourt ? "Cập nhật thất bại" : "Tạo sân thất bại");
     }
   };
 
@@ -95,13 +106,37 @@ export default function OwnerCourtTab({ onDetail }: OwnerCourtTabProps) {
       message.success("Xoá sân thành công");
       fetchCourts(managerId);
     } catch (err: any) {
-      console.error(err);
       const msg =
         err?.response?.data?.message ||
         err?.response?.data?.error ||
         "Xoá sân thất bại";
       message.error(msg);
     }
+  };
+
+  const handleUpdateStatus = async (courtId: string, newStatus: string) => {
+    try {
+      await api.patch(`court/${courtId}/status`, { status: newStatus });
+      message.success("Cập nhật trạng thái thành công");
+      fetchCourts(managerId);
+    } catch (err: any) {
+      console.error(err);
+      message.error("Cập nhật trạng thái thất bại");
+    }
+  };
+
+  const handleEdit = (court: Court) => {
+    setEditingCourt(court);
+    form.setFieldsValue({
+      ...court,
+      businessLocationId: court.businessLocation?.id,
+      images: court.images?.map((img) => img.imageUrl) || [],
+      prices: court.prices?.map((p) => ({
+        priceType: p.priceType,
+        price: p.price,
+      })),
+    });
+    setIsOpenModal(true);
   };
 
   const columns = [
@@ -117,16 +152,24 @@ export default function OwnerCourtTab({ onDetail }: OwnerCourtTabProps) {
     },
     {
       title: "Giá",
-      render: (_unused: any, record: Court) =>
-        formatVND(record.prices?.[0]?.price),
+      render: (_: any, record: Court) => formatVND(record.prices?.[0]?.price),
       key: "price",
     },
     {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
-      render: (status: string) => (
-        <Tag color={status === "AVAILABLE" ? "green" : "red"}>{status}</Tag>
+      render: (status: string, record: Court) => (
+        <Select
+          value={status}
+          onChange={(value) => handleUpdateStatus(record.id, value)}
+          style={{ width: 150 }}
+        >
+          <Option value="AVAILABLE">Sẵn sàng</Option>
+          <Option value="IN_USE">Đang sử dụng</Option>
+          <Option value="MAINTENANCE">Bảo trì</Option>
+          <Option value="INACTIVE">Vô hiệu hóa</Option>
+        </Select>
       ),
     },
     {
@@ -134,18 +177,17 @@ export default function OwnerCourtTab({ onDetail }: OwnerCourtTabProps) {
       key: "actions",
       render: (_: any, record: Court) => (
         <div className="flex gap-2">
-          <Button
-            icon={<EyeOutlined />}
-            onClick={() => onDetail(record)}
-            type="link"
-          >
+          <Button icon={<EyeOutlined />} onClick={() => onDetail(record)} type="link">
             Chi tiết
+          </Button>
+          <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} type="link">
+            Chỉnh sửa
           </Button>
           {record.status === "AVAILABLE" && (
             <Button
-              type="link"
               icon={<DeleteOutlined />}
               danger
+              type="link"
               onClick={() => handleDelete(record.id)}
             >
               Xoá
@@ -156,8 +198,13 @@ export default function OwnerCourtTab({ onDetail }: OwnerCourtTabProps) {
     },
   ];
 
-  const activeCourts = courts.filter((c) => c.status === "AVAILABLE");
-  const inactiveCourts = courts.filter((c) => c.status === "INACTIVE");
+  const activeCourts = courts.filter((c) =>
+    c.status === "AVAILABLE" || c.status === "IN_USE"
+  );
+
+  const inactiveCourts = courts.filter((c) =>
+    c.status === "MAINTENANCE" || c.status === "INACTIVE"
+  );
 
   return (
     <div>
@@ -166,7 +213,11 @@ export default function OwnerCourtTab({ onDetail }: OwnerCourtTabProps) {
         <Button
           type="primary"
           icon={<PlusOutlined />}
-          onClick={() => setIsOpenModal(true)}
+          onClick={() => {
+            setIsOpenModal(true);
+            setEditingCourt(null);
+            form.resetFields();
+          }}
         >
           Thêm sân mới
         </Button>
@@ -192,33 +243,29 @@ export default function OwnerCourtTab({ onDetail }: OwnerCourtTabProps) {
         className="rounded-md shadow"
       />
 
-      {/* Modal Thêm sân */}
+      {/* Modal Thêm / Chỉnh sửa sân */}
       <Modal
-        title="Thêm sân mới"
+        title={editingCourt ? "Chỉnh sửa sân" : "Thêm sân mới"}
         open={isOpenModal}
-        onCancel={() => setIsOpenModal(false)}
+        onCancel={() => {
+          setIsOpenModal(false);
+          setEditingCourt(null);
+          form.resetFields();
+        }}
         onOk={() => form.submit()}
-        okText="Tạo"
+        okText={editingCourt ? "Cập nhật" : "Tạo"}
         cancelText="Hủy"
         width={800}
       >
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item
-                name="courtName"
-                label="Tên sân"
-                rules={[{ required: true }]}
-              >
+              <Form.Item name="courtName" label="Tên sân" rules={[{ required: true }]}>
                 <Input placeholder="Nhập tên sân" />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item
-                name="courtType"
-                label="Loại sân"
-                rules={[{ required: true }]}
-              >
+              <Form.Item name="courtType" label="Loại sân" rules={[{ required: true }]}>
                 <Select placeholder="Chọn loại sân">
                   <Option value="FOOTBALL">Bóng đá</Option>
                   <Option value="TENNIS">Tennis</Option>
@@ -229,61 +276,33 @@ export default function OwnerCourtTab({ onDetail }: OwnerCourtTabProps) {
               </Form.Item>
             </Col>
             <Col span={24}>
-              <Form.Item
-                name="description"
-                label="Mô tả"
-                rules={[{ required: true }]}
-              >
+              <Form.Item name="description" label="Mô tả" rules={[{ required: true }]}>
                 <Input.TextArea rows={3} placeholder="Mô tả chi tiết sân" />
               </Form.Item>
             </Col>
             <Col span={6}>
-              <Form.Item
-                name="length"
-                label="Chiều dài (m)"
-                rules={[{ required: true }]}
-              >
+              <Form.Item name="length" label="Chiều dài (m)" rules={[{ required: true }]}>
                 <InputNumber min={1} className="w-full" />
               </Form.Item>
             </Col>
             <Col span={6}>
-              <Form.Item
-                name="width"
-                label="Chiều rộng (m)"
-                rules={[{ required: true }]}
-              >
+              <Form.Item name="width" label="Chiều rộng (m)" rules={[{ required: true }]}>
                 <InputNumber min={1} className="w-full" />
               </Form.Item>
             </Col>
             <Col span={6}>
-              <Form.Item
-                name="yearBuild"
-                label="Năm xây dựng"
-                rules={[{ required: true }]}
-              >
-                <InputNumber
-                  min={1900}
-                  max={new Date().getFullYear()}
-                  className="w-full"
-                />
+              <Form.Item name="yearBuild" label="Năm xây dựng" rules={[{ required: true }]}>
+                <InputNumber min={1900} max={new Date().getFullYear()} className="w-full" />
               </Form.Item>
             </Col>
             <Col span={6}>
-              <Form.Item
-                name="maxPlayers"
-                label="Sức chứa tối đa"
-                rules={[{ required: true }]}
-              >
+              <Form.Item name="maxPlayers" label="Sức chứa tối đa" rules={[{ required: true }]}>
                 <InputNumber min={1} className="w-full" />
               </Form.Item>
             </Col>
 
             <Col span={24}>
-              <Form.Item
-                name="businessLocationId"
-                label="Địa điểm"
-                rules={[{ required: true }]}
-              >
+              <Form.Item name="businessLocationId" label="Địa điểm" rules={[{ required: true }]}>
                 <Select placeholder="Chọn địa điểm">
                   {locations.map((loc) => (
                     <Option key={loc.id} value={loc.id}>
@@ -300,12 +319,7 @@ export default function OwnerCourtTab({ onDetail }: OwnerCourtTabProps) {
                   <>
                     <label className="font-medium">Bảng giá</label>
                     {fields.map((field) => (
-                      <Row
-                        key={field.key}
-                        gutter={8}
-                        align="middle"
-                        className="my-1"
-                      >
+                      <Row key={field.key} gutter={8} align="middle" className="my-1">
                         <Col span={8}>
                           <Form.Item
                             {...field}
@@ -326,11 +340,7 @@ export default function OwnerCourtTab({ onDetail }: OwnerCourtTabProps) {
                             name={[field.name, "price"]}
                             rules={[{ required: true }]}
                           >
-                            <InputNumber
-                              min={0}
-                              placeholder="Giá"
-                              className="w-full"
-                            />
+                            <InputNumber min={0} placeholder="Giá" className="w-full" />
                           </Form.Item>
                         </Col>
                         <Col>
@@ -357,12 +367,7 @@ export default function OwnerCourtTab({ onDetail }: OwnerCourtTabProps) {
                   <>
                     <label className="font-medium">Ảnh</label>
                     {fields.map((field) => (
-                      <Row
-                        key={field.key}
-                        gutter={8}
-                        align="middle"
-                        className="my-1"
-                      >
+                      <Row key={field.key} gutter={8} align="middle" className="my-1">
                         <Col span={22}>
                           <Form.Item
                             {...field}
