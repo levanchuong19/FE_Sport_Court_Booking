@@ -14,7 +14,6 @@ import {
   Select,
 } from "antd";
 import { useForm } from "antd/es/form/Form";
-import { Option } from "antd/es/mentions";
 import type { BusinessLocation } from "../../Model/businessLocation";
 import { EllipsisOutlined } from "@ant-design/icons";
 
@@ -30,6 +29,9 @@ function CourtManagement() {
 
   const handleOpenModal = () => {
     setIsOpenModal(true);
+    form.setFieldsValue({
+      prices: [{ priceType: undefined, price: undefined }],
+    });
   };
 
   const handleCloseModal = () => {
@@ -67,11 +69,13 @@ function CourtManagement() {
 
   const handleDelete = async (courtId: string) => {
     try {
-      await api.delete(`court/delete/${courtId}`);
+      await api.put(`court/update/${courtId}`, {
+        status: "INACTIVE",
+      });
       fetchCourts();
-      console.log("Court deleted successfully");
+      console.log("Court set to INACTIVE");
     } catch (error) {
-      console.error("Error deleting court:", error);
+      console.error("Error updating court status:", error);
     }
   };
 
@@ -129,10 +133,6 @@ function CourtManagement() {
             <Search />
           </span>{" "}
           Lọc
-          <span>
-            <Search />
-          </span>{" "}
-          Lọc
         </button>
         <select
           className="border border-gray-200 rounded-lg px-3 py-2"
@@ -182,7 +182,7 @@ function CourtManagement() {
                   <td className="py-2 px-4">
                     <span
                       className={`px-3 py-1 rounded-full text-xs ${
-                        f.status === "AVAILABLE" ? "bg-green-500" : ""
+                        f.status === "AVAILABLE" ? "bg-green-500" : "bg-red-500"
                       }`}
                     >
                       {f.status}
@@ -248,7 +248,7 @@ function CourtManagement() {
                     {fields.map((field) => (
                       <div key={field.key}>
                         <Form.Item
-                          {...field}
+                          fieldKey={[field.key, "priceType"]}
                           name={[field.name, "priceType"]}
                           label="Giá"
                           rules={[
@@ -256,14 +256,14 @@ function CourtManagement() {
                           ]}
                         >
                           <Select placeholder="Chọn loại giá">
-                            <Option value="HOURLY">Giờ</Option>
-                            <Option value="DAILY">Ngày</Option>
-                            <Option value="WEEKLY">Tuần</Option>
-                            <Option value="MONTHLY">Tháng</Option>
+                            <Select.Option value="HOURLY">Giờ</Select.Option>
+                            <Select.Option value="DAILY">Ngày</Select.Option>
+                            <Select.Option value="WEEKLY">Tuần</Select.Option>
+                            <Select.Option value="MONTHLY">Tháng</Select.Option>
                           </Select>
                         </Form.Item>
                         <Form.Item
-                          {...field}
+                          fieldKey={[field.key, "price"]}
                           name={[field.name, "price"]}
                           rules={[
                             {
@@ -309,18 +309,24 @@ function CourtManagement() {
             <Form.Item name="businessLocationId" label="Địa điểm kinh doanh">
               <Select placeholder="Chọn địa điểm kinh doanh">
                 {isLocation.map((location: BusinessLocation) => (
-                  <Option key={location.id} value={location.id}>
+                  <Select.Option key={location.id} value={location.id}>
                     {location.address}
-                  </Option>
+                  </Select.Option>
                 ))}
               </Select>
             </Form.Item>
             <Form.Item name="manager_id" label="Quản lý sân">
               <Select placeholder="Chọn quản lý sân">
-                {isLocation.map((location: BusinessLocation) => (
-                  <Option key={location.owner.id} value={location.owner.id}>
-                    {location.owner.fullName}
-                  </Option>
+                {[
+                  ...new Map(
+                    isLocation
+                      .filter((location) => location.owner) // Lọc location có owner
+                      .map((location) => [location.owner.id, location.owner])
+                  ).values(),
+                ].map((owner) => (
+                  <Select.Option key={owner.id} value={owner.id}>
+                    {owner.fullName}
+                  </Select.Option>
                 ))}
               </Select>
             </Form.Item>
@@ -393,9 +399,9 @@ function CourtManagement() {
                       key={key}
                       label={`Ảnh ${key + 1}`}
                       name={name}
-                      rules={[
-                        { required: true, message: "Vui lòng nhập URL ảnh!" },
-                      ]}
+                      // rules={[
+                      //   { required: true, message: "Vui lòng nhập URL ảnh!" },
+                      // ]}
                     >
                       <Input
                         placeholder="Nhập URL ảnh"
