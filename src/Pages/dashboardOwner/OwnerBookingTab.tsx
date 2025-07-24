@@ -28,10 +28,8 @@ export default function OwnerBookingTab({ onDetail }: OwnerBookingTabProps) {
         (booking: Slot) =>
           booking.ownerId === user && booking.status === "BOOKED"
       );
-      console.log("booked", booked);
       setBookings(bookings);
       setIsBooked(booked);
-      console.log("response.data.data", response.data.data.content);
     } else {
       setBookings([]);
     }
@@ -41,11 +39,46 @@ export default function OwnerBookingTab({ onDetail }: OwnerBookingTabProps) {
     fetchBookings();
   }, []);
 
+useEffect(() => {
+  console.log("bookings", bookings);
+  console.log("isBooked", isBooked);
+}, [bookings, isBooked]);
   const handleCheckIn = async (values: Slot) => {
-    const response = await api.patch(`slot/${values.id}/checkIn`);
-    console.log("response", response.data.data);
+    await api.patch(`slot/${values.id}/checkIn`);
     customAlert("Thành Công", "Check-In thành công", "default");
     fetchBookings();
+  };
+
+  const renderStatus = (status: string) => {
+    switch (status) {
+      case "PENDING":
+        return <Tag color="orange">Chờ xác nhận</Tag>;
+      case "BOOKED":
+        return <Tag color="gray">Chờ Check-in</Tag>;
+      case "CANCELED":
+        return <Tag color="red">Đã hủy</Tag>;
+      case "COMPLETED":
+        return <Tag color="green">Đã hoàn thành</Tag>;
+      case "CHECKED_IN":
+        return <Tag color="blue">Đã Check-In</Tag>;
+      default:
+        return <Tag color="default">{status}</Tag>;
+    }
+  };
+
+  const renderBookingStatus = (bookingStatus: string) => {
+    switch (bookingStatus) {
+      case "PAID":
+        return <Tag color="green">Đã thanh toán</Tag>;
+      case "PENDING":
+        return <Tag color="orange">Chờ thanh toán</Tag>;
+      case "OVERDUE":
+        return <Tag color="red">Quá hạn</Tag>;
+      case "UNPAID":
+        return <Tag color="volcano">Chưa thanh toán</Tag>;
+      default:
+        return <Tag color="default">{bookingStatus}</Tag>;
+    }
   };
 
   const columns = [
@@ -62,14 +95,13 @@ export default function OwnerBookingTab({ onDetail }: OwnerBookingTabProps) {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
-      render: (status: string) => {
-        if (status === "PENDING") return <Tag color="orange">Chờ xác nhận</Tag>;
-        if (status === "BOOKED") return <Tag color="gray">Chờ Check-in</Tag>;
-        if (status === "CANCELED") return <Tag color="red">Đã hủy</Tag>;
-        if (status === "COMPLETED")
-          return <Tag color="green">Đã hoàn thành</Tag>;
-        return <Tag color="default">{status}</Tag>;
-      },
+      render: renderStatus,
+    },
+    {
+      title: "Thanh toán",
+      dataIndex: "bookingStatus",
+      key: "bookingStatus",
+      render: renderBookingStatus,
     },
     {
       title: "Giá",
@@ -85,6 +117,7 @@ export default function OwnerBookingTab({ onDetail }: OwnerBookingTabProps) {
       ),
     },
   ];
+
   const columnCheckIn = [
     {
       title: "Khách hàng",
@@ -99,14 +132,13 @@ export default function OwnerBookingTab({ onDetail }: OwnerBookingTabProps) {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
-      render: (status: string) => {
-        if (status === "PENDING") return <Tag color="orange">Chờ xác nhận</Tag>;
-        if (status === "BOOKED") return <Tag color="gray">Chờ Check-in</Tag>;
-        if (status === "CANCELED") return <Tag color="red">Đã hủy</Tag>;
-        if (status === "COMPLETED")
-          return <Tag color="green">Đã hoàn thành</Tag>;
-        return <Tag color="default">{status}</Tag>;
-      },
+      render: renderStatus,
+    },
+    {
+      title: "Thanh toán",
+      dataIndex: "bookingStatus",
+      key: "bookingStatus",
+      render: renderBookingStatus,
     },
     {
       title: "Giá",
@@ -124,6 +156,7 @@ export default function OwnerBookingTab({ onDetail }: OwnerBookingTabProps) {
       ),
     },
   ];
+
   return (
     <div>
       <h2 className="text-xl font-semibold mb-2">Quản lý đặt sân</h2>
