@@ -35,7 +35,10 @@ const CourtBooking: React.FC = () => {
   const handleSearch = async () => {
     try {
       const res = await api.get("court/getAll");
-      setCourts(res.data?.data?.content || []);
+      const response = res.data?.data?.content.filter(
+        (court: Court) => court.status === "AVAILABLE"
+      );
+      setCourts(response || []);
     } catch (err) {
       console.error("Lỗi khi gọi API:", err);
       setCourts([]);

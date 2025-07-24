@@ -5,7 +5,7 @@ import type { BusinessLocation } from "../Model/businessLocation";
 import { useNavigate } from "react-router-dom";
 import { Modal } from "antd";
 import { CheckCircleOutlined, EnvironmentOutlined } from "@ant-design/icons";
-import type { Feedback } from "../Model/Feedback";
+import type { Feedback } from "../Model/feedback";
 
 function Home() {
   const [location, setLocation] = useState<BusinessLocation[]>([]);
@@ -218,11 +218,16 @@ function Home() {
       // Gọi Nominatim để lấy lat/lng từ searchLocation
       try {
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchLocation)}&countrycodes=vn&limit=1`
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+            searchLocation
+          )}&countrycodes=vn&limit=1`
         );
         const data = await res.json();
         if (data && data.length > 0) {
-          center = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+          center = {
+            lat: parseFloat(data[0].lat),
+            lng: parseFloat(data[0].lon),
+          };
           latitude = parseFloat(data[0].lat);
           longitude = parseFloat(data[0].lon);
         }
@@ -234,17 +239,19 @@ function Home() {
     const searchData = {
       location: currentLocation ? "" : searchLocation,
       latitude,
-      longitude
+      longitude,
     };
 
     try {
       const response = await api.post("/search", searchData);
       navigate("/search", {
         state: {
-          searchResults: response.data.data.filter((location: BusinessLocation) => location.status === "ACTIVE"),
+          searchResults: response.data.data.filter(
+            (location: BusinessLocation) => location.status === "ACTIVE"
+          ),
           searchData: searchData,
-          center // luôn truyền center nếu có
-        }
+          center, // luôn truyền center nếu có
+        },
       });
     } catch (error) {
       alert("Có lỗi xảy ra khi tìm kiếm. Vui lòng thử lại.");
@@ -286,9 +293,9 @@ function Home() {
 
   const fetchRating = async () => {
     const response = await api.get("feedback/random");
-    console.log("response", response.data.data)
-    setRating(response.data.data)
-  }
+    console.log("response", response.data.data);
+    setRating(response.data.data);
+  };
 
   useEffect(() => {
     fetchRating();
@@ -394,10 +401,11 @@ function Home() {
                               setSelectedDistrict(null);
                               setSelectedWard(null);
                             }}
-                            className={`px-2 py-1 rounded text-xs ${currentStep === "province"
+                            className={`px-2 py-1 rounded text-xs ${
+                              currentStep === "province"
                                 ? "bg-emerald-600 text-white"
                                 : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                              }`}
+                            }`}
                           >
                             Tỉnh/TP
                           </button>
@@ -410,10 +418,11 @@ function Home() {
                                   setSelectedDistrict(null);
                                   setSelectedWard(null);
                                 }}
-                                className={`px-2 py-1 rounded text-xs ${currentStep === "district"
+                                className={`px-2 py-1 rounded text-xs ${
+                                  currentStep === "district"
                                     ? "bg-emerald-600 text-white"
                                     : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                                  }`}
+                                }`}
                               >
                                 {selectedProvince.name}
                               </button>
@@ -427,10 +436,11 @@ function Home() {
                                   setCurrentStep("ward");
                                   setSelectedWard(null);
                                 }}
-                                className={`px-2 py-1 rounded text-xs ${currentStep === "ward"
+                                className={`px-2 py-1 rounded text-xs ${
+                                  currentStep === "ward"
                                     ? "bg-emerald-600 text-white"
                                     : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                                  }`}
+                                }`}
                               >
                                 {selectedDistrict.name}
                               </button>
@@ -562,7 +572,7 @@ function Home() {
         <section className="py-16 bg-slate-50">
           <div className="container mx-auto max-w-6xl px-4">
             <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
-              <h2 className="text-3xl font-bold">Sân nổi bật</h2>
+              <h2 className="text-3xl font-bold">Địa điểm nổi bật</h2>
               <a
                 href="/search"
                 className="text-emerald-600 hover:text-emerald-700 font-medium flex items-center"
@@ -651,16 +661,18 @@ function Home() {
                       {t.account?.fullName.charAt(0) ?? "?"}
                     </div>
                     <div>
-                      <div className="font-medium">{t.account?.fullName ?? "Ẩn danh"}</div>
+                      <div className="font-medium">
+                        {t.account?.fullName ?? "Ẩn danh"}
+                      </div>
                       <div className="text-sm text-gray-500">
-                        Đã chơi ngày {new Date(t.playedDate).toLocaleDateString("vi-VN")}
+                        Đã chơi ngày{" "}
+                        {new Date(t.playedDate).toLocaleDateString("vi-VN")}
                       </div>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-
           </div>
         </section>
       </main>
