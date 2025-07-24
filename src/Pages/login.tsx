@@ -46,6 +46,8 @@ function Login() {
           navigate("/dashboard", { replace: true });
         } else if (response.data.data.role === "MANAGER") {
           navigate("/dashboardOwner", { replace: true });
+        } else if (response.data.data.role === "STAFF") {
+          navigate("/dashboardStaff", { replace: true });
         } else {
           navigate("/", { replace: true });
         }
