@@ -69,13 +69,11 @@ function CourtManagement() {
 
   const handleDelete = async (courtId: string) => {
     try {
-      await api.put(`court/update/${courtId}`, {
-        status: "INACTIVE",
-      });
+      await api.delete(`court/delete/${courtId}`);
       fetchCourts();
-      console.log("Court set to INACTIVE");
+      console.log("Court deleted successfully");
     } catch (error) {
-      console.error("Error updating court status:", error);
+      console.error("Error deleting court:", error);
     }
   };
 
@@ -163,6 +161,7 @@ function CourtManagement() {
               <th className="py-2 px-4 text-left">Địa điểm</th>
               <th className="py-2 px-4 text-left">Giá</th>
               <th className="py-2 px-4 text-left">Trạng thái</th>
+              <th className="py-2 px-4 text-left">Tình trạng </th>
               <th className="py-2 px-4 text-left">Thao tác</th>
             </tr>
           </thead>
@@ -186,6 +185,15 @@ function CourtManagement() {
                       }`}
                     >
                       {f.status}
+                    </span>
+                  </td>
+                  <td className="py-2 px-4">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs ${
+                        f.isDelete === false ? "bg-green-500" : "bg-red-500"
+                      }`}
+                    >
+                      {f.isDelete === false ? "Đang hoạt động" : "Đã xóa"}
                     </span>
                   </td>
                   <td className="py-2 px-4">
@@ -233,7 +241,7 @@ function CourtManagement() {
               <Input placeholder="Nhập tên sân" />
             </Form.Item>
             <Form.Item
-              name="address"
+              name="businessLocation.address"
               label="Địa chỉ"
               rules={[
                 { required: true, message: "Vui lòng nhập địa chỉ của sân!" },

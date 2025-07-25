@@ -50,7 +50,6 @@ export default function Dashboard() {
     return ((today - yesterday) / yesterday) * 100;
   };
 
-  
   const bookingChange = statsData
     ? calculatePercentageChange(
         statsData.todayTotalPaidBookings,
