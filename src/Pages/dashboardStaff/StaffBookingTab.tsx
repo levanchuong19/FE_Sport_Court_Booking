@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Button, Table, Tag } from "antd";
+import { Button, Table, Tag, Input } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
 import api from "../../Config/api";
 import type { Slot } from "../../Model/slot";
 import type { JwtPayload } from "../../Model/user";
@@ -14,81 +15,41 @@ interface StaffBookingTabProps {
 export default function StaffBookingTab({ onDetail }: StaffBookingTabProps) {
   const [bookings, setBookings] = useState<Slot[]>([]);
   const [isBooked, setIsBooked] = useState<Slot[]>([]);
-
-  const fetchBookings = async () => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      const decodedToken: JwtPayload = jwtDecode(token);
-      const user = decodedToken.sub;
-      const account = await api.get(`auth/account/${user}`);
-      const response = await api.get("slot/getAll");
-      const bookings = response.data.data.content.filter(
-        (booking: Slot) => booking.ownerId === account.data.data.managerId
-      );
-      const booked = response.data.data.content.filter(
-        (booking: Slot) =>
-          booking.ownerId === account.data.data.managerId &&
-          booking.status === "BOOKED"
-      );
-      setBookings(bookings);
-      setIsBooked(booked);
-    } else {
-      setBookings([]);
-    }
-  };
+  const [searchText, setSearchText] = useState("");
+  const [checkInSearchText, setCheckInSearchText] = useState("");
 
   useEffect(() => {
+    const fetchBookings = async () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        const decodedToken: JwtPayload = jwtDecode(token);
+        const user = decodedToken.sub;
+        const account = await api.get(`auth/account/${user}`);
+        const response = await api.get("slot/getAll");
+        const all = response.data.data.content.filter(
+          (booking: Slot) => booking.ownerId === account.data.data.managerId
+        );
+        setBookings(all);
+        setIsBooked(all.filter((b) => b.status === "BOOKED"));
+      } else {
+        setBookings([]);
+      }
+    };
     fetchBookings();
   }, []);
 
-  const handleCheckIn = async (values: Slot) => {
-    await api.patch(`slot/${values.id}/checkIn`);
+  const handleCheckIn = async (slot: Slot) => {
+    await api.patch(`slot/${slot.id}/checkIn`);
     customAlert("Thành Công", "Check-In thành công", "default");
-    fetchBookings();
+    location.reload(); // reload toàn bộ để tránh lỗi trạng thái không khớp
   };
 
-  const columnCheckIn = [
-    {
-      title: "Khách hàng",
-      dataIndex: "accountUsername",
-      key: "accountUsername",
-    },
-    { title: "Số điện thoại", dataIndex: "phone", key: "phone" },
-    { title: "Sân", dataIndex: "courtName", key: "courtName" },
-    { title: "Ngày bắt đầu", dataIndex: "startDate", key: "startDate" },
-    { title: "Ngày kết thúc", dataIndex: "endDate", key: "endDate" },
-    { title: "Giờ bắt đầu", dataIndex: "startTime", key: "startTime" },
-    { title: "Giờ kết thúc", dataIndex: "endTime", key: "endTime" },
-    {
-      title: "Trạng thái",
-      dataIndex: "status",
-      key: "status",
-      render: (status: string) => {
-        if (status === "PENDING")
-          return <Tag color="orange">Chưa thanh toán</Tag>;
-        if (status === "BOOKED") return <Tag color="gray">Sắp tới</Tag>;
-        if (status === "CANCELED") return <Tag color="red">Đã hủy</Tag>;
-        if (status === "COMPLETED")
-          return <Tag color="green">Đã hoàn thành</Tag>;
-        return <Tag color="default">{status}</Tag>;
-      },
-    },
-    {
-      title: "Giá",
-      dataIndex: "price",
-      key: "price",
-      render: (price: number) => formatVND(price),
-    },
-    {
-      title: "",
-      key: "detail",
-      render: (_: any, record: Slot) => (
-        <Button type="primary" onClick={() => handleCheckIn(record)}>
-          Check-In
-        </Button>
-      ),
-    },
-  ];
+  const filterSlots = (list: Slot[], keyword: string) =>
+    list.filter(
+      (s) =>
+        s.accountUsername.toLowerCase().includes(keyword.toLowerCase()) ||
+        s.phone.includes(keyword)
+    );
 
   const columns = [
     {
@@ -107,13 +68,27 @@ export default function StaffBookingTab({ onDetail }: StaffBookingTabProps) {
       dataIndex: "status",
       key: "status",
       render: (status: string) => {
-        if (status === "PENDING")
-          return <Tag color="orange">Chưa thanh toán</Tag>;
-        if (status === "BOOKED") return <Tag color="gray">Sắp tới</Tag>;
-        if (status === "CANCELED") return <Tag color="red">Đã hủy</Tag>;
-        if (status === "COMPLETED")
-          return <Tag color="green">Đã hoàn thành</Tag>;
-        return <Tag color="default">{status}</Tag>;
+        const tagColor =
+          status === "PENDING"
+            ? "orange"
+            : status === "BOOKED"
+            ? "gray"
+            : status === "IN_USE"
+            ? "blue"
+            : status === "CANCELED"
+            ? "red"
+            : "green";
+        const label =
+          status === "PENDING"
+            ? "Chưa thanh toán"
+            : status === "BOOKED"
+            ? "Sắp tới"
+            : status === "IN_USE"
+            ? "Đang hoạt động"
+            : status === "CANCELED"
+            ? "Đã hủy"
+            : "Đã hoàn thành";
+        return <Tag color={tagColor}>{label}</Tag>;
       },
     },
     {
@@ -123,22 +98,57 @@ export default function StaffBookingTab({ onDetail }: StaffBookingTabProps) {
       render: (price: number) => formatVND(price),
     },
   ];
+
+  const columnsCheckIn = [
+    ...columns,
+    {
+      title: "",
+      key: "action",
+      render: (_: any, record: Slot) => (
+        <Button type="primary" onClick={() => handleCheckIn(record)}>
+          Check-In
+        </Button>
+      ),
+    },
+  ];
+
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-2">Quản lý đặt sân</h2>
-      <Table
-        columns={columns}
-        dataSource={bookings}
-        rowKey="id"
-        pagination={{ pageSize: 5 }}
-      />
-      <h2 className="text-xl font-semibold mb-2">Check-In</h2>
-      <Table
-        columns={columnCheckIn}
-        dataSource={isBooked}
-        rowKey="id"
-        pagination={{ pageSize: 5 }}
-      />
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-xl font-semibold mb-2">Quản lý đặt sân</h2>
+        <Input
+          placeholder="Tìm tên hoặc số điện thoại"
+          prefix={<SearchOutlined />}
+          allowClear
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          className="mb-3 max-w-sm"
+        />
+        <Table
+          columns={columns}
+          dataSource={filterSlots(bookings, searchText)}
+          rowKey="id"
+          pagination={{ pageSize: 5 }}
+        />
+      </div>
+
+      <div>
+        <h2 className="text-xl font-semibold mb-2">Check-In</h2>
+        <Input
+          placeholder="Tìm tên hoặc số điện thoại"
+          prefix={<SearchOutlined />}
+          allowClear
+          value={checkInSearchText}
+          onChange={(e) => setCheckInSearchText(e.target.value)}
+          className="mb-3 max-w-sm"
+        />
+        <Table
+          columns={columnsCheckIn}
+          dataSource={filterSlots(isBooked, checkInSearchText)}
+          rowKey="id"
+          pagination={{ pageSize: 5 }}
+        />
+      </div>
     </div>
   );
 }
