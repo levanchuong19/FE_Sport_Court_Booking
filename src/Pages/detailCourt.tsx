@@ -189,11 +189,19 @@ const DetailCourt = () => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.05 }}
                     >
-                      <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold">
-                        {fb.account?.fullName
-                          ? fb.account.fullName.charAt(0).toUpperCase()
-                          : "Ẩn"}
-                      </div>
+                      {fb.account?.image ? (
+                        <img
+                          src={fb.account.image}
+                          alt={fb.account.fullName || "Avatar"}
+                          className="w-10 h-10 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold">
+                          {fb.account?.fullName
+                            ? fb.account.fullName.charAt(0).toUpperCase()
+                            : "Ẩn"}
+                        </div>
+                      )}
 
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
