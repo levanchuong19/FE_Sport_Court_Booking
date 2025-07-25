@@ -87,7 +87,7 @@ function DashboardSidebar() {
             </span>{" "}
             Quản lý người dùng
           </NavLink>
-          <NavLink
+          {/* <NavLink
             to="/dashboard/statistic"
             className={({ isActive }) =>
               `${linkClass} ${isActive ? activeClass : inactiveClass}`
@@ -97,7 +97,7 @@ function DashboardSidebar() {
               <ChartNoAxesCombined />
             </span>{" "}
             Thống kê
-          </NavLink>
+          </NavLink> */}
         </nav>
       </div>
       <div className="p-4 border-t border-gray-200">

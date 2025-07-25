@@ -24,7 +24,6 @@ function UserManagement() {
   const [isDelete, setIsDelete] = useState("ALL");
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [form] = useForm();
-  // const [open, setOpen] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
   const [editingUser, setEditingUser] = useState<User | null>(null);
 
@@ -44,10 +43,8 @@ function UserManagement() {
 
   const handleSubmit = async (values: User) => {
     if (editingUser) {
-      // Update existing user
       await api.put(`account/${editingUser.id}`, values);
     } else {
-      // Create new user
       await api.post("account", values);
     }
 
@@ -72,13 +69,14 @@ function UserManagement() {
   };
 
   const filterUsers = users.filter((u) => {
+    const isNotAdmin = u.role !== "ADMIN";
     const matchName = u.fullName.toLowerCase().includes(isSearch.toLowerCase());
     const matchRole = role === "ALL" || u.role === role;
     const matchStatus =
       isDelete === "ALL" ||
       (isDelete === "Đã xóa" && u.isDelete) ||
       (isDelete === "Hoạt động" && !u.isDelete);
-    return matchName && matchRole && matchStatus;
+    return isNotAdmin && matchName && matchRole && matchStatus;
   });
 
   const fetchUsers = async () => {
@@ -126,7 +124,6 @@ function UserManagement() {
           onChange={(e) => setRole(e.target.value)}
         >
           <option value="ALL">Tất cả vai trò</option>
-          <option value="ADMIN">Admin</option>
           <option value="CUSTOMER">Người dùng</option>
           <option value="STAFF">Nhân viên</option>
           <option value="MANAGER">Quản lý</option>
@@ -145,7 +142,6 @@ function UserManagement() {
         <table className="min-w-full text-sm">
           <thead>
             <tr className="bg-gray-100">
-              {/* <th className="py-2 px-4 text-left">ID</th> */}
               <th className="py-2 px-4 text-left">Account</th>
               <th className="py-2 px-4 text-left">Email</th>
               <th className="py-2 px-4 text-left">Số điện thoại</th>
@@ -158,7 +154,6 @@ function UserManagement() {
           <tbody>
             {filterUsers.map((u, idx) => (
               <tr key={idx} className="border-b border-gray-200">
-                {/* <td className="py-2 px-4 font-semibold">{u.id}</td> */}
                 <td className="py-2 px-4 flex items-center gap-2">
                   <img
                     src={
@@ -225,9 +220,9 @@ function UserManagement() {
           open={isOpenModal}
           onCancel={handleCloseModal}
           onOk={handleOk}
-          title="Thêm người dùng"
+          title={editingUser ? "Cập nhật người dùng" : "Thêm người dùng"}
         >
-          <Form form={form} onFinish={handleSubmit}>
+          <Form form={form} onFinish={handleSubmit} layout="vertical">
             <Form.Item
               name="fullName"
               label="Họ và tên"
@@ -240,7 +235,11 @@ function UserManagement() {
               label="Ngày sinh"
               rules={[{ required: true, message: "Vui lòng nhập ngày sinh" }]}
             >
-              <DatePicker format={"DD/MM/YYYY"} placeholder="Chọn ngày sinh" />
+              <DatePicker
+                format={"DD/MM/YYYY"}
+                placeholder="Chọn ngày sinh"
+                style={{ width: "100%" }}
+              />
             </Form.Item>
             <Form.Item
               name="email"
@@ -250,7 +249,7 @@ function UserManagement() {
               <Input placeholder="Nhập email" />
             </Form.Item>
             <Form.Item
-              name="phone"
+              name="phoneNumber"
               label="Số điện thoại"
               rules={[
                 { required: true, message: "Vui lòng nhập số điện thoại" },
@@ -272,7 +271,7 @@ function UserManagement() {
               label="Giới tính"
               rules={[{ required: true, message: "Vui lòng chọn giới tính" }]}
             >
-              <Select>
+              <Select placeholder="Chọn giới tính">
                 <Select.Option value="MALE">Nam</Select.Option>
                 <Select.Option value="FEMALE">Nữ</Select.Option>
                 <Select.Option value="OTHER">Khác</Select.Option>
@@ -293,7 +292,7 @@ function UserManagement() {
               label="Vai trò"
               rules={[{ required: true, message: "Vui lòng chọn vai trò" }]}
             >
-              <Select>
+              <Select placeholder="Chọn vai trò">
                 <Select.Option value="CUSTOMER">Người dùng</Select.Option>
                 <Select.Option value="STAFF">Nhân viên</Select.Option>
                 <Select.Option value="MANAGER">Quản lý</Select.Option>
