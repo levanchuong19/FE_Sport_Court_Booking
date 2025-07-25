@@ -1,26 +1,15 @@
 import { useEffect, useState } from "react";
-import {
-  Button,
-  Form,
-  Input,
-  InputNumber,
-  Modal,
-  Popover,
-  Select,
-  Table,
-  Tag,
-} from "antd";
+import { Button, Form, Input, Modal, Select, Table, Tag } from "antd";
 import api from "../../Config/api";
 import type { Court } from "../../Model/court";
 import type { JwtPayload, User } from "../../Model/user";
 import { jwtDecode } from "jwt-decode";
 import formatVND from "../../Utils/currency";
-import { Option } from "antd/es/mentions";
 import type { BusinessLocation } from "../../Model/businessLocation";
 import { useForm } from "antd/es/form/Form";
 import type { Price } from "../../Model/price";
 import { customAlert } from "../../Components/customAlert";
-import { Ellipsis } from "lucide-react";
+import { SearchOutlined } from "@ant-design/icons";
 
 interface StaffCourtTabProps {
   onDetail: (record: Court) => void;
@@ -37,7 +26,6 @@ export default function StaffCourtTab({ onDetail }: StaffCourtTabProps) {
   const [reportCourt, setReportCourt] = useState<Court | null>(null);
   const [reportContent, setReportContent] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
-  // const [reportEmail, setReportEmail] = useState("");
 
   const fetchCourts = async () => {
     const token = localStorage.getItem("token");
@@ -80,7 +68,6 @@ export default function StaffCourtTab({ onDetail }: StaffCourtTabProps) {
       console.log(response.data.data);
       setIsOpenModal(false);
       form.resetFields();
-      // fetchCourts();
     } catch (error) {
       console.error("Error submitting form:", error);
     }
@@ -91,6 +78,7 @@ export default function StaffCourtTab({ onDetail }: StaffCourtTabProps) {
     setReportContent("");
     setIsReportModalOpen(true);
   };
+
   const handleReportOk = async () => {
     if (!reportCourt) return;
     try {
@@ -127,7 +115,6 @@ export default function StaffCourtTab({ onDetail }: StaffCourtTabProps) {
 
   const fetchLocations = async () => {
     const response = await api.get("location/getAll");
-    console.log(response.data.data.content);
     setIsLocation(response.data.data.content);
   };
 
@@ -162,7 +149,7 @@ export default function StaffCourtTab({ onDetail }: StaffCourtTabProps) {
       dataIndex: "status",
       key: "status",
       render: (status: string) => (
-        <Tag color={status === "AVAILABLE" ? "green" : "red"}>{status}</Tag>
+        <Tag color={status === "AVAILABLE" ? "yellow" : "green"}>{status}</Tag>
       ),
     },
     {
@@ -178,40 +165,41 @@ export default function StaffCourtTab({ onDetail }: StaffCourtTabProps) {
         </Button>
       ),
     },
-    // {
-    //   title: "",
-    //   key: "detail",
-    //   render: (_: any, record: Court) => (
-    //     <Popover
-    //       content={
-    //         <div className="flex  gap-2">
-    //           <Button> Sửa </Button>
-    //           <Button danger> Xóa </Button>
-    //         </div>
-    //       }
-    //       trigger="click"
-    //       open={openId === record.id}
-    //       onOpenChange={(newOpen) => setOpenId(newOpen ? record.id : null)}
-    //     >
-    //       <button className="px-2 py-1 rounded hover:bg-gray-100">
-    //         <Ellipsis className="text-xl" />
-    //       </button>
-    //     </Popover>
-    //   ),
-    // },
   ];
+
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
         <h2 className="text-xl font-semibold">Quản lý sân</h2>
+        <div className="flex gap-2 items-center">
+          <Input
+            placeholder="Tìm kiếm tên sân"
+            prefix={<SearchOutlined />}
+            value={isSearch}
+            onChange={(e) => setIsSearch(e.target.value)}
+            allowClear
+          />
+          <Select
+            value={type}
+            onChange={(value) => setType(value)}
+            style={{ width: 160 }}
+          >
+            <Select.Option value="ALL">Tất cả loại sân</Select.Option>
+            <Select.Option value="BADMINTON">Cầu lông</Select.Option>
+            <Select.Option value="FOOTBALL">Bóng đá</Select.Option>
+            <Select.Option value="TENNIS">Tennis</Select.Option>
+            {/* Thêm loại khác nếu có */}
+          </Select>
+        </div>
       </div>
+
       <Table
         columns={columns}
         dataSource={filterFields}
-        // loading={loading}
         rowKey="id"
         pagination={{ pageSize: 5 }}
       />
+
       <Modal
         title="Gửi báo cáo sân"
         open={isReportModalOpen}
