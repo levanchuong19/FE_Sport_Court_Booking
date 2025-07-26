@@ -12,6 +12,7 @@ interface Manager {
 }
 
 function CourtManagement() {
+  // 'courts' state bây giờ sẽ lưu trữ dữ liệu gốc từ API (chưa lọc theo manager)
   const [courts, setCourts] = useState<Court[]>([]);
   const [managers, setManagers] = useState<Manager[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -27,8 +28,15 @@ function CourtManagement() {
 
   const fetchManagers = async () => {
     try {
-      const response = await api.get<Manager[]>("account/managers");
-      setManagers(response.data);
+      // Giả sử API này trả về một mảng Manager, nếu không hãy điều chỉnh cho phù hợp
+      const response = await api.get("account/managers");
+      // Cần đảm bảo response.data là một mảng Manager[]
+      if (Array.isArray(response.data)) {
+        setManagers(response.data);
+      } else if (response.data.success && Array.isArray(response.data.data)) {
+        // Hoặc nếu API trả về cấu trúc { success: true, data: [...] }
+        setManagers(response.data.data);
+      }
     } catch (error) {
       console.error("Failed to fetch managers:", error);
     }
@@ -42,7 +50,7 @@ function CourtManagement() {
         courtName: searchQuery || null,
         courtType: filterType === "ALL" ? null : filterType,
         status: filterStatus === "ALL" ? null : filterStatus,
-        ownerId: filterManager === "ALL" ? null : filterManager,
+        // **THAY ĐỔI**: Đã xóa `ownerId` khỏi đây. API sẽ không còn lọc theo manager nữa.
       };
       const response = await api.get("court/getAll", { params });
       setCourts(response.data.data.content);
@@ -58,19 +66,23 @@ function CourtManagement() {
 
   useEffect(() => {
     fetchCourts();
-  }, [
-    currentPage,
-    pageSize,
-    searchQuery,
-    filterType,
-    filterStatus,
-    filterManager,
-  ]);
+    // **THAY ĐỔI**: Xóa `filterManager` khỏi mảng dependency.
+    // Thay đổi bộ lọc manager sẽ không trigger fetchCourts nữa.
+  }, [currentPage, pageSize, searchQuery, filterType, filterStatus]);
+
+  // **THAY ĐỔI MỚI**: Tạo một biến dẫn xuất để hiển thị.
+  // Biến này sẽ lọc danh sách 'courts' dựa trên 'filterManager' ở phía client.
+  const displayedCourts =
+    filterManager === "ALL"
+      ? courts
+      : courts.filter(
+          (court) => court.businessLocation?.owner?.id === filterManager
+        );
 
   const handleDelete = async (courtId: string) => {
     try {
       await api.delete(`court/delete/${courtId}`);
-      fetchCourts();
+      fetchCourts(); // Tải lại danh sách sau khi xóa
       console.log("Court deleted successfully");
     } catch (error) {
       console.error("Error deleting court:", error);
@@ -105,7 +117,7 @@ function CourtManagement() {
 
   const handleManagerChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setFilterManager(e.target.value);
-    setCurrentPage(1);
+    // Không cần reset trang vì việc lọc diễn ra ở client
   };
 
   const handlePageChange = (page: number) => {
@@ -176,13 +188,14 @@ function CourtManagement() {
               <th className="py-3 px-4 text-left font-semibold">Địa điểm</th>
               <th className="py-3 px-4 text-left font-semibold">Giá cơ bản</th>
               <th className="py-3 px-4 text-left font-semibold">Trạng thái</th>
-              <th className="py-3 px-4 text-left font-semibold">Tình trạng</th>
+              {/* <th className="py-3 px-4 text-left font-semibold">Tình trạng</th> */}
               <th className="py-3 px-4 text-center font-semibold">Thao tác</th>
             </tr>
           </thead>
           <tbody>
-            {Array.isArray(courts) &&
-              courts.map((court) => (
+            {/* **THAY ĐỔI**: Lặp qua `displayedCourts` thay vì `courts` */}
+            {Array.isArray(displayedCourts) &&
+              displayedCourts.map((court) => (
                 <tr
                   key={court.id}
                   className="border-b border-gray-200 hover:bg-gray-50"
@@ -228,7 +241,7 @@ function CourtManagement() {
                       })()}
                     </span>
                   </td>
-                  <td className="py-3 px-4">
+                  {/* <td className="py-3 px-4">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium text-white ${
                         !court.isDelete ? "bg-blue-500" : "bg-gray-500"
@@ -236,7 +249,7 @@ function CourtManagement() {
                     >
                       {!court.isDelete ? "Đang hoạt động" : "Đã xóa"}
                     </span>
-                  </td>
+                  </td> */}
                   <td className="py-3 px-4 text-center">
                     <Popover
                       content={
@@ -281,6 +294,7 @@ function CourtManagement() {
         />
       </div>
 
+      {/* Modal chi tiết không thay đổi */}
       {selectedCourt && (
         <Modal
           title={
@@ -297,6 +311,7 @@ function CourtManagement() {
           ]}
           width={900}
         >
+          {/* ...Nội dung modal giữ nguyên... */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-4">
             <div className="lg:col-span-2 space-y-6">
               <div className="bg-gray-50 p-4 rounded-lg shadow-sm">

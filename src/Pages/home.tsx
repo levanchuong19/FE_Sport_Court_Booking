@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { Modal } from "antd";
 import { CheckCircleOutlined, EnvironmentOutlined } from "@ant-design/icons";
 import type { Feedback } from "../Model/feedback";
+import { customAlert } from "../Components/customAlert";
 
 function Home() {
   const [location, setLocation] = useState<BusinessLocation[]>([]);
@@ -41,10 +42,14 @@ function Home() {
     const params = new URLSearchParams(window.location.search);
     console.log("params:", params);
     const code = params.get("bookingID");
+    const responseCode = params.get("vnp_ResponseCode");
     console.log("code:", code);
-    if (code) {
+    console.log("responseCode:", responseCode);
+    if (code && responseCode === "00") {
       setPaymentBookingCode(code);
       setShowPaymentSuccessModal(true);
+    } else if (code && responseCode !== null && responseCode !== "00") {
+      customAlert("error", "Thanh toán thất bại");
     }
   }, [location]);
 

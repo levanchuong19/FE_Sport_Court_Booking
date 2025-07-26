@@ -1,4 +1,4 @@
-import { MapPin, Star} from "lucide-react";
+import { MapPin, Star } from "lucide-react";
 import type { BusinessLocation } from "../Model/businessLocation";
 import { useNavigate } from "react-router-dom";
 
@@ -28,39 +28,47 @@ export default function MiniLocationCard({
         </div>
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2 mb-1">
-          <span className="flex items-center text-yellow-500 text-xs font-bold">
-            <Star className="w-3 h-3 mr-1" />
-            {location.rating || 4.8}
-          </span>
-          <span className="text-gray-400 text-xs">
-            ({location.reviews || 0})
-          </span>
+            <span className="flex items-center text-yellow-500 text-xs font-bold">
+              <Star className="w-3 h-3 mr-1" />
+              {location.rating || 4.8}
+            </span>
+            <span className="text-gray-400 text-xs">
+              ({location.reviews || 0})
+            </span>
           </div>
-          {location.distance ? <span className="text-gray-400 text-xs">Cách bạn: {location.distance.toFixed(1)} km</span> :""}
+          {location.distance ? (
+            <span className="text-gray-400 text-xs">
+              Cách bạn: {location.distance.toFixed(1)} km
+            </span>
+          ) : (
+            ""
+          )}
         </div>
         <div className="text-emerald-600 text-xs font-bold mb-1">
           Mở cửa từ : {location.openTime || "pp"} - {location.closeTime}
         </div>
         <div className="flex flex-col gap-2 my-2">
-              <div className="flex items-center space-x-2">
-                <img
-                  src={
-                    location.owner.image ||
-                    "https://thanhtra.com.vn/images/avatar-default.png?id=420048c5169f5847774bafb5e8b641b4"
-                  }
-                  alt={location.owner.fullName}
-                  className="h-6 w-6 rounded-full"
-                />
-                {/* <AvatarFallback className="text-xs">{location.owner.name.charAt(0)}</AvatarFallback> */}
+          <div className="flex items-center space-x-2">
+            <img
+              src={
+                location.owner.image ||
+                "https://thanhtra.com.vn/images/avatar-default.png?id=420048c5169f5847774bafb5e8b641b4"
+              }
+              alt={location.owner.fullName}
+              className="h-6 w-6 rounded-full"
+            />
+            {/* <AvatarFallback className="text-xs">{location.owner.name.charAt(0)}</AvatarFallback> */}
 
-                <div className="flex items-center text-sm text-gray-600">
-                  <span className="truncate">{location.owner.fullName}</span>
-                </div>
-              </div>
+            <div className="flex items-center text-sm text-gray-600">
+              <span className="truncate">{location.owner.fullName}</span>
             </div>
-            <div className="flex flex-col gap-2 my-2 w-full text-xs text-gray-600">
-            <span className="break-words whitespace-pre-wrap">{location.description}</span>
-              </div>
+          </div>
+        </div>
+        <div className="flex flex-col gap-2 my-2 w-full text-xs text-gray-600">
+          <span className="break-words whitespace-pre-wrap">
+            {location.description}
+          </span>
+        </div>
         <div className="flex gap-2">
           <button
             className="bg-emerald-600 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-emerald-700 transition"
@@ -68,12 +76,12 @@ export default function MiniLocationCard({
           >
             Xem chi tiết
           </button>
-          <button
+          {/* <button
             className="border border-emerald-600 text-emerald-600 px-2 py-1 rounded text-xs font-semibold hover:bg-emerald-50 transition"
             onClick={() => navigate(`/booking/${location.id}`)}
           >
             Đặt sân
-          </button>
+          </button> */}
         </div>
       </div>
     </div>

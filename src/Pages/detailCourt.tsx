@@ -12,6 +12,7 @@ import {
   Quote,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import formatVND from "../Utils/currency";
 
 const sportMap: Record<string, string> = {
   FOOTBALL: "Bóng đá",
@@ -84,6 +85,8 @@ const DetailCourt = () => {
       </div>
     );
   }
+
+  const price = court.prices?.find((p) => p.priceType === "HOURLY")?.price;
 
   return (
     <>
@@ -258,7 +261,7 @@ const DetailCourt = () => {
                 <div className="pt-3 border-t border-gray-200">
                   <p className="text-sm text-gray-500">Giá thuê</p>
                   <p className="text-xl font-bold text-red-500">
-                    {court.prices?.[0]?.price?.toLocaleString("vi-VN")}đ / giờ
+                    {formatVND(price || 0)} / giờ
                   </p>
                 </div>
               </div>

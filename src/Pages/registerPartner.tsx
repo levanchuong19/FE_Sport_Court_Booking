@@ -117,6 +117,19 @@ const RegisterPartner: React.FC = () => {
           ? parseFloat(formData.longitude)
           : undefined,
       });
+      setFormData({
+        name: "",
+        yearBuild: "",
+        utilities: [""],
+        businessLicense: "",
+        courtNum: 1,
+        latitude: "",
+        longitude: "",
+        address: "",
+        description: "",
+        openTime: "",
+        closeTime: "",
+      });
       customAlert(
         "Success",
         "Bạn đã đăng ký thành công ! Vui Lòng đợi đội ngũ chúng tôi liên hệ để xác minh thông tin (hãy thêm sđt của bạn ở phần hồ sơ)",

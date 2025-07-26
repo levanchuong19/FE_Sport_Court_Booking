@@ -15,7 +15,6 @@ import {
 } from "antd";
 
 // --- Type Definitions ---
-// Cập nhật để khớp với enum mới từ backend
 type PriceType = "HOURLY" | "DAILY" | "WEEKLY" | "MONTHLY";
 type SlotStatus =
   | "BOOKED"
@@ -35,8 +34,8 @@ interface SlotDTO {
   courtName: string | null;
   slotType: PriceType;
   status: SlotStatus;
-  startDate: string; // API trả về string "YYYY-MM-DD"
-  endDate: string; // API trả về string "YYYY-MM-DD"
+  startDate: string;
+  endDate: string;
   startTime: string;
   endTime: string;
   price: number | null;
@@ -78,16 +77,14 @@ export default function BookingManagement() {
         size: pagination.pageSize.toString(),
       });
 
-      if (filters.slotStatus) {
-        params.append("slotStatus", filters.slotStatus);
-      }
+      // **THAY ĐỔI**: Chỉ gửi slotType lên API, không gửi slotStatus nữa.
       if (filters.slotType) {
         params.append("slotType", filters.slotType);
       }
 
       const response = await api.get(`slot/getAll?${params.toString()}`);
 
-      if (response.data && response.data.success) {
+      if (response.data && response.data.status) {
         const responseData = response.data.data;
         setBookings(responseData.content);
         setPagination((prev) => ({
@@ -104,11 +101,17 @@ export default function BookingManagement() {
     } finally {
       setLoading(false);
     }
-  }, [pagination.current, pagination.pageSize, filters]);
+    // **THAY ĐỔI**: Xóa `filters` khỏi dependency, chỉ giữ lại những gì thực sự trigger API call.
+  }, [pagination.current, pagination.pageSize, filters.slotType]);
 
   useEffect(() => {
     fetchBookings();
   }, [fetchBookings]);
+
+  // **THAY ĐỔI MỚI**: Tạo biến dẫn xuất để lọc dữ liệu ở phía client.
+  const displayedBookings = filters.slotStatus
+    ? bookings.filter((booking) => booking.status === filters.slotStatus)
+    : bookings;
 
   // --- Handlers ---
   const handlePageChange = (page: number, pageSize: number) => {
@@ -119,7 +122,10 @@ export default function BookingManagement() {
     filterName: keyof FilterState,
     value: string | null
   ) => {
-    setPagination((prev) => ({ ...prev, current: 1 }));
+    // Nếu filter là loại API-based, reset về trang 1.
+    if (filterName === "slotType") {
+      setPagination((prev) => ({ ...prev, current: 1 }));
+    }
     setFilters((prev) => ({ ...prev, [filterName]: value }));
   };
 
@@ -219,7 +225,6 @@ export default function BookingManagement() {
     {
       title: "Hành động",
       key: "action",
-      // **THAY ĐỔI**: Thay Dropdown bằng một Button duy nhất
       render: (_: any, record: SlotDTO) => (
         <Button onClick={() => handleViewDetails(record)}>Xem chi tiết</Button>
       ),
@@ -231,7 +236,6 @@ export default function BookingManagement() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">Quản lý đặt sân</h1>
-        {/* **ĐÃ XÓA**: Nút "Tạo đặt sân mới" đã được gỡ bỏ */}
       </div>
 
       {/* Filter Bar */}
@@ -270,7 +274,8 @@ export default function BookingManagement() {
       <div className="overflow-x-auto bg-white rounded-xl shadow">
         <Table
           columns={columns}
-          dataSource={bookings}
+          // **THAY ĐỔI**: Sử dụng `displayedBookings` để hiển thị dữ liệu đã lọc.
+          dataSource={displayedBookings}
           rowKey="id"
           loading={loading}
           pagination={false}
