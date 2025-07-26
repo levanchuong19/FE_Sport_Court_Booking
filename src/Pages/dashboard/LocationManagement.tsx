@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Button,
   Input,
@@ -8,12 +8,14 @@ import {
   message,
   Modal,
   Descriptions,
+  Select,
 } from "antd";
 import type { PaginationProps, MenuProps } from "antd";
 import { EllipsisOutlined } from "@ant-design/icons";
 import api from "../../Config/api";
 
 const { TextArea } = Input;
+const { Option } = Select;
 
 interface Owner {
   id: string;
@@ -43,6 +45,7 @@ export default function ShowBusinessLocation() {
   const [locations, setLocations] = useState<BusinessLocation[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [pagination, setPagination] = useState<PaginationProps>({
     current: 1,
     pageSize: 10,
@@ -60,12 +63,13 @@ export default function ShowBusinessLocation() {
   const fetchLocations = async (page: number, size: number, name: string) => {
     setLoading(true);
     try {
-      const params = {
+      const params: any = {
         page: page - 1,
         size: size,
         name: name || null,
         isDelete: false,
       };
+
       const res = await api.get("location/getAll", { params });
       const responseData = res.data.data;
       setLocations(responseData.content || []);
@@ -91,9 +95,20 @@ export default function ShowBusinessLocation() {
     );
   }, [pagination.current, pagination.pageSize, searchTerm]);
 
+  const filteredLocations = useMemo(() => {
+    if (!statusFilter) {
+      return locations;
+    }
+    return locations.filter((location) => location.status === statusFilter);
+  }, [locations, statusFilter]);
+
   const handleSearch = (value: string) => {
     setSearchTerm(value);
     setPagination((prev) => ({ ...prev, current: 1 }));
+  };
+
+  const handleStatusChange = (value: string | null) => {
+    setStatusFilter(value);
   };
 
   const handleTableChange = (newPagination: PaginationProps) => {
@@ -317,12 +332,25 @@ export default function ShowBusinessLocation() {
             }}
             style={{ width: 250 }}
           />
+          <Select
+            placeholder="Lọc theo trạng thái"
+            allowClear
+            onChange={handleStatusChange}
+            style={{ width: 200 }}
+            value={statusFilter}
+          >
+            <Option value="ACTIVE">Đang hoạt động</Option>
+            <Option value="INACTIVE">Chờ duyệt</Option>
+            <Option value="REJECTED">Đã từ chối</Option>
+            <Option value="DELETED">Đã xoá</Option>
+            <Option value="MAINTENANCE">Bảo trì</Option>
+          </Select>
         </div>
       </div>
 
       <Table
         columns={columns}
-        dataSource={locations}
+        dataSource={filteredLocations}
         loading={loading}
         rowKey="id"
         pagination={pagination}
@@ -395,7 +423,7 @@ export default function ShowBusinessLocation() {
         okText="Xác nhận"
         cancelText="Hủy"
         okButtonProps={{ disabled: !rejectReason.trim() }}
-        destroyOnClose
+        destroyOnHidden
       >
         <TextArea
           rows={4}
