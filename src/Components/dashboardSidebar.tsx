@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   CalendarDays,
-  ChartNoAxesCombined,
+  BadgeAlert,
   LayoutDashboard,
   MapPinHouse,
   MapPinned,
@@ -87,17 +87,17 @@ function DashboardSidebar() {
             </span>{" "}
             Quản lý người dùng
           </NavLink>
-          {/* <NavLink
-            to="/dashboard/statistic"
+          <NavLink
+            to="/dashboard/supports"
             className={({ isActive }) =>
               `${linkClass} ${isActive ? activeClass : inactiveClass}`
             }
           >
             <span className="text-xl">
-              <ChartNoAxesCombined />
+              <BadgeAlert />
             </span>{" "}
-            Thống kê
-          </NavLink> */}
+            Hỗ trợ
+          </NavLink>
         </nav>
       </div>
       <div className="p-4 border-t border-gray-200">

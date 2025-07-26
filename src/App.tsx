@@ -25,6 +25,7 @@ import ShowBusinessLocation from "./Pages/dashboard/LocationManagement";
 import DashboardOwner from "./Pages/dashboardOwner/dashboardOwner";
 import EditProfile from "./Pages/editProfile";
 import DashboardStaff from "./Pages/dashboardStaff/dashboardStaff";
+import SupportManagement from "./Pages/dashboard/SupportManagement";
 function App() {
   const router = createBrowserRouter([
     {
@@ -71,6 +72,7 @@ function App() {
         { path: "/dashboard/court", element: <CourtManagement /> },
         { path: "/dashboard/user", element: <UserManagement /> },
         { path: "/dashboard/statistic", element: <Statistic /> },
+         { path: "/dashboard/supports", element: <SupportManagement /> },
       ],
     },
     {
