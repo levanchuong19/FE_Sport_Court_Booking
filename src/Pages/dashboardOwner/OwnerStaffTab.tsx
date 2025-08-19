@@ -1,13 +1,5 @@
-import {
-  Table,
-  Button,
-  Tag,
-  Modal,
-  Form,
-  Input,
-  Select,
-  message
-} from "antd";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Table, Button, Tag, Modal, Form, Input, Select, message } from "antd";
 import formatDate from "../../Utils/date";
 import { useEffect, useState } from "react";
 import type { JwtPayload, User } from "../../Model/user";
@@ -45,14 +37,17 @@ export default function OwnerStaffTab() {
       const token = localStorage.getItem("token");
       const decodedToken: JwtPayload = jwtDecode(token!);
       await api.post("/account", values, {
-        params: { managerId: decodedToken.sub }
+        params: { managerId: decodedToken.sub },
       });
       message.success("Tạo nhân viên thành công");
       setIsCreateModalOpen(false);
       form.resetFields();
       fetchStaffData();
     } catch (error: any) {
-      console.error("❌ Tạo nhân viên thất bại:", error.response?.data || error);
+      console.error(
+        "❌ Tạo nhân viên thất bại:",
+        error.response?.data || error
+      );
       message.error("Tạo nhân viên thất bại");
     }
   };
@@ -66,7 +61,7 @@ export default function OwnerStaffTab() {
         gender: values.gender,
         address: values.address,
         phoneNumber: values.phone,
-        image: ""
+        image: "",
       };
       await api.put(`/account/${editingUser?.id}`, payload);
       message.success("Cập nhật thành công");
@@ -106,13 +101,13 @@ export default function OwnerStaffTab() {
           <Tag color="red">Đã nghỉ</Tag>
         ) : (
           <Tag color="green">Đang làm</Tag>
-        )
+        ),
     },
     {
       title: "Ngày tham gia",
       dataIndex: "createAt",
       key: "createAt",
-      render: (createAt: Date) => formatDate(createAt)
+      render: (createAt: Date) => formatDate(createAt),
     },
     {
       title: "Thao tác",
@@ -128,7 +123,7 @@ export default function OwnerStaffTab() {
                 phone: record.phone,
                 gender: record.gender,
                 address: record.address,
-                dateOfBirth: record.dateOfBirth?.split("T")[0] // Format ISO date
+                dateOfBirth: formatDate(record.dateOfBirth), // Format ISO date
               });
               setIsEditModalOpen(true);
             }}
@@ -144,8 +139,8 @@ export default function OwnerStaffTab() {
             {record.isDelete ? "Kích hoạt lại" : "Cho nghỉ việc"}
           </Button>
         </>
-      )
-    }
+      ),
+    },
   ];
 
   return (
@@ -192,7 +187,7 @@ export default function OwnerStaffTab() {
             label="Email"
             rules={[
               { required: true },
-              { type: "email", message: "Email không hợp lệ" }
+              { type: "email", message: "Email không hợp lệ" },
             ]}
           >
             <Input />
@@ -204,8 +199,8 @@ export default function OwnerStaffTab() {
             rules={[
               {
                 pattern: /^(84|0[3|5|7|8|9])\d{8}$/,
-                message: "Số điện thoại không hợp lệ"
-              }
+                message: "Số điện thoại không hợp lệ",
+              },
             ]}
           >
             <Input />
@@ -223,7 +218,7 @@ export default function OwnerStaffTab() {
             <Select
               options={[
                 { label: "Nam", value: "Nam" },
-                { label: "Nữ", value: "Nữ" }
+                { label: "Nữ", value: "Nữ" },
               ]}
             />
           </Form.Item>
@@ -259,7 +254,11 @@ export default function OwnerStaffTab() {
         cancelText="Hủy"
       >
         <Form layout="vertical" form={form}>
-          <Form.Item name="fullName" label="Họ và tên" rules={[{ required: true }]}>
+          <Form.Item
+            name="fullName"
+            label="Họ và tên"
+            rules={[{ required: true }]}
+          >
             <Input />
           </Form.Item>
 
@@ -271,7 +270,7 @@ export default function OwnerStaffTab() {
             <Select
               options={[
                 { label: "Nam", value: "Nam" },
-                { label: "Nữ", value: "Nữ" }
+                { label: "Nữ", value: "Nữ" },
               ]}
             />
           </Form.Item>

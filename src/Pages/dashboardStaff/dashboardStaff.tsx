@@ -1,9 +1,5 @@
 import { useState } from "react";
-import type { Court } from "../../Model/court";
 import StaffSidebar from "./StaffSidebar";
-import StaffCourtTab from "./StaffCourtTab";
-import StaffBookingTab from "./StaffBookingTab";
-import type { Slot } from "../../Model/slot";
 
 type TabKey = "overview" | "court" | "booking";
 
@@ -20,22 +16,24 @@ export default function DashboardStaff() {
             Chào mừng bạn đến với dashboard quản lý của nhân viên!
           </div>
         )}
-        {tab === "court" && (
-          <StaffCourtTab
-            onDetail={(record: Court) => {
-              console.log("View court details:", record);
-              /* TODO: điều hướng sang trang chi tiết sân nếu có */
-            }}
-          />
-        )}
-        {tab === "booking" && (
-          <StaffBookingTab
-            onDetail={(record: Slot) => {
-              console.log("View booking details:", record);
-              /* TODO: điều hướng sang trang chi tiết booking nếu có */
-            }}
-          />
-        )}
+        {
+          tab === "court" && "Tính năng đang phát triển" // Placeholder for court management feature
+          // <StaffCourtTab
+          //   onDetail={(record: Court) => {
+          //     console.log("View court details:", record);
+          //     /* TODO: điều hướng sang trang chi tiết sân nếu có */
+          //   }}
+          // />
+        }
+        {
+          tab === "booking" && "Tính năng đang phát triển" // Placeholder for booking management feature
+          // <StaffBookingTab
+          //   onDetail={(record: Slot) => {
+          //     console.log("View booking details:", record);
+          //     /* TODO: điều hướng sang trang chi tiết booking nếu có */
+          //   }}
+          // />
+        }
       </main>
     </div>
   );

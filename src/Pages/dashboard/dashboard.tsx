@@ -310,12 +310,17 @@ export default function Dashboard() {
                           `${name}: ${(percent * 100).toFixed(0)}%`
                         }
                       >
-                        {revenueBySport.map((entry, idx) => (
-                          <Cell
-                            key={`cell-${idx}`}
-                            fill={COLORS[idx % COLORS.length]}
-                          />
-                        ))}
+                        {revenueBySport.map(
+                          (entry, idx) => (
+                            console.log(entry.name),
+                            (
+                              <Cell
+                                key={`cell-${idx}`}
+                                fill={COLORS[idx % COLORS.length]}
+                              />
+                            )
+                          )
+                        )}
                       </Pie>
                       <Tooltip
                         formatter={(value: number) =>
