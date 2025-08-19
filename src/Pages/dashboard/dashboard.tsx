@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import api from "../../Config/api";
 import axios from "axios";
 import formatVND from "../../Utils/currency";
-import React from "react";
 import {
   BarChart,
   Bar,

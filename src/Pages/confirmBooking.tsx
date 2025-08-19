@@ -6,17 +6,10 @@ import type { Slot } from "../Model/slot";
 import { useEffect, useState } from "react";
 import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
 
-// Giả lập lấy user từ account đăng nhập
-const user = {
-  name: "Nguyễn Văn A",
-  phone: "0901234567",
-  email: "nguyenvana@gmail.com",
-};
-
 export default function ConfirmBooking() {
   // Đặt tất cả hook ở đầu function
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: "AIzaSyBRt3wAQATMzjz8MiJQQfCfAOOkFrtg6AY"
+    googleMapsApiKey: "AIzaSyBRt3wAQATMzjz8MiJQQfCfAOOkFrtg6AY",
   });
   // const location = useLocation();
   const navigate = useNavigate();
@@ -42,8 +35,8 @@ export default function ConfirmBooking() {
   if (bookingInfo) {
     if (bookingInfo.slotType === "HOURLY") {
       // Tính số giờ
-      const [startH, startM] = bookingInfo.startTime.split(":").map(Number);
-      const [endH, endM] = bookingInfo.endTime.split(":").map(Number);
+      const [startH] = bookingInfo.startTime.split(":").map(Number);
+      const [endH] = bookingInfo.endTime.split(":").map(Number);
       let hours = endH - startH;
       if (hours < 0) hours += 24;
       priceNum =
@@ -60,8 +53,8 @@ export default function ConfirmBooking() {
       bookingInfo.slotType === "MONTHLY"
     ) {
       // Tính số giờ (slot)
-      const [startH, startM] = bookingInfo.startTime.split(":").map(Number);
-      const [endH, endM] = bookingInfo.endTime.split(":").map(Number);
+      const [startH] = bookingInfo.startTime.split(":").map(Number);
+      const [endH] = bookingInfo.endTime.split(":").map(Number);
       let slots = endH - startH;
       if (slots < 0) slots += 24;
       // Tính số ngày
@@ -106,11 +99,11 @@ export default function ConfirmBooking() {
   const containerStyle = {
     width: "100%",
     height: "370px",
-    marginTop: "30px"
+    marginTop: "30px",
   };
   const center = {
     lat: bookingInfo?.court?.businessLocation?.latitude || 10.816632639921957,
-    lng: bookingInfo?.court?.businessLocation?.longitude || 106.73380658226068
+    lng: bookingInfo?.court?.businessLocation?.longitude || 106.73380658226068,
   };
 
   return (
@@ -125,7 +118,7 @@ export default function ConfirmBooking() {
         {/* Thông tin đặt sân */}
         <div>
           <h2 className="text-2xl font-bold mb-6">Vị trí sân đã đặt</h2>
-        {isLoaded ? (
+          {isLoaded ? (
             <GoogleMap
               mapContainerStyle={containerStyle}
               center={center}
@@ -134,9 +127,10 @@ export default function ConfirmBooking() {
               <Marker position={center} />
             </GoogleMap>
           ) : (
-            <div className="h-[350px] flex items-center justify-center text-gray-400">Đang tải bản đồ...</div>
+            <div className="h-[350px] flex items-center justify-center text-gray-400">
+              Đang tải bản đồ...
+            </div>
           )}
-          
         </div>
         {/* Chi tiết đặt sân */}
         <div>
@@ -256,11 +250,11 @@ export default function ConfirmBooking() {
         </div>
       </div>
       <button
-            onClick={handleBooking}
-            className="w-full bg-black mt-4 text-white py-3 rounded-lg font-semibold hover:bg-gray-900 transition"
-          >
-            Thanh toán
-          </button>
+        onClick={handleBooking}
+        className="w-full bg-black mt-4 text-white py-3 rounded-lg font-semibold hover:bg-gray-900 transition"
+      >
+        Thanh toán
+      </button>
     </div>
   );
 }

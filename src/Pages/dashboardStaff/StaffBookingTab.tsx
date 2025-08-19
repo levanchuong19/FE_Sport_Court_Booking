@@ -8,11 +8,7 @@ import { jwtDecode } from "jwt-decode";
 import formatVND from "../../Utils/currency";
 import { customAlert } from "../../Components/customAlert";
 
-interface StaffBookingTabProps {
-  onDetail: (record: Slot) => void;
-}
-
-export default function StaffBookingTab({ onDetail }: StaffBookingTabProps) {
+export default function StaffBookingTab() {
   const [bookings, setBookings] = useState<Slot[]>([]);
   const [isBooked, setIsBooked] = useState<Slot[]>([]);
   const [searchText, setSearchText] = useState("");
@@ -30,7 +26,9 @@ export default function StaffBookingTab({ onDetail }: StaffBookingTabProps) {
           (booking: Slot) => booking.ownerId === account.data.data.managerId
         );
         setBookings(all);
-        setIsBooked(all.filter((b) => b.status === "BOOKED"));
+        setIsBooked(
+          all.filter((b: { status: string }) => b.status === "BOOKED")
+        );
       } else {
         setBookings([]);
       }
@@ -45,10 +43,8 @@ export default function StaffBookingTab({ onDetail }: StaffBookingTabProps) {
   };
 
   const filterSlots = (list: Slot[], keyword: string) =>
-    list.filter(
-      (s) =>
-        s.accountUsername.toLowerCase().includes(keyword.toLowerCase()) ||
-        s.phone.includes(keyword)
+    list.filter((s) =>
+      s.accountUsername.toLowerCase().includes(keyword.toLowerCase())
     );
 
   const columns = [
@@ -106,6 +102,7 @@ export default function StaffBookingTab({ onDetail }: StaffBookingTabProps) {
     {
       title: "",
       key: "action",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       render: (_: any, record: Slot) => (
         <Button type="primary" onClick={() => handleCheckIn(record)}>
           Check-In

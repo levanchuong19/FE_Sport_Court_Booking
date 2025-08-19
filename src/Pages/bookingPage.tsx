@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { Calendar, Clock } from "lucide-react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
@@ -48,15 +49,6 @@ const getLocalDateString = (date: Date) => {
   return `${year}-${month}-${day}`;
 };
 
-// Hàm chuẩn hóa ngày về YYYY-MM-DD
-const normalizeDate = (dateStr: string) => {
-  if (!dateStr) return "";
-  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return "";
-  return getLocalDateString(d);
-};
-
 export default function BookingPage() {
   const [tab, setTab] = useState("date");
   const [selectedDay, setSelectedDay] = useState(0);
@@ -72,8 +64,6 @@ export default function BookingPage() {
   const [startDayOffset, setStartDayOffset] = useState(0);
   const [weekDays, setWeekDays] = useState(getNext7Days(0));
   const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
-  const [fullDay, setFullDay] = useState(true);
-  const [selectedFixedSlot, setSelectedFixedSlot] = useState<string>("");
   const [oldSlotLength, setOldSlotLength] = useState<number | null>(null);
 
   const bookingTypes = [
@@ -235,6 +225,7 @@ export default function BookingPage() {
 
   useEffect(() => {
     fetchCourt();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   useEffect(() => {
@@ -286,7 +277,7 @@ export default function BookingPage() {
     if (selectedSlots.includes(slot)) {
       setSelectedSlots(selectedSlots.filter((s) => s !== slot));
     } else {
-      let next = [...selectedSlots, slot].sort();
+      const next = [...selectedSlots, slot].sort();
       setSelectedSlots(next);
     }
   };
@@ -339,6 +330,7 @@ export default function BookingPage() {
     let endDate = startDate;
     let startTime = "";
     let endTime = "";
+    // eslint-disable-next-line prefer-const
     let slotType = bookingType;
     if (bookingType === "HOURLY") {
       const sorted = [...selectedSlots].sort();
@@ -783,7 +775,7 @@ export default function BookingPage() {
                               );
                             } else {
                               // Chỉ cho phép chọn liên tục và tối đa 5 slot
-                              let next = [...selectedSlots, slot];
+                              const next = [...selectedSlots, slot];
                               const toMinutes = (t: string) => {
                                 const [h, m] = t.split(":");
                                 return parseInt(h) * 60 + parseInt(m);

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
@@ -24,7 +25,11 @@ export default function ChangePasswordPage() {
   });
 
   useEffect(() => {
-    customAlert("Warning", "Nếu đăng nhập bằng Google sẽ không thể đổi mật khẩu", "default");
+    customAlert(
+      "Warning",
+      "Nếu đăng nhập bằng Google sẽ không thể đổi mật khẩu",
+      "default"
+    );
     const token = localStorage.getItem("token");
     if (!token) {
       navigate("/login");
@@ -75,6 +80,7 @@ export default function ChangePasswordPage() {
       }, 1500);
     } catch (error: any) {
       const errMsg = error?.response?.data?.message || "Lỗi không xác định.";
+      console.error("Change password error:", errMsg);
       customAlert("Lỗi", "Lỗi không xác định", "destructive");
     } finally {
       setLoading(false);

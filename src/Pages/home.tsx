@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState, useRef } from "react";
 import api from "../Config/api";
 import LocationCard from "../Components/locationCard";
@@ -17,7 +18,7 @@ function Home() {
 
   // Search states
   const [searchLocation, setSearchLocation] = useState("");
-  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [currentLocation, setCurrentLocation] = useState<{
     lat: number;
@@ -32,7 +33,7 @@ function Home() {
   const [wards, setWards] = useState<any[]>([]);
   const [selectedProvince, setSelectedProvince] = useState<any>(null);
   const [selectedDistrict, setSelectedDistrict] = useState<any>(null);
-  const [selectedWard, setSelectedWard] = useState<any>(null);
+  const [, setSelectedWard] = useState<any>(null);
   const [rating, setRating] = useState<Feedback[]>([]);
   const [currentStep, setCurrentStep] = useState<
     "province" | "district" | "ward"
@@ -651,7 +652,7 @@ function Home() {
               </p>
             </div>
             <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-              {rating.map((t, idx) => (
+              {rating.map((t) => (
                 <div
                   key={t.id}
                   className="bg-white p-6 rounded-xl shadow flex flex-col items-center"

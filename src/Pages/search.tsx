@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import api from "../Config/api";
@@ -38,6 +39,7 @@ function SearchPage() {
     mapRef.current = map;
   }, []);
   const onUnmount = useCallback((map: google.maps.Map) => {
+    console.log("Map unmounted", map);
     mapRef.current = null;
   }, []);
 

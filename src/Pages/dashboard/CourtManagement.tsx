@@ -23,7 +23,7 @@ function CourtManagement() {
   const [selectedCourt, setSelectedCourt] = useState<Court | null>(null);
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(30);
+  const [pageSize] = useState(30);
   const [totalElements, setTotalElements] = useState(0);
 
   const fetchManagers = async () => {

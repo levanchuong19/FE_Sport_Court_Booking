@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -71,7 +71,9 @@ export default function Statistic() {
           topCourtsResponse,
           courtStatsResponse,
         ] = await Promise.all([
-          api.get<Record<string, number>>("/admin/stats/revenue-this-month-eachCourt"),
+          api.get<Record<string, number>>(
+            "/admin/stats/revenue-this-month-eachCourt"
+          ),
           api.get<Record<string, number>>("/admin/stats/booking-this-week"),
           api.get<Record<string, number>>("/admin/stats/booking-this-year"),
           api.get<NewManagerData[]>("/admin/stats/new-manager-this-year"),
@@ -208,12 +210,17 @@ export default function Statistic() {
                         `${name}: ${(percent * 100).toFixed(0)}%`
                       }
                     >
-                      {revenueBySport.map((entry, idx) => (
-                        <Cell
-                          key={`cell-${idx}`}
-                          fill={COLORS[idx % COLORS.length]}
-                        />
-                      ))}
+                      {revenueBySport.map(
+                        (entry, idx) => (
+                          console.log(entry, idx),
+                          (
+                            <Cell
+                              key={`cell-${idx}`}
+                              fill={COLORS[idx % COLORS.length]}
+                            />
+                          )
+                        )
+                      )}
                     </Pie>
                     <Tooltip
                       formatter={(value: number) =>
@@ -391,7 +398,7 @@ export default function Statistic() {
           </thead>
           <tbody>
             {managerStatistics.length > 0 ? (
-              managerStatistics.map((stat, idx) => (
+              managerStatistics.map((stat) => (
                 <tr key={stat.managerId} className="border-b border-gray-200">
                   <td className="py-2 px-4">{stat.fullName}</td>
                   <td className="py-2 px-4">{stat.phone}</td>

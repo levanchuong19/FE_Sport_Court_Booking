@@ -32,6 +32,7 @@ const RegisterPartner: React.FC = () => {
   });
   const [isGettingLocation, setIsGettingLocation] = useState(false);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleInputChange = (field: string, value: any) => {
     setFormData((prev) => ({
       ...prev,
@@ -81,6 +82,7 @@ const RegisterPartner: React.FC = () => {
         setIsGettingLocation(false);
       },
       (error) => {
+        console.error("Error getting location:", error);
         alert("Không thể lấy vị trí hiện tại. Vui lòng thử lại.");
         setIsGettingLocation(false);
       }
@@ -136,6 +138,7 @@ const RegisterPartner: React.FC = () => {
         "default"
       );
     } catch (error) {
+      console.error("Error registering partner:", error);
       customAlert("Error", "Đăng ký thất bại", "destructive");
     }
   };

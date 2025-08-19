@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../../Config/api";
 import {
   Table,
@@ -75,7 +75,7 @@ function SupportManagement() {
         const response = await api.get("support/getAll");
         if (response.data && response.data.status) {
           setTickets(response.data.data);
-          console.log("Check data: ", response.data.data)
+          console.log("Check data: ", response.data.data);
         } else {
           setTickets([]);
         }
@@ -142,6 +142,7 @@ function SupportManagement() {
     {
       title: "Hành động",
       key: "action",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       render: (_: any, record: SupportTicket) => (
         <Button onClick={() => handleViewDetails(record)}>Xem chi tiết</Button>
       ),

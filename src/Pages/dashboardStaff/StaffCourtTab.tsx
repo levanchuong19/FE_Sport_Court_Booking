@@ -1,31 +1,24 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { Button, Form, Input, Modal, Select, Table, Tag } from "antd";
 import api from "../../Config/api";
 import type { Court } from "../../Model/court";
-import type { JwtPayload, User } from "../../Model/user";
+import type { JwtPayload } from "../../Model/user";
 import { jwtDecode } from "jwt-decode";
 import formatVND from "../../Utils/currency";
 import type { BusinessLocation } from "../../Model/businessLocation";
-import { useForm } from "antd/es/form/Form";
 import type { Price } from "../../Model/price";
 import { customAlert } from "../../Components/customAlert";
 import { SearchOutlined } from "@ant-design/icons";
 
-interface StaffCourtTabProps {
-  onDetail: (record: Court) => void;
-}
-
-export default function StaffCourtTab({ onDetail }: StaffCourtTabProps) {
+export default function StaffCourtTab() {
   const [courts, setCourts] = useState<Court[]>([]);
   const [isSearch, setIsSearch] = useState("");
-  const [isOpenModal, setIsOpenModal] = useState(false);
-  const [form] = useForm();
-  const [isLocation, setIsLocation] = useState<BusinessLocation[]>([]);
+  const [, setIsLocation] = useState<BusinessLocation[]>([]);
   const [type, setType] = useState("ALL");
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [reportCourt, setReportCourt] = useState<Court | null>(null);
   const [reportContent, setReportContent] = useState("");
-  const [openId, setOpenId] = useState<string | null>(null);
 
   const fetchCourts = async () => {
     const token = localStorage.getItem("token");
@@ -49,29 +42,6 @@ export default function StaffCourtTab({ onDetail }: StaffCourtTabProps) {
   useEffect(() => {
     fetchCourts();
   }, []);
-
-  const handleOpenModal = () => {
-    setIsOpenModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsOpenModal(false);
-  };
-
-  const handleOK = () => {
-    form.submit();
-  };
-
-  const handleSubmit = async (values: Court) => {
-    try {
-      const response = await api.post("court/create", values);
-      console.log(response.data.data);
-      setIsOpenModal(false);
-      form.resetFields();
-    } catch (error) {
-      console.error("Error submitting form:", error);
-    }
-  };
 
   const handleSendReport = (court: Court) => {
     setReportCourt(court);
@@ -101,6 +71,7 @@ export default function StaffCourtTab({ onDetail }: StaffCourtTabProps) {
       customAlert("Success", "Gửi báo cáo thành công!");
       setIsReportModalOpen(false);
     } catch (err) {
+      console.error("Error sending report:", err);
       customAlert("Error", "Gửi báo cáo thất bại!");
     }
   };

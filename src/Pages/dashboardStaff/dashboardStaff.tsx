@@ -23,6 +23,7 @@ export default function DashboardStaff() {
         {tab === "court" && (
           <StaffCourtTab
             onDetail={(record: Court) => {
+              console.log("View court details:", record);
               /* TODO: điều hướng sang trang chi tiết sân nếu có */
             }}
           />
@@ -30,6 +31,7 @@ export default function DashboardStaff() {
         {tab === "booking" && (
           <StaffBookingTab
             onDetail={(record: Slot) => {
+              console.log("View booking details:", record);
               /* TODO: điều hướng sang trang chi tiết booking nếu có */
             }}
           />
