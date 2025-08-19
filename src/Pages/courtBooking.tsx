@@ -36,7 +36,8 @@ const CourtBooking: React.FC = () => {
     try {
       const res = await api.get("court/getAll");
       const response = res.data?.data?.content.filter(
-        (court: Court) => court.status === "AVAILABLE"
+        (court: Court) =>
+          court.status === "AVAILABLE" && court.isDelete === false
       );
       setCourts(response || []);
     } catch (err) {

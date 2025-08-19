@@ -20,6 +20,7 @@ export default function OwnerBookingTab({ onDetail }: OwnerBookingTabProps) {
     if (token) {
       const decodedToken: JwtPayload = jwtDecode(token);
       const user = decodedToken.sub;
+      console.log("user", user);
       const response = await api.get("slot/getAll");
       const bookings = response.data.data.content.filter(
         (booking: Slot) => booking.ownerId === user
@@ -39,10 +40,10 @@ export default function OwnerBookingTab({ onDetail }: OwnerBookingTabProps) {
     fetchBookings();
   }, []);
 
-useEffect(() => {
-  console.log("bookings", bookings);
-  console.log("isBooked", isBooked);
-}, [bookings, isBooked]);
+  useEffect(() => {
+    console.log("bookings", bookings);
+    console.log("isBooked", isBooked);
+  }, [bookings, isBooked]);
   const handleCheckIn = async (values: Slot) => {
     await api.patch(`slot/${values.id}/checkIn`);
     customAlert("Thành Công", "Check-In thành công", "default");

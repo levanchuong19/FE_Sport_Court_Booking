@@ -90,7 +90,11 @@ const RegisterPartner: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.latitude || !formData.longitude) {
-      customAlert("Error", "Vui lòng lấy vị trí hiện tại trước khi đăng ký!", "destructive");
+      customAlert(
+        "Error",
+        "Vui lòng lấy vị trí hiện tại trước khi đăng ký!",
+        "destructive"
+      );
       return;
     }
     const token = localStorage.getItem("token");
@@ -109,7 +113,22 @@ const RegisterPartner: React.FC = () => {
         ...formData,
         owner: userId,
         latitude: formData.latitude ? parseFloat(formData.latitude) : undefined,
-        longitude: formData.longitude ? parseFloat(formData.longitude) : undefined,
+        longitude: formData.longitude
+          ? parseFloat(formData.longitude)
+          : undefined,
+      });
+      setFormData({
+        name: "",
+        yearBuild: "",
+        utilities: [""],
+        businessLicense: "",
+        courtNum: 1,
+        latitude: "",
+        longitude: "",
+        address: "",
+        description: "",
+        openTime: "",
+        closeTime: "",
       });
       customAlert(
         "Success",
@@ -215,30 +234,53 @@ const RegisterPartner: React.FC = () => {
                 className="mt-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-60"
                 disabled={isGettingLocation}
               >
-                {isGettingLocation ? "Đang lấy vị trí..." : "Lấy vị trí hiện tại"}
+                {isGettingLocation
+                  ? "Đang lấy vị trí..."
+                  : "Lấy vị trí hiện tại"}
               </button>
               <div className="flex gap-4 mt-2">
                 <div className="flex-1">
-                  <label className="block text-xs text-gray-500">Vĩ độ (Latitude)</label>
+                  <label className="block text-xs text-gray-500">
+                    Vĩ độ (Latitude)
+                  </label>
                   <input
                     type="text"
                     value={formData.latitude}
-                    readOnly
+                    onChange={(e) =>
+                      handleInputChange("latitude", e.target.value)
+                    }
+                    // readOnly
                     className="w-full border border-gray-200 rounded-md px-3 py-1 bg-gray-100"
                     placeholder="Vĩ độ"
                   />
                 </div>
                 <div className="flex-1">
-                  <label className="block text-xs text-gray-500">Kinh độ (Longitude)</label>
+                  <label className="block text-xs text-gray-500">
+                    Kinh độ (Longitude)
+                  </label>
                   <input
                     type="text"
                     value={formData.longitude}
-                    readOnly
+                    onChange={(e) =>
+                      handleInputChange("longitude", e.target.value)
+                    }
+                    // readOnly
                     className="w-full border border-gray-200 rounded-md px-3 py-1 bg-gray-100"
                     placeholder="Kinh độ"
                   />
                 </div>
               </div>
+            </div>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 className="font-medium text-blue-800 mb-2">
+                💡 Cách lấy tọa độ:
+              </h4>
+              <ul className="text-sm text-blue-700 space-y-1 list-disc list-inside">
+                <li>Mở Google Maps, tìm địa chỉ của bạn</li>
+                <li>Click chuột phải vào vị trí chính xác</li>
+                <li>Chọn tọa độ đầu tiên trong menu (VD: 10.7769, 106.7009)</li>
+                <li>Sao chép và dán vào các ô trên</li>
+              </ul>
             </div>
 
             {/* Hình ảnh */}

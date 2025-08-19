@@ -87,6 +87,8 @@ export default function StaffBookingTab({ onDetail }: StaffBookingTabProps) {
             ? "Đang hoạt động"
             : status === "CANCELED"
             ? "Đã hủy"
+            : status === "CHECKED_IN"
+            ? "Đã check-in"
             : "Đã hoàn thành";
         return <Tag color={tagColor}>{label}</Tag>;
       },

@@ -22,7 +22,9 @@ export default function PopupLocationCard({
         )}
       </div>
       <div className="flex-1  min-w-0">
-        <div className="font-semibold text-base break-words whitespace-pre-wrap">{location.name}</div>
+        <div className="font-semibold text-base break-words whitespace-pre-wrap">
+          {location.name}
+        </div>
         <div className="text-xs text-gray-500 flex items-center gap-1 break-words whitespace-pre-wrap mb-1">
           <MapPin className="w-3 h-3" /> {location.address}
         </div>
@@ -34,7 +36,13 @@ export default function PopupLocationCard({
           <span className="text-gray-400 text-xs">
             ({location.reviews || 0})
           </span>
-          {location.distance ? <span className="text-gray-400 text-xs">Cách bạn: {location.distance.toFixed(1)} km</span> :""}
+          {location.distance ? (
+            <span className="text-gray-400 text-xs">
+              Cách bạn: {location.distance.toFixed(1)} km
+            </span>
+          ) : (
+            ""
+          )}
         </div>
         <div className="text-emerald-600 text-xs font-bold mb-1">
           Mở cửa từ : {location.openTime || "pp"} - {location.closeTime}
@@ -46,12 +54,12 @@ export default function PopupLocationCard({
           >
             Xem chi tiết
           </button>
-          <button
+          {/* <button
             className="border border-emerald-600 text-emerald-600 px-2 py-1 rounded text-xs font-semibold hover:bg-emerald-50 transition"
             onClick={() => navigate(`/booking/${location.id}`)}
           >
             Đặt sân
-          </button>
+          </button> */}
         </div>
       </div>
     </div>
