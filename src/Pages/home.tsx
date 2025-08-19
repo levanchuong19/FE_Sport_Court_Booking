@@ -237,6 +237,7 @@ function Home() {
           longitude = parseFloat(data[0].lon);
         }
       } catch (e) {
+        console.error("Error fetching location data:", e);
         // Nếu lỗi thì bỏ qua, center sẽ undefined
       }
     }
@@ -259,6 +260,7 @@ function Home() {
         },
       });
     } catch (error) {
+      console.error("Error searching locations:", error);
       alert("Có lỗi xảy ra khi tìm kiếm. Vui lòng thử lại.");
     }
   };
