@@ -265,7 +265,10 @@ function Home() {
 
   const fetchCourt = async () => {
     const response = await api.get("location/top3-BusinessLocations");
-    setLocation(response.data.data);
+    const data = response.data.data.filter(
+      (location: BusinessLocation) => location.status === "ACTIVE"
+    );
+    setLocation(data);
     console.log(response.data.data);
   };
   useEffect(() => {
